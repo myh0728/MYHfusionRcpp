@@ -1,0 +1,26 @@
+Package: MYHfusionRcpp
+Type: Package
+Title: Packed codes of Ming-Yueh Huang's work
+Version: 0.2.0
+Date: 2024-10-23
+Author: Ming-Yueh Huang
+Maintainer: Ming-Yueh Huang
+    <myh0728@stat.sinica.edu.tw>
+Description: Topics including
+    Maximum likelihood estimation for generalized linear models
+    Dataset shift
+Depends: R (>= 4.2.1)
+License: None
+LazyData: true
+Imports: Rcpp (>= 1.0.9),
+    RcppArmadillo,
+    frailtypack,
+    survival,
+    dfoptim
+LinkingTo: Rcpp, RcppArmadillo
+SystemRequirements: C++11
+NeedsCompilation: yes
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
