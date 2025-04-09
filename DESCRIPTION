@@ -24,3 +24,5 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+URL: https://github.com/myh0728/MYHfusionRcpp
+BugReports: https://github.com/myh0728/MYHfusionRcpp/issues
