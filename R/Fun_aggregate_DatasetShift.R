@@ -44,14 +44,14 @@ GLMcombineADavar <- function(name.par,
   {
     if (is.null(avar.working))
     {
-      avar.inv <- inv_sympd_rcpp(avar.phi)
+      avar.inv <- solve_rcpp(avar.phi, diag(number_m))
       avar.S[paste("phi", 1:number_m, sep = ""),
              paste("phi", 1:number_m, sep = "")] <- kappa * avar.inv
       J.V[paste("phi", 1:number_m, sep = ""),
           paste("phi", 1:number_m, sep = "")] <- kappa * avar.inv
     }else
     {
-      avar.working.inv <- inv_sympd_rcpp(avar.working)
+      avar.working.inv <- solve_rcpp(avar.working, number_m)
       avar.S[paste("phi", 1:number_m, sep = ""),
              paste("phi", 1:number_m, sep = "")] <- kappa * avar.working.inv %*%
         avar.phi %*% avar.working.inv
