@@ -973,6 +973,370 @@ ggplot2::autoplot(
   )
 )
 
+##### Logistic regression model #####
+
+p <- 2
+
+theta0 <- 1
+theta1 <- 1
+theta2 <- 1
+
+n <- 100
+N <- 1000
+
+X1 <- rnorm(n = n, mean = 0, sd = 1)
+X2 <- rbinom(n = n, size = 1, prob = 0.6)
+X <- cbind(X1, X2)
+Y <- rbinom(n = n,
+            size = 1,
+            prob = 1 / (1 + exp(-(theta0 + X1 * theta1 + X2 * theta2))))
+test.data <- data.frame(response = Y,
+                        covariate = X)
+
+X1_shift <- rnorm(n = n, mean = 0, sd = 1)
+X2_shift <- rbinom(n = n, size = 1, prob = 0.6)
+X_shift <- cbind(X1_shift, X2_shift)
+Y_shift <- rbinom(n = n,
+                  size = 1,
+                  prob = 1 / (1 + exp(-(theta0 + X1_shift * theta1 + X2_shift * theta2))))
+
+### auxiliary information: average of X
+
+### auxiliary information: average of Y
+
+X <- as.matrix(X)
+phi <- mean(Y_shift)
+
+test1 <- AD_EY_logistic_Lagrange(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, eta = 0.1)
+
+test2 <- AD_EY_logistic_Lagrange_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, eta = 0.1)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = AD_EY_logistic_Lagrange(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, eta = 0.1),
+    "Rcpp" = AD_EY_logistic_Lagrange_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, eta = 0.1)
+  )
+)
+
+test1 <- AD_EY_logistic_SolveLagrange(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, eta.initial = 0,
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+
+test2 <- AD_EY_logistic_SolveLagrange_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, eta_initial = 0,
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+
+test3 <- AD_EY_logistic_SolveLagrange_v1(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, eta.initial = 0,
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = AD_EY_logistic_SolveLagrange(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, eta.initial = 0,
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+    "Rcpp" = AD_EY_logistic_SolveLagrange_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, eta_initial = 0,
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7),
+    "R_Rcpp" = AD_EY_logistic_SolveLagrange_v1(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, eta.initial = 0,
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  )
+)
+
+test1 <- AD_EY_logistic(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi)
+
+test2 <- AD_EY_logistic_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = AD_EY_logistic(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi),
+    "Rcpp" = AD_EY_logistic_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi)
+  )
+)
+
+test1 <- ADvar_EY_logistic(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, eta = 0.1)
+
+test2 <- ADvar_EY_logistic_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, eta = 0.1)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = ADvar_EY_logistic(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, eta = 0.1),
+    "Rcpp" = ADvar_EY_logistic_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, eta = 0.1)
+  )
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### auxiliary information: average of X
+
+X <- as.matrix(X)
+phi <- colMeans(X_shift)
+
+test1 <- ADPPS_EX_logistic_SolveLagrange(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, PPS.beta = 0.1, eta.initial = rep(0, length(phi)),
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+
+test2 <- ADPPS_EX_logistic_SolveLagrange_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, PPS_beta = 0.1, eta_initial = rep(0, length(phi)),
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = ADPPS_EX_logistic_SolveLagrange(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, PPS.beta = 0.1, eta.initial = rep(0, length(phi)),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+    "Rcpp" = ADPPS_EX_logistic_SolveLagrange_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, PPS_beta = 0.1, eta_initial = rep(0, length(phi)),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  )
+)
+
+### auxiliary information: average of Y
+
+X <- as.matrix(X)
+phi <- mean(Y_shift)
+
+
+
+test1 <- ADPPS_EY_logistic_SolveLagrange(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, PPS.beta = 0.1, eta.initial = 0,
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+
+test2 <- ADPPS_EY_logistic_SolveLagrange_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, PPS_beta = 0.1, eta_initial = 0,
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = ADPPS_EY_logistic_SolveLagrange(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, PPS.beta = 0.1, eta.initial = 0,
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+    "Rcpp" = ADPPS_EY_logistic_SolveLagrange_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, PPS_beta = 0.1, eta_initial = 0,
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  )
+)
+
+test1 <- ADCS_EY_logistic_SolveLagrange(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, CS.beta = rep(0.1, p), eta.initial = 0,
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+
+test2 <- ADCS_EY_logistic_SolveLagrange_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, CS_beta = rep(0.1, p), eta_initial = 0,
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = ADCS_EY_logistic_SolveLagrange(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, CS.beta = rep(0.1, p), eta.initial = 0,
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+    "Rcpp" = ADCS_EY_logistic_SolveLagrange_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, CS_beta = rep(0.1, p), eta_initial = 0,
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  )
+)
+
+### auxiliary information: average of X given Y
+
+X <- as.matrix(X)
+
+phi <- matrix(0, 2, p)
+phi[1, ] <- colMeans(X_shift[Y_shift == 1, ])
+phi[2, ] <- colMeans(X_shift[Y_shift == 0, ])
+
+test1 <- AD_EXsubY_logistic_SolveLagrange(
+  X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
+  eta.initial = rep(0, length(phi)),
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+
+test2 <- AD_EXsubY_logistic_SolveLagrange_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
+  eta_initial = rep(0, length(phi)),
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = AD_EXsubY_logistic_SolveLagrange(
+      X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
+      eta.initial = rep(0, length(phi)),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+    "Rcpp" = AD_EXsubY_logistic_SolveLagrange_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
+      eta_initial = rep(0, length(phi)),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  )
+)
+
+test1 <- ADCS_EXsubY_logistic_SolveLagrange(
+  X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
+  CS.beta = rep(0.1, p), eta.initial = rep(0, length(phi)),
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+
+test2 <- ADCS_EXsubY_logistic_SolveLagrange_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
+  CS_beta = rep(0.1, p), eta_initial = rep(0, length(phi)),
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = ADCS_EXsubY_logistic_SolveLagrange(
+      X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
+      CS.beta = rep(0.1, p), eta.initial = rep(0, length(phi)),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+    "Rcpp" = ADCS_EXsubY_logistic_SolveLagrange_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
+      CS_beta = rep(0.1, p), eta_initial = rep(0, length(phi)),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  )
+)
+
+### auxiliary information: average of Y given X
+
+X <- as.matrix(X)
+
+phi <- c(mean(Y_shift[X_shift[, 1] > 0]),
+         mean(Y_shift[X_shift[, 1] <= 0]))
+inclusion <- cbind(X_shift[, 1] > 0,
+                   X_shift[, 1] <= 0)
+
+test1 <- AD_EYsubX_logistic_SolveLagrange(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, inclusion = inclusion,
+  eta.initial = rep(0, length(phi)),
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+
+test2 <- AD_EYsubX_logistic_SolveLagrange_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, inclusion = inclusion,
+  eta_initial = rep(0, length(phi)),
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = AD_EYsubX_logistic_SolveLagrange(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, inclusion = inclusion,
+      eta.initial = rep(0, length(phi)),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+    "Rcpp" = AD_EYsubX_logistic_SolveLagrange_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, inclusion = inclusion,
+      eta_initial = rep(0, length(phi)),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  )
+)
+
+test1 <- ADPPS_EYsubX_logistic_SolveLagrange(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, PPS.beta = 0.1, inclusion = inclusion,
+  eta.initial = rep(0, length(phi)),
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+
+test2 <- ADPPS_EYsubX_logistic_SolveLagrange_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, PPS_beta = 0.1, inclusion = inclusion,
+  eta_initial = rep(0, length(phi)),
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = ADPPS_EYsubX_logistic_SolveLagrange(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, PPS.beta = 0.1, inclusion = inclusion,
+      eta.initial = rep(0, length(phi)),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+    "Rcpp" = ADPPS_EYsubX_logistic_SolveLagrange_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, PPS_beta = 0.1, inclusion = inclusion,
+      eta_initial = rep(0, length(phi)),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  )
+)
+
+test1 <- ADCS_EYsubX_logistic_SolveLagrange(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, CS.beta = rep(0.1, p), inclusion = inclusion,
+  eta.initial = rep(0, length(phi)),
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+
+test2 <- ADCS_EYsubX_logistic_SolveLagrange_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, CS_beta = rep(0.1, p), inclusion = inclusion,
+  eta_initial = rep(0, length(phi)),
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = ADCS_EYsubX_logistic_SolveLagrange(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, CS.beta = rep(0.1, p), inclusion = inclusion,
+      eta.initial = rep(0, length(phi)),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+    "Rcpp" = ADCS_EYsubX_logistic_SolveLagrange_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, CS_beta = rep(0.1, p), inclusion = inclusion,
+      eta_initial = rep(0, length(phi)),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  )
+)
+
 
 
 
@@ -1299,279 +1663,6 @@ ggplot2::autoplot(
       iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
     "Rcpp" = ADCS_EYsubX_Gamma_SolveLagrange_rcpp(
       X = X, alpha = theta0, beta = c(theta1, theta2), nu = nu0,
-      phi = phi, CS_beta = rep(0.1, p), inclusion = inclusion,
-      eta_initial = rep(0, length(phi)),
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-  )
-)
-
-##### Logistic regression model #####
-
-p <- 2
-
-theta0 <- 1
-theta1 <- 1
-theta2 <- 1
-
-n <- 100
-N <- 1000
-
-X1 <- rnorm(n = n, mean = 0, sd = 1)
-X2 <- rbinom(n = n, size = 1, prob = 0.6)
-X <- cbind(X1, X2)
-Y <- rbinom(n = n,
-            size = 1,
-            prob = 1 / (1 + exp(-(theta0 + X1 * theta1 + X2 * theta2))))
-test.data <- data.frame(response = Y,
-                        covariate = X)
-
-X1_shift <- rnorm(n = n, mean = 0, sd = 1)
-X2_shift <- rbinom(n = n, size = 1, prob = 0.6)
-X_shift <- cbind(X1_shift, X2_shift)
-Y_shift <- rbinom(n = n,
-                  size = 1,
-                  prob = 1 / (1 + exp(-(theta0 + X1_shift * theta1 + X2_shift * theta2))))
-
-### auxiliary information: average of X
-
-X <- as.matrix(X)
-phi <- colMeans(X_shift)
-
-test1 <- ADPPS_EX_logistic_SolveLagrange(
-  X = X, alpha = theta0, beta = c(theta1, theta2),
-  phi = phi, PPS.beta = 0.1, eta.initial = rep(0, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
-
-test2 <- ADPPS_EX_logistic_SolveLagrange_rcpp(
-  X = X, alpha = theta0, beta = c(theta1, theta2),
-  phi = phi, PPS_beta = 0.1, eta_initial = rep(0, length(phi)),
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-
-ggplot2::autoplot(
-  microbenchmark::microbenchmark(
-    "R" = ADPPS_EX_logistic_SolveLagrange(
-      X = X, alpha = theta0, beta = c(theta1, theta2),
-      phi = phi, PPS.beta = 0.1, eta.initial = rep(0, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
-    "Rcpp" = ADPPS_EX_logistic_SolveLagrange_rcpp(
-      X = X, alpha = theta0, beta = c(theta1, theta2),
-      phi = phi, PPS_beta = 0.1, eta_initial = rep(0, length(phi)),
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-  )
-)
-
-### auxiliary information: average of Y
-
-X <- as.matrix(X)
-phi <- mean(Y_shift)
-
-test1 <- AD_EY_logistic_SolveLagrange(
-  X = X, alpha = theta0, beta = c(theta1, theta2),
-  phi = phi, eta.initial = 0,
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
-
-test2 <- AD_EY_logistic_SolveLagrange_rcpp(
-  X = X, alpha = theta0, beta = c(theta1, theta2),
-  phi = phi, eta_initial = 0,
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-
-ggplot2::autoplot(
-  microbenchmark::microbenchmark(
-    "R" = AD_EY_logistic_SolveLagrange(
-      X = X, alpha = theta0, beta = c(theta1, theta2),
-      phi = phi, eta.initial = 0,
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
-    "Rcpp" = AD_EY_logistic_SolveLagrange_rcpp(
-      X = X, alpha = theta0, beta = c(theta1, theta2),
-      phi = phi, eta_initial = 0,
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-  )
-)
-
-test1 <- ADPPS_EY_logistic_SolveLagrange(
-  X = X, alpha = theta0, beta = c(theta1, theta2),
-  phi = phi, PPS.beta = 0.1, eta.initial = 0,
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
-
-test2 <- ADPPS_EY_logistic_SolveLagrange_rcpp(
-  X = X, alpha = theta0, beta = c(theta1, theta2),
-  phi = phi, PPS_beta = 0.1, eta_initial = 0,
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-
-ggplot2::autoplot(
-  microbenchmark::microbenchmark(
-    "R" = ADPPS_EY_logistic_SolveLagrange(
-      X = X, alpha = theta0, beta = c(theta1, theta2),
-      phi = phi, PPS.beta = 0.1, eta.initial = 0,
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
-    "Rcpp" = ADPPS_EY_logistic_SolveLagrange_rcpp(
-      X = X, alpha = theta0, beta = c(theta1, theta2),
-      phi = phi, PPS_beta = 0.1, eta_initial = 0,
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-  )
-)
-
-test1 <- ADCS_EY_logistic_SolveLagrange(
-  X = X, alpha = theta0, beta = c(theta1, theta2),
-  phi = phi, CS.beta = rep(0.1, p), eta.initial = 0,
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
-
-test2 <- ADCS_EY_logistic_SolveLagrange_rcpp(
-  X = X, alpha = theta0, beta = c(theta1, theta2),
-  phi = phi, CS_beta = rep(0.1, p), eta_initial = 0,
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-
-ggplot2::autoplot(
-  microbenchmark::microbenchmark(
-    "R" = ADCS_EY_logistic_SolveLagrange(
-      X = X, alpha = theta0, beta = c(theta1, theta2),
-      phi = phi, CS.beta = rep(0.1, p), eta.initial = 0,
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
-    "Rcpp" = ADCS_EY_logistic_SolveLagrange_rcpp(
-      X = X, alpha = theta0, beta = c(theta1, theta2),
-      phi = phi, CS_beta = rep(0.1, p), eta_initial = 0,
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-  )
-)
-
-### auxiliary information: average of X given Y
-
-X <- as.matrix(X)
-
-phi <- matrix(0, 2, p)
-phi[1, ] <- colMeans(X_shift[Y_shift == 1, ])
-phi[2, ] <- colMeans(X_shift[Y_shift == 0, ])
-
-test1 <- AD_EXsubY_logistic_SolveLagrange(
-  X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
-  eta.initial = rep(0, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
-
-test2 <- AD_EXsubY_logistic_SolveLagrange_rcpp(
-  X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
-  eta_initial = rep(0, length(phi)),
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-
-ggplot2::autoplot(
-  microbenchmark::microbenchmark(
-    "R" = AD_EXsubY_logistic_SolveLagrange(
-      X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
-      eta.initial = rep(0, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
-    "Rcpp" = AD_EXsubY_logistic_SolveLagrange_rcpp(
-      X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
-      eta_initial = rep(0, length(phi)),
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-  )
-)
-
-test1 <- ADCS_EXsubY_logistic_SolveLagrange(
-  X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
-  CS.beta = rep(0.1, p), eta.initial = rep(0, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
-
-test2 <- ADCS_EXsubY_logistic_SolveLagrange_rcpp(
-  X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
-  CS_beta = rep(0.1, p), eta_initial = rep(0, length(phi)),
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-
-ggplot2::autoplot(
-  microbenchmark::microbenchmark(
-    "R" = ADCS_EXsubY_logistic_SolveLagrange(
-      X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
-      CS.beta = rep(0.1, p), eta.initial = rep(0, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
-    "Rcpp" = ADCS_EXsubY_logistic_SolveLagrange_rcpp(
-      X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
-      CS_beta = rep(0.1, p), eta_initial = rep(0, length(phi)),
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-  )
-)
-
-### auxiliary information: average of Y given X
-
-X <- as.matrix(X)
-
-phi <- c(mean(Y_shift[X_shift[, 1] > 0]),
-         mean(Y_shift[X_shift[, 1] <= 0]))
-inclusion <- cbind(X_shift[, 1] > 0,
-               X_shift[, 1] <= 0)
-
-test1 <- AD_EYsubX_logistic_SolveLagrange(
-  X = X, alpha = theta0, beta = c(theta1, theta2),
-  phi = phi, inclusion = inclusion,
-  eta.initial = rep(0, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
-
-test2 <- AD_EYsubX_logistic_SolveLagrange_rcpp(
-  X = X, alpha = theta0, beta = c(theta1, theta2),
-  phi = phi, inclusion = inclusion,
-  eta_initial = rep(0, length(phi)),
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-
-ggplot2::autoplot(
-  microbenchmark::microbenchmark(
-    "R" = AD_EYsubX_logistic_SolveLagrange(
-      X = X, alpha = theta0, beta = c(theta1, theta2),
-      phi = phi, inclusion = inclusion,
-      eta.initial = rep(0, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
-    "Rcpp" = AD_EYsubX_logistic_SolveLagrange_rcpp(
-      X = X, alpha = theta0, beta = c(theta1, theta2),
-      phi = phi, inclusion = inclusion,
-      eta_initial = rep(0, length(phi)),
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-  )
-)
-
-test1 <- ADPPS_EYsubX_logistic_SolveLagrange(
-  X = X, alpha = theta0, beta = c(theta1, theta2),
-  phi = phi, PPS.beta = 0.1, inclusion = inclusion,
-  eta.initial = rep(0, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
-
-test2 <- ADPPS_EYsubX_logistic_SolveLagrange_rcpp(
-  X = X, alpha = theta0, beta = c(theta1, theta2),
-  phi = phi, PPS_beta = 0.1, inclusion = inclusion,
-  eta_initial = rep(0, length(phi)),
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-
-ggplot2::autoplot(
-  microbenchmark::microbenchmark(
-    "R" = ADPPS_EYsubX_logistic_SolveLagrange(
-      X = X, alpha = theta0, beta = c(theta1, theta2),
-      phi = phi, PPS.beta = 0.1, inclusion = inclusion,
-      eta.initial = rep(0, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
-    "Rcpp" = ADPPS_EYsubX_logistic_SolveLagrange_rcpp(
-      X = X, alpha = theta0, beta = c(theta1, theta2),
-      phi = phi, PPS_beta = 0.1, inclusion = inclusion,
-      eta_initial = rep(0, length(phi)),
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-  )
-)
-
-test1 <- ADCS_EYsubX_logistic_SolveLagrange(
-  X = X, alpha = theta0, beta = c(theta1, theta2),
-  phi = phi, CS.beta = rep(0.1, p), inclusion = inclusion,
-  eta.initial = rep(0, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
-
-test2 <- ADCS_EYsubX_logistic_SolveLagrange_rcpp(
-  X = X, alpha = theta0, beta = c(theta1, theta2),
-  phi = phi, CS_beta = rep(0.1, p), inclusion = inclusion,
-  eta_initial = rep(0, length(phi)),
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-
-ggplot2::autoplot(
-  microbenchmark::microbenchmark(
-    "R" = ADCS_EYsubX_logistic_SolveLagrange(
-      X = X, alpha = theta0, beta = c(theta1, theta2),
-      phi = phi, CS.beta = rep(0.1, p), inclusion = inclusion,
-      eta.initial = rep(0, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
-    "Rcpp" = ADCS_EYsubX_logistic_SolveLagrange_rcpp(
-      X = X, alpha = theta0, beta = c(theta1, theta2),
       phi = phi, CS_beta = rep(0.1, p), inclusion = inclusion,
       eta_initial = rep(0, length(phi)),
       iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
