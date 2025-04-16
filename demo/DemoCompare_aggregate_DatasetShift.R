@@ -49,32 +49,32 @@ ggplot2::autoplot(
 test1 <- ADPPS_EX_normal_SolveLagrange(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, PPS.beta = 0.1, eta.initial = rep(0.1, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test2 <- ADPPS_EX_normal_SolveLagrange_rcpp(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, PPS_beta = 0.1, eta_initial = rep(0.1, length(phi)),
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test3 <- ADPPS_EX_normal_SolveLagrange_v1(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, PPS.beta = 0.1, eta.initial = rep(0.1, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 ggplot2::autoplot(
   microbenchmark::microbenchmark(
     "R" = ADPPS_EX_normal_SolveLagrange(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, PPS.beta = 0.1, eta.initial = rep(0.1, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7),
     "Rcpp" = ADPPS_EX_normal_SolveLagrange_rcpp(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, PPS_beta = 0.1, eta_initial = rep(0.1, length(phi)),
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7),
     "R_Rcpp" = ADPPS_EX_normal_SolveLagrange_v1(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, PPS.beta = 0.1, eta.initial = rep(0.1, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
   )
 )
 
@@ -143,32 +143,32 @@ ggplot2::autoplot(
 test1 <- AD_EY_normal_SolveLagrange(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, eta.initial = 0,
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test2 <- AD_EY_normal_SolveLagrange_rcpp(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, eta_initial = 0,
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test3 <- AD_EY_normal_SolveLagrange_v1(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, eta.initial = 0,
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 ggplot2::autoplot(
   microbenchmark::microbenchmark(
     "R" = AD_EY_normal_SolveLagrange(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, eta.initial = 0,
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7),
     "Rcpp" = AD_EY_normal_SolveLagrange_rcpp(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, eta_initial = 0,
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7),
     "R_Rcpp" = AD_EY_normal_SolveLagrange_v1(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, eta.initial = 0,
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
   )
 )
 
@@ -232,32 +232,32 @@ ggplot2::autoplot(
 test1 <- ADCS_EY_normal_SolveLagrange(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, CS.beta = rep(0.1, p), eta.initial = 0.1,
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test2 <- ADCS_EY_normal_SolveLagrange_rcpp(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, CS_beta = rep(0.1, p), eta_initial = 0.1,
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test3 <- ADCS_EY_normal_SolveLagrange_v1(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, CS.beta = rep(0.1, p), eta.initial = 0.1,
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 ggplot2::autoplot(
   microbenchmark::microbenchmark(
     "R" = ADCS_EY_normal_SolveLagrange(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, CS.beta = rep(0.1, p), eta.initial = 0.1,
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7),
     "Rcpp" = ADCS_EY_normal_SolveLagrange_rcpp(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, CS_beta = rep(0.1, p), eta_initial = 0.1,
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7),
     "R_Rcpp" = ADCS_EY_normal_SolveLagrange_v1(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, CS.beta = rep(0.1, p), eta.initial = 0.1,
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
   )
 )
 
@@ -321,32 +321,32 @@ ggplot2::autoplot(
 test1 <- ADPPS_EY_normal_SolveLagrange(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, PPS.beta = 0.1, eta.initial = 0.1,
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test2 <- ADPPS_EY_normal_SolveLagrange_rcpp(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, PPS_beta = 0.1, eta_initial = 0.1,
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test3 <- ADPPS_EY_normal_SolveLagrange_v1(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, PPS.beta = 0.1, eta.initial = 0.1,
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 ggplot2::autoplot(
   microbenchmark::microbenchmark(
     "R" = ADPPS_EY_normal_SolveLagrange(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, PPS.beta = 0.1, eta.initial = 0.1,
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7),
     "Rcpp" = ADPPS_EY_normal_SolveLagrange_rcpp(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, PPS_beta = 0.1, eta_initial = 0.1,
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7),
     "R_Rcpp" = ADPPS_EY_normal_SolveLagrange_v1(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, PPS.beta = 0.1, eta.initial = 0.1,
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
   )
 )
 
@@ -423,19 +423,19 @@ test1 <- AD_EXsubY_normal_SolveLagrange(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, y.pts = y.pts,
   eta.initial = rep(0, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test2 <- AD_EXsubY_normal_SolveLagrange_rcpp(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, y_pts = y.pts,
   eta_initial = rep(0, length(phi)),
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test3 <- AD_EXsubY_normal_SolveLagrange_v1(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, y.pts = y.pts,
   eta.initial = rep(0, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 ggplot2::autoplot(
   microbenchmark::microbenchmark(
@@ -443,17 +443,17 @@ ggplot2::autoplot(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, y.pts = y.pts,
       eta.initial = rep(0, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7),
     "Rcpp" = AD_EXsubY_normal_SolveLagrange_rcpp(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, y_pts = y.pts,
       eta_initial = rep(0, length(phi)),
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7),
     "R_Rcpp" = AD_EXsubY_normal_SolveLagrange_v1(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, y.pts = y.pts,
       eta.initial = rep(0, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
   )
 )
 
@@ -518,19 +518,19 @@ test1 <- ADCS_EXsubY_normal_SolveLagrange(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, CS.beta = rep(0.1, p), y.pts = y.pts,
   eta.initial = rep(0.1, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test2 <- ADCS_EXsubY_normal_SolveLagrange_rcpp(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, CS_beta = rep(0.1, p), y_pts = y.pts,
   eta_initial = rep(0.1, length(phi)),
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test3 <- ADCS_EXsubY_normal_SolveLagrange_v1(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, CS.beta = rep(0.1, p), y.pts = y.pts,
   eta.initial = rep(0.1, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 ggplot2::autoplot(
   microbenchmark::microbenchmark(
@@ -538,17 +538,17 @@ ggplot2::autoplot(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, CS.beta = rep(0.1, p), y.pts = y.pts,
       eta.initial = rep(0.1, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7),
     "Rcpp" = ADCS_EXsubY_normal_SolveLagrange_rcpp(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, CS_beta = rep(0.1, p), y_pts = y.pts,
       eta_initial = rep(0.1, length(phi)),
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7),
     "R_Rcpp" = ADCS_EXsubY_normal_SolveLagrange_v1(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, CS.beta = rep(0.1, p), y.pts = y.pts,
       eta.initial = rep(0.1, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
   )
 )
 
@@ -612,32 +612,32 @@ ggplot2::autoplot(
 test1 <- ADPPS_EXsubY_normal_SolveLagrange(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, PPS.beta = 0.1, y.pts = y.pts, eta.initial = rep(0.1, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test2 <- ADPPS_EXsubY_normal_SolveLagrange_rcpp(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, PPS_beta = 0.1, y_pts = y.pts, eta_initial = rep(0.1, length(phi)),
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test3 <- ADPPS_EXsubY_normal_SolveLagrange_v1(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, PPS.beta = 0.1, y.pts = y.pts, eta.initial = rep(0.1, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 ggplot2::autoplot(
   microbenchmark::microbenchmark(
     "R" = ADPPS_EXsubY_normal_SolveLagrange(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, PPS.beta = 0.1, y.pts = y.pts, eta.initial = rep(0.1, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7),
     "Rcpp" = ADPPS_EXsubY_normal_SolveLagrange_rcpp(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, PPS_beta = 0.1, y_pts = y.pts, eta_initial = rep(0.1, length(phi)),
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7),
     "R_Rcpp" = ADPPS_EXsubY_normal_SolveLagrange_v1(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, PPS.beta = 0.1, y.pts = y.pts, eta.initial = rep(0.1, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
   )
 )
 
@@ -711,19 +711,19 @@ test1 <- AD_EYsubX_normal_SolveLagrange(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, inclusion = inclusion,
   eta.initial = rep(0, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test2 <- AD_EYsubX_normal_SolveLagrange_rcpp(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, inclusion = inclusion,
   eta_initial = rep(0, length(phi)),
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test3 <- AD_EYsubX_normal_SolveLagrange_v1(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, inclusion = inclusion,
   eta.initial = rep(0, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 ggplot2::autoplot(
   microbenchmark::microbenchmark(
@@ -731,17 +731,17 @@ ggplot2::autoplot(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, inclusion = inclusion,
       eta.initial = rep(0, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7),
     "Rcpp" = AD_EYsubX_normal_SolveLagrange_rcpp(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, inclusion = inclusion,
       eta_initial = rep(0, length(phi)),
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7),
     "R_Rcpp" = AD_EYsubX_normal_SolveLagrange_v1(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, inclusion = inclusion,
       eta.initial = rep(0, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
   )
 )
 
@@ -806,19 +806,19 @@ test1 <- ADCS_EYsubX_normal_SolveLagrange(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, CS.beta = rep(0.1, p), inclusion = inclusion,
   eta.initial = rep(0.1, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test2 <- ADCS_EYsubX_normal_SolveLagrange_rcpp(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, CS_beta = rep(0.1, p), inclusion = inclusion,
   eta_initial = rep(0.1, length(phi)),
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test3 <- ADCS_EYsubX_normal_SolveLagrange_v1(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, CS.beta = rep(0.1, p), inclusion = inclusion,
   eta.initial = rep(0.1, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 ggplot2::autoplot(
   microbenchmark::microbenchmark(
@@ -826,17 +826,17 @@ ggplot2::autoplot(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, CS.beta = rep(0.1, p), inclusion = inclusion,
       eta.initial = rep(0.1, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7),
     "Rcpp" = ADCS_EYsubX_normal_SolveLagrange_rcpp(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, CS_beta = rep(0.1, p), inclusion = inclusion,
       eta_initial = rep(0.1, length(phi)),
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7),
     "R_Rcpp" = ADCS_EYsubX_normal_SolveLagrange_v1(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, CS.beta = rep(0.1, p), inclusion = inclusion,
       eta.initial = rep(0.1, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
   )
 )
 
@@ -901,19 +901,19 @@ test1 <- ADPPS_EYsubX_normal_SolveLagrange(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, PPS.beta = 0.1, inclusion = inclusion,
   eta.initial = rep(0.1, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test2 <- ADPPS_EYsubX_normal_SolveLagrange_rcpp(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, PPS_beta = 0.1, inclusion = inclusion,
   eta_initial = rep(0.1, length(phi)),
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test3 <- ADPPS_EYsubX_normal_SolveLagrange_v1(
   X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
   phi = phi, PPS.beta = 0.1, inclusion = inclusion,
   eta.initial = rep(0.1, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 ggplot2::autoplot(
   microbenchmark::microbenchmark(
@@ -921,17 +921,17 @@ ggplot2::autoplot(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, PPS.beta = 0.1, inclusion = inclusion,
       eta.initial = rep(0.1, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7),
     "Rcpp" = ADPPS_EYsubX_normal_SolveLagrange_rcpp(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, PPS_beta = 0.1, inclusion = inclusion,
       eta_initial = rep(0.1, length(phi)),
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7),
     "R_Rcpp" = ADPPS_EYsubX_normal_SolveLagrange_v1(
       X = X, alpha = theta0, beta = c(theta1, theta2), sigma = sigma0,
       phi = phi, PPS.beta = 0.1, inclusion = inclusion,
       eta.initial = rep(0.1, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
   )
 )
 
@@ -1002,6 +1002,9 @@ Y_shift <- rbinom(n = n,
 
 ### auxiliary information: average of X
 
+X <- as.matrix(X)
+phi <- colMeans(X_shift)
+
 ### auxiliary information: average of Y
 
 X <- as.matrix(X)
@@ -1029,32 +1032,32 @@ ggplot2::autoplot(
 test1 <- AD_EY_logistic_SolveLagrange(
   X = X, alpha = theta0, beta = c(theta1, theta2),
   phi = phi, eta.initial = 0,
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test2 <- AD_EY_logistic_SolveLagrange_rcpp(
   X = X, alpha = theta0, beta = c(theta1, theta2),
   phi = phi, eta_initial = 0,
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 test3 <- AD_EY_logistic_SolveLagrange_v1(
   X = X, alpha = theta0, beta = c(theta1, theta2),
   phi = phi, eta.initial = 0,
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
 ggplot2::autoplot(
   microbenchmark::microbenchmark(
     "R" = AD_EY_logistic_SolveLagrange(
       X = X, alpha = theta0, beta = c(theta1, theta2),
       phi = phi, eta.initial = 0,
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7),
     "Rcpp" = AD_EY_logistic_SolveLagrange_rcpp(
       X = X, alpha = theta0, beta = c(theta1, theta2),
       phi = phi, eta_initial = 0,
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7),
     "R_Rcpp" = AD_EY_logistic_SolveLagrange_v1(
       X = X, alpha = theta0, beta = c(theta1, theta2),
       phi = phi, eta.initial = 0,
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
   )
 )
 
@@ -1096,6 +1099,44 @@ ggplot2::autoplot(
   )
 )
 
+### auxiliary information: average of X given Y
+
+X <- as.matrix(X)
+
+phi <- matrix(0, 2, p)
+phi[1, ] <- colMeans(X_shift[Y_shift == 1, ])
+phi[2, ] <- colMeans(X_shift[Y_shift == 0, ])
+
+test1 <- AD_EXsubY_logistic_Lagrange(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, eta = rep(0.1, p * 2))
+
+test2 <- AD_EXsubY_logistic_Lagrange_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, eta = rep(0.1, p * 2))
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = AD_EXsubY_logistic_Lagrange(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, eta = rep(0.1, p * 2)),
+    "Rcpp" = AD_EXsubY_logistic_Lagrange_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, eta = rep(0.1, p * 2))
+  )
+)
+
+### auxiliary information: average of Y given X
+
+X <- as.matrix(X)
+
+phi <- c(mean(Y_shift[X_shift[, 1] > 0]),
+         mean(Y_shift[X_shift[, 1] <= 0]))
+inclusion <- cbind(X[, 1] > 0,
+                   X[, 1] <= 0)
+
+
+
 
 
 
@@ -1114,8 +1155,6 @@ ggplot2::autoplot(
 
 ### auxiliary information: average of X
 
-X <- as.matrix(X)
-phi <- colMeans(X_shift)
 
 test1 <- ADPPS_EX_logistic_SolveLagrange(
   X = X, alpha = theta0, beta = c(theta1, theta2),
@@ -1141,10 +1180,6 @@ ggplot2::autoplot(
 )
 
 ### auxiliary information: average of Y
-
-X <- as.matrix(X)
-phi <- mean(Y_shift)
-
 
 
 test1 <- ADPPS_EY_logistic_SolveLagrange(
@@ -1195,11 +1230,6 @@ ggplot2::autoplot(
 
 ### auxiliary information: average of X given Y
 
-X <- as.matrix(X)
-
-phi <- matrix(0, 2, p)
-phi[1, ] <- colMeans(X_shift[Y_shift == 1, ])
-phi[2, ] <- colMeans(X_shift[Y_shift == 0, ])
 
 test1 <- AD_EXsubY_logistic_SolveLagrange(
   X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi,
@@ -1249,12 +1279,6 @@ ggplot2::autoplot(
 
 ### auxiliary information: average of Y given X
 
-X <- as.matrix(X)
-
-phi <- c(mean(Y_shift[X_shift[, 1] > 0]),
-         mean(Y_shift[X_shift[, 1] <= 0]))
-inclusion <- cbind(X_shift[, 1] > 0,
-                   X_shift[, 1] <= 0)
 
 test1 <- AD_EYsubX_logistic_SolveLagrange(
   X = X, alpha = theta0, beta = c(theta1, theta2),

@@ -6,7 +6,8 @@ GLMcombineADavar <- function(name.par,
                              Psi.diff.theta = NULL,
                              kappa = NULL,
                              avar.phi = NULL,
-                             avar.working = NULL)
+                             avar.working = NULL,
+                             eps.inv = 1e-7)
 {
   number_l <- dim(MLE.hessian)[1]
   number_m <- dim(Psi.square)[1]
@@ -44,14 +45,14 @@ GLMcombineADavar <- function(name.par,
   {
     if (is.null(avar.working))
     {
-      avar.inv <- solve_rcpp(avar.phi, diag(number_m))
+      avar.inv <- inv_sympd_rcpp(avar.phi + eps.inv * diag(number_m))
       avar.S[paste("phi", 1:number_m, sep = ""),
              paste("phi", 1:number_m, sep = "")] <- kappa * avar.inv
       J.V[paste("phi", 1:number_m, sep = ""),
           paste("phi", 1:number_m, sep = "")] <- kappa * avar.inv
     }else
     {
-      avar.working.inv <- solve_rcpp(avar.working, number_m)
+      avar.working.inv <- inv_sympd_rcpp(avar.working + eps.inv * diag(number_m))
       avar.S[paste("phi", 1:number_m, sep = ""),
              paste("phi", 1:number_m, sep = "")] <- kappa * avar.working.inv %*%
         avar.phi %*% avar.working.inv

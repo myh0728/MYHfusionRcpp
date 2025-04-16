@@ -76,7 +76,8 @@ List AD_EY_normal_SolveLagrange_rcpp(const arma::mat & X,
                                      const size_t & iter_max,
                                      const double & step_rate,
                                      const size_t & step_max,
-                                     const double & tol) {
+                                     const double & tol,
+                                     const double & eps_inv) {
 
   double eta = eta_initial;
   List step = AD_EY_normal_Lagrange_rcpp(
@@ -96,14 +97,7 @@ List AD_EY_normal_SolveLagrange_rcpp(const arma::mat & X,
     gradient = step["gradient"];
     hessian = step["hessian"];
 
-    if (hessian != 0) {
-
-      direction_step = gradient / hessian;
-
-    } else {
-
-      direction_step = -gradient;
-    }
+    direction_step = gradient / (hessian - eps_inv);
 
     step_size = 1.0;
     eta_new = eta - direction_step;
@@ -320,7 +314,8 @@ List AD_EXsubY_normal_SolveLagrange_rcpp(const arma::mat & X,
                                          const size_t & iter_max,
                                          const double & step_rate,
                                          const size_t & step_max,
-                                         const double & tol) {
+                                         const double & tol,
+                                         const double & eps_inv) {
 
   const arma::uword n_m = eta_initial.n_elem;
   arma::vec eta = eta_initial;
@@ -330,7 +325,6 @@ List AD_EXsubY_normal_SolveLagrange_rcpp(const arma::mat & X,
   double step_value = 0.0;
   arma::vec gradient(n_m);
   arma::mat hessian(n_m, n_m);
-  double ind_NT_GD = 0.0;
   arma::vec direction_step(n_m);
   double step_size = 0.0;
   arma::vec eta_new(n_m);
@@ -341,16 +335,9 @@ List AD_EXsubY_normal_SolveLagrange_rcpp(const arma::mat & X,
     step_value = step["value"];
     gradient = as<arma::vec>(step["gradient"]);
     hessian = as<arma::mat>(step["hessian"]);
-    ind_NT_GD = rcond_rcpp(hessian);
+    hessian.diag() -= eps_inv;
 
-    if (ind_NT_GD > tol) {
-
-      direction_step = solve_rcpp(hessian, gradient);
-
-    } else {
-
-      direction_step = -gradient;
-    }
+    direction_step = solve_rcpp(hessian, gradient);
 
     step_size = 1.0;
     eta_new = eta - direction_step;
@@ -601,7 +588,8 @@ List AD_EYsubX_normal_SolveLagrange_rcpp(const arma::mat & X,
                                          const size_t & iter_max,
                                          const double & step_rate,
                                          const size_t & step_max,
-                                         const double & tol) {
+                                         const double & tol,
+                                         const double & eps_inv) {
 
   const arma::uword n_m = eta_initial.n_elem;
   arma::vec eta = eta_initial;
@@ -611,7 +599,6 @@ List AD_EYsubX_normal_SolveLagrange_rcpp(const arma::mat & X,
   double step_value = 0.0;
   arma::vec gradient(n_m);
   arma::mat hessian(n_m, n_m);
-  double ind_NT_GD = 0.0;
   arma::vec direction_step(n_m);
   double step_size = 0.0;
   arma::vec eta_new(n_m);
@@ -622,16 +609,9 @@ List AD_EYsubX_normal_SolveLagrange_rcpp(const arma::mat & X,
     step_value = step["value"];
     gradient = as<arma::vec>(step["gradient"]);
     hessian = as<arma::mat>(step["hessian"]);
-    ind_NT_GD = rcond_rcpp(hessian);
+    hessian.diag() -= eps_inv;
 
-    if (ind_NT_GD > tol) {
-
-      direction_step = solve_rcpp(hessian, gradient);
-
-    } else {
-
-      direction_step = -gradient;
-    }
+    direction_step = solve_rcpp(hessian, gradient);
 
     step_size = 1.0;
     eta_new = eta - direction_step;
@@ -866,7 +846,8 @@ List ADCS_EY_normal_SolveLagrange_rcpp(const arma::mat & X,
                                        const size_t & iter_max,
                                        const double & step_rate,
                                        const size_t & step_max,
-                                       const double & tol) {
+                                       const double & tol,
+                                       const double & eps_inv) {
 
   double eta = eta_initial;
   List step = ADCS_EY_normal_Lagrange_rcpp(
@@ -885,14 +866,7 @@ List ADCS_EY_normal_SolveLagrange_rcpp(const arma::mat & X,
     gradient = step["gradient"];
     hessian = step["hessian"];
 
-    if (hessian != 0) {
-
-      direction_step = gradient / hessian;
-
-    } else {
-
-      direction_step = -gradient;
-    }
+    direction_step = gradient / (hessian - eps_inv);
 
     step_size = 1.0;
     eta_new = eta - direction_step;
@@ -1128,7 +1102,8 @@ List ADCS_EXsubY_normal_SolveLagrange_rcpp(const arma::mat & X,
                                            const size_t & iter_max,
                                            const double & step_rate,
                                            const size_t & step_max,
-                                           const double & tol) {
+                                           const double & tol,
+                                           const double & eps_inv) {
 
   const arma::uword n_m = eta_initial.n_elem;
   arma::vec eta = eta_initial;
@@ -1137,7 +1112,6 @@ List ADCS_EXsubY_normal_SolveLagrange_rcpp(const arma::mat & X,
   double step_value = 0.0;
   arma::vec gradient(n_m);
   arma::mat hessian(n_m, n_m);
-  double ind_NT_GD = 0.0;
   arma::vec direction_step(n_m);
   double step_size = 0.0;
   arma::vec eta_new(n_m);
@@ -1148,16 +1122,9 @@ List ADCS_EXsubY_normal_SolveLagrange_rcpp(const arma::mat & X,
     step_value = step["value"];
     gradient = as<arma::vec>(step["gradient"]);
     hessian = as<arma::mat>(step["hessian"]);
-    ind_NT_GD = rcond_rcpp(hessian);
+    hessian.diag() -= eps_inv;
 
-    if (ind_NT_GD > tol) {
-
-      direction_step = solve_rcpp(hessian, gradient);
-
-    } else {
-
-      direction_step = -gradient;
-    }
+    direction_step = solve_rcpp(hessian, gradient);
 
     step_size = 1.0;
     eta_new = eta - direction_step;
@@ -1426,7 +1393,8 @@ List ADCS_EYsubX_normal_SolveLagrange_rcpp(const arma::mat & X,
                                            const size_t & iter_max,
                                            const double & step_rate,
                                            const size_t & step_max,
-                                           const double & tol) {
+                                           const double & tol,
+                                           const double & eps_inv) {
 
   const arma::uword n_m = eta_initial.n_elem;
   arma::vec eta = eta_initial;
@@ -1436,7 +1404,6 @@ List ADCS_EYsubX_normal_SolveLagrange_rcpp(const arma::mat & X,
   double step_value = 0.0;
   arma::vec gradient(n_m);
   arma::mat hessian(n_m, n_m);
-  double ind_NT_GD = 0.0;
   arma::vec direction_step(n_m);
   double step_size = 0.0;
   arma::vec eta_new(n_m);
@@ -1447,16 +1414,9 @@ List ADCS_EYsubX_normal_SolveLagrange_rcpp(const arma::mat & X,
     step_value = step["value"];
     gradient = as<arma::vec>(step["gradient"]);
     hessian = as<arma::mat>(step["hessian"]);
-    ind_NT_GD = rcond_rcpp(hessian);
+    hessian.diag() -= eps_inv;
 
-    if (ind_NT_GD > tol) {
-
-      direction_step = solve_rcpp(hessian, gradient);
-
-    } else {
-
-      direction_step = -gradient;
-    }
+    direction_step = solve_rcpp(hessian, gradient);
 
     step_size = 1.0;
     eta_new = eta - direction_step;
@@ -1704,7 +1664,8 @@ List ADPPS_EX_normal_SolveLagrange_rcpp(const arma::mat & X,
                                         const size_t & iter_max,
                                         const double & step_rate,
                                         const size_t & step_max,
-                                        const double & tol) {
+                                        const double & tol,
+                                        const double & eps_inv) {
 
   const arma::uword n_m = eta_initial.n_elem;
   arma::vec eta = eta_initial;
@@ -1714,7 +1675,6 @@ List ADPPS_EX_normal_SolveLagrange_rcpp(const arma::mat & X,
   double step_value = 0.0;
   arma::vec gradient(n_m);
   arma::mat hessian(n_m, n_m);
-  double ind_NT_GD = 0.0;
   arma::vec direction_step(n_m);
   double step_size = 0.0;
   arma::vec eta_new(n_m);
@@ -1725,16 +1685,9 @@ List ADPPS_EX_normal_SolveLagrange_rcpp(const arma::mat & X,
     step_value = step["value"];
     gradient = as<arma::vec>(step["gradient"]);
     hessian = as<arma::mat>(step["hessian"]);
-    ind_NT_GD = rcond_rcpp(hessian);
+    hessian.diag() -= eps_inv;
 
-    if (ind_NT_GD > tol) {
-
-      direction_step = solve_rcpp(hessian, gradient);
-
-    } else {
-
-      direction_step = -gradient;
-    }
+    direction_step = solve_rcpp(hessian, gradient);
 
     step_size = 1.0;
     eta_new = eta - direction_step;
@@ -1957,7 +1910,8 @@ List ADPPS_EY_normal_SolveLagrange_rcpp(const arma::mat & X,
                                         const size_t & iter_max,
                                         const double & step_rate,
                                         const size_t & step_max,
-                                        const double & tol) {
+                                        const double & tol,
+                                        const double & eps_inv) {
 
   double eta = eta_initial;
   List step = ADPPS_EY_normal_Lagrange_rcpp(
@@ -1977,14 +1931,7 @@ List ADPPS_EY_normal_SolveLagrange_rcpp(const arma::mat & X,
     gradient = step["gradient"];
     hessian = step["hessian"];
 
-    if (hessian != 0) {
-
-      direction_step = gradient / hessian;
-
-    } else {
-
-      direction_step = -gradient;
-    }
+    direction_step = gradient / (hessian - eps_inv);
 
     step_size = 1.0;
     eta_new = eta - direction_step;
@@ -2220,7 +2167,8 @@ List ADPPS_EXsubY_normal_SolveLagrange_rcpp(const arma::mat & X,
                                             const size_t & iter_max,
                                             const double & step_rate,
                                             const size_t & step_max,
-                                            const double & tol) {
+                                            const double & tol,
+                                            const double & eps_inv) {
 
   const arma::uword n_m = eta_initial.n_elem;
   arma::vec eta = eta_initial;
@@ -2230,7 +2178,6 @@ List ADPPS_EXsubY_normal_SolveLagrange_rcpp(const arma::mat & X,
   double step_value = 0.0;
   arma::vec gradient(n_m);
   arma::mat hessian(n_m, n_m);
-  double ind_NT_GD = 0.0;
   arma::vec direction_step(n_m);
   double step_size = 0.0;
   arma::vec eta_new(n_m);
@@ -2241,16 +2188,9 @@ List ADPPS_EXsubY_normal_SolveLagrange_rcpp(const arma::mat & X,
     step_value = step["value"];
     gradient = as<arma::vec>(step["gradient"]);
     hessian = as<arma::mat>(step["hessian"]);
-    ind_NT_GD = rcond_rcpp(hessian);
+    hessian.diag() -= eps_inv;
 
-    if (ind_NT_GD > tol) {
-
-      direction_step = solve_rcpp(hessian, gradient);
-
-    } else {
-
-      direction_step = -gradient;
-    }
+    direction_step = solve_rcpp(hessian, gradient);
 
     step_size = 1.0;
     eta_new = eta - direction_step;
@@ -2522,7 +2462,8 @@ List ADPPS_EYsubX_normal_SolveLagrange_rcpp(const arma::mat & X,
                                             const size_t & iter_max,
                                             const double & step_rate,
                                             const size_t & step_max,
-                                            const double & tol) {
+                                            const double & tol,
+                                            const double & eps_inv) {
 
   const arma::uword n_m = eta_initial.n_elem;
   arma::vec eta = eta_initial;
@@ -2532,7 +2473,6 @@ List ADPPS_EYsubX_normal_SolveLagrange_rcpp(const arma::mat & X,
   double step_value = 0.0;
   arma::vec gradient(n_m);
   arma::mat hessian(n_m, n_m);
-  double ind_NT_GD = 0.0;
   arma::vec direction_step(n_m);
   double step_size = 0.0;
   arma::vec eta_new(n_m);
@@ -2543,16 +2483,9 @@ List ADPPS_EYsubX_normal_SolveLagrange_rcpp(const arma::mat & X,
     step_value = step["value"];
     gradient = as<arma::vec>(step["gradient"]);
     hessian = as<arma::mat>(step["hessian"]);
-    ind_NT_GD = rcond_rcpp(hessian);
+    hessian.diag() -= eps_inv;
 
-    if (ind_NT_GD > tol) {
-
-      direction_step = solve_rcpp(hessian, gradient);
-
-    } else {
-
-      direction_step = -gradient;
-    }
+    direction_step = solve_rcpp(hessian, gradient);
 
     step_size = 1.0;
     eta_new = eta - direction_step;
@@ -2801,7 +2734,8 @@ List AD_EY_logistic_SolveLagrange_rcpp(const arma::mat & X,
                                        const size_t & iter_max,
                                        const double & step_rate,
                                        const size_t & step_max,
-                                       const double & tol) {
+                                       const double & tol,
+                                       const double & eps_inv) {
 
   double eta = eta_initial;
   List step = AD_EY_logistic_Lagrange_rcpp(
@@ -2821,14 +2755,7 @@ List AD_EY_logistic_SolveLagrange_rcpp(const arma::mat & X,
     gradient = step["gradient"];
     hessian = step["hessian"];
 
-    if (hessian != 0) {
-
-      direction_step = gradient / hessian;
-
-    } else {
-
-      direction_step = -gradient;
-    }
+    direction_step = gradient / (hessian - eps_inv);
 
     step_size = 1.0;
     eta_new = eta - direction_step;
@@ -2962,6 +2889,66 @@ List ADvar_EY_logistic_rcpp(const arma::mat & X,
   );
 }
 
+// [[Rcpp::export]]
+List AD_EXsubY_logistic_Lagrange_rcpp(const arma::mat & X,
+                                      const double & alpha,
+                                      const arma::vec & beta,
+                                      const arma::mat & phi,
+                                      const arma::vec & eta) {
+
+  const arma::uword n_n = X.n_rows;
+  const arma::uword n_p = X.n_cols;
+  const arma::uword n_m = n_p * 2;
+  double value = 0.0;
+  arma::vec gradient(n_m);
+  arma::mat hessian(n_m, n_m);
+
+  const arma::vec X_intercept = arma::vec({1});
+
+  arma::vec Xrow_i(n_p);
+  arma::vec extXrow_i(n_p + 1);
+  double eSI_i = 0.0;
+  arma::mat Psi_i_mat(2, n_p);
+  arma::vec Psi_i(n_m);
+  double denominator = 0.0;
+
+  for (size_t i = 0; i < n_n; ++i) {
+
+    Xrow_i = X.row(i).t();
+    extXrow_i = arma::join_vert(X_intercept, Xrow_i);
+    eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
+    Psi_i_mat.row(0) = (Xrow_i.t() - phi.row(0)) * eSI_i / (1 + eSI_i);
+    Psi_i_mat.row(1) = (Xrow_i.t() - phi.row(1)) / (1 + eSI_i);
+    Psi_i = arma::reshape(Psi_i_mat.t(), n_m, 1);
+
+    denominator = 1.0 + arma::dot(eta, Psi_i);
+    if (denominator > 0.0) {
+
+      value += log(denominator);
+      gradient += Psi_i / denominator;
+      hessian += -Psi_i * Psi_i.t() / pow(denominator, 2);
+
+    } else {
+
+      value += -10000.0;
+    }
+  }
+
+  if (!std::isfinite(value) ||
+      !gradient.is_finite() ||
+      !hessian.is_finite()) {
+
+    value = -10000.0 * n_n;
+    gradient = arma::vec(n_m);
+    hessian = arma::mat(n_m, n_m);
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("value") = value,
+    Rcpp::Named("gradient") = gradient,
+    Rcpp::Named("hessian") = hessian
+  );
+}
 
 
 
@@ -4523,61 +4510,7 @@ List ADCS_EYsubX_Gamma_SolveLagrange_rcpp(const arma::mat & X,
 
 
 
-// [[Rcpp::export]]
-List AD_EXsubY_logistic_Lagrange_rcpp(const arma::mat & X,
-                                      const double & alpha,
-                                      const arma::vec & beta,
-                                      const arma::mat & phi,
-                                      const arma::vec & eta) {
 
-  const arma::uword n_n = X.n_rows;
-  const arma::uword n_p = X.n_cols;
-  const arma::uword n_m = n_p * 2;
-  double value = 0.0;
-  arma::vec gradient(n_m);
-  arma::mat hessian(n_m, n_m);
-
-  const arma::vec X_intercept = arma::vec({1});
-
-  for (size_t i = 0; i < n_n; ++i) {
-
-    const arma::vec Xrow_i = X.row(i).t();
-    const arma::vec extXrow_i = arma::join_vert(X_intercept, Xrow_i);
-    const double eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
-    arma::mat Psi_i_mat(2, n_p);
-    Psi_i_mat.row(0) = (Xrow_i.t() - phi.row(0)) * eSI_i / (1 + eSI_i);
-    Psi_i_mat.row(1) = (Xrow_i.t() - phi.row(1)) / (1 + eSI_i);
-    const arma::vec Psi_i = arma::reshape(
-      Psi_i_mat.t(), n_m, 1);
-
-    const double denominator = 1.0 + arma::dot(eta, Psi_i);
-    if (denominator > 0.0) {
-
-      value += log(denominator);
-      gradient += Psi_i / denominator;
-      hessian += -Psi_i * Psi_i.t() / pow(denominator, 2);
-
-    } else {
-
-      value += -10000.0;
-    }
-  }
-
-  if (!std::isfinite(value) ||
-      !gradient.is_finite() ||
-      !hessian.is_finite()) {
-
-    value = -10000.0 * n_n;
-    gradient = arma::vec(n_m);
-    hessian = arma::mat(n_m, n_m);
-  }
-
-  return Rcpp::List::create(
-    Rcpp::Named("value") = value,
-    Rcpp::Named("gradient") = gradient,
-    Rcpp::Named("hessian") = hessian
-  );
-}
 
 // [[Rcpp::export]]
 List AD_EXsubY_logistic_SolveLagrange_rcpp(const arma::mat & X,

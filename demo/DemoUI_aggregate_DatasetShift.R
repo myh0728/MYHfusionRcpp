@@ -77,6 +77,7 @@ iter.max = 10
 step.rate = 2
 step.max = 5
 tol = 1e-5
+eps.inv = 1e-7
 
 ###
 
