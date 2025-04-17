@@ -1283,6 +1283,55 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// AD_EXsubY_logistic_SolveLagrange_rcpp
+List AD_EXsubY_logistic_SolveLagrange_rcpp(const arma::mat& X, const double& alpha, const arma::vec& beta, const arma::mat& phi, const arma::vec& eta_initial, const size_t& iter_max, const double& step_rate, const size_t& step_max, const double& tol, const double& eps_inv);
+RcppExport SEXP _MYHfusionRcpp_AD_EXsubY_logistic_SolveLagrange_rcpp(SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP phiSEXP, SEXP eta_initialSEXP, SEXP iter_maxSEXP, SEXP step_rateSEXP, SEXP step_maxSEXP, SEXP tolSEXP, SEXP eps_invSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type phi(phiSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type eta_initial(eta_initialSEXP);
+    Rcpp::traits::input_parameter< const size_t& >::type iter_max(iter_maxSEXP);
+    Rcpp::traits::input_parameter< const double& >::type step_rate(step_rateSEXP);
+    Rcpp::traits::input_parameter< const size_t& >::type step_max(step_maxSEXP);
+    Rcpp::traits::input_parameter< const double& >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< const double& >::type eps_inv(eps_invSEXP);
+    rcpp_result_gen = Rcpp::wrap(AD_EXsubY_logistic_SolveLagrange_rcpp(X, alpha, beta, phi, eta_initial, iter_max, step_rate, step_max, tol, eps_inv));
+    return rcpp_result_gen;
+END_RCPP
+}
+// AD_EXsubY_logistic_rcpp
+List AD_EXsubY_logistic_rcpp(const arma::mat& X, const double& alpha, const arma::vec& beta, const arma::mat& phi);
+RcppExport SEXP _MYHfusionRcpp_AD_EXsubY_logistic_rcpp(SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP phiSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type phi(phiSEXP);
+    rcpp_result_gen = Rcpp::wrap(AD_EXsubY_logistic_rcpp(X, alpha, beta, phi));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ADvar_EXsubY_logistic_rcpp
+List ADvar_EXsubY_logistic_rcpp(const arma::mat& X, const double& alpha, const arma::vec& beta, const arma::mat& phi, const arma::vec& eta);
+RcppExport SEXP _MYHfusionRcpp_ADvar_EXsubY_logistic_rcpp(SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP phiSEXP, SEXP etaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type phi(phiSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type eta(etaSEXP);
+    rcpp_result_gen = Rcpp::wrap(ADvar_EXsubY_logistic_rcpp(X, alpha, beta, phi, eta));
+    return rcpp_result_gen;
+END_RCPP
+}
 // AD_EY_Gamma_Lagrange_rcpp
 List AD_EY_Gamma_Lagrange_rcpp(const arma::mat& X, const double& alpha, const arma::vec& beta, const double& nu, const double& phi, const double& eta);
 RcppExport SEXP _MYHfusionRcpp_AD_EY_Gamma_Lagrange_rcpp(SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP nuSEXP, SEXP phiSEXP, SEXP etaSEXP) {
@@ -1697,25 +1746,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const size_t& >::type step_max(step_maxSEXP);
     Rcpp::traits::input_parameter< const double& >::type tol(tolSEXP);
     rcpp_result_gen = Rcpp::wrap(ADCS_EYsubX_Gamma_SolveLagrange_rcpp(X, alpha, beta, nu, phi, CS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol));
-    return rcpp_result_gen;
-END_RCPP
-}
-// AD_EXsubY_logistic_SolveLagrange_rcpp
-List AD_EXsubY_logistic_SolveLagrange_rcpp(const arma::mat& X, const double& alpha, const arma::vec& beta, const arma::mat& phi, const arma::vec& eta_initial, const size_t& iter_max, const double& step_rate, const size_t& step_max, const double& tol);
-RcppExport SEXP _MYHfusionRcpp_AD_EXsubY_logistic_SolveLagrange_rcpp(SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP phiSEXP, SEXP eta_initialSEXP, SEXP iter_maxSEXP, SEXP step_rateSEXP, SEXP step_maxSEXP, SEXP tolSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type phi(phiSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type eta_initial(eta_initialSEXP);
-    Rcpp::traits::input_parameter< const size_t& >::type iter_max(iter_maxSEXP);
-    Rcpp::traits::input_parameter< const double& >::type step_rate(step_rateSEXP);
-    Rcpp::traits::input_parameter< const size_t& >::type step_max(step_maxSEXP);
-    Rcpp::traits::input_parameter< const double& >::type tol(tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(AD_EXsubY_logistic_SolveLagrange_rcpp(X, alpha, beta, phi, eta_initial, iter_max, step_rate, step_max, tol));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -2438,6 +2468,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_MYHfusionRcpp_AD_EY_logistic_rcpp", (DL_FUNC) &_MYHfusionRcpp_AD_EY_logistic_rcpp, 4},
     {"_MYHfusionRcpp_ADvar_EY_logistic_rcpp", (DL_FUNC) &_MYHfusionRcpp_ADvar_EY_logistic_rcpp, 5},
     {"_MYHfusionRcpp_AD_EXsubY_logistic_Lagrange_rcpp", (DL_FUNC) &_MYHfusionRcpp_AD_EXsubY_logistic_Lagrange_rcpp, 5},
+    {"_MYHfusionRcpp_AD_EXsubY_logistic_SolveLagrange_rcpp", (DL_FUNC) &_MYHfusionRcpp_AD_EXsubY_logistic_SolveLagrange_rcpp, 10},
+    {"_MYHfusionRcpp_AD_EXsubY_logistic_rcpp", (DL_FUNC) &_MYHfusionRcpp_AD_EXsubY_logistic_rcpp, 4},
+    {"_MYHfusionRcpp_ADvar_EXsubY_logistic_rcpp", (DL_FUNC) &_MYHfusionRcpp_ADvar_EXsubY_logistic_rcpp, 5},
     {"_MYHfusionRcpp_AD_EY_Gamma_Lagrange_rcpp", (DL_FUNC) &_MYHfusionRcpp_AD_EY_Gamma_Lagrange_rcpp, 6},
     {"_MYHfusionRcpp_AD_EY_Gamma_SolveLagrange_rcpp", (DL_FUNC) &_MYHfusionRcpp_AD_EY_Gamma_SolveLagrange_rcpp, 10},
     {"_MYHfusionRcpp_AD_EY_Gamma_rcpp", (DL_FUNC) &_MYHfusionRcpp_AD_EY_Gamma_rcpp, 5},
@@ -2460,7 +2493,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_MYHfusionRcpp_ADCS_EXsubY_Gamma_SolveLagrange_rcpp", (DL_FUNC) &_MYHfusionRcpp_ADCS_EXsubY_Gamma_SolveLagrange_rcpp, 12},
     {"_MYHfusionRcpp_ADCS_EYsubX_Gamma_Lagrange_rcpp", (DL_FUNC) &_MYHfusionRcpp_ADCS_EYsubX_Gamma_Lagrange_rcpp, 8},
     {"_MYHfusionRcpp_ADCS_EYsubX_Gamma_SolveLagrange_rcpp", (DL_FUNC) &_MYHfusionRcpp_ADCS_EYsubX_Gamma_SolveLagrange_rcpp, 12},
-    {"_MYHfusionRcpp_AD_EXsubY_logistic_SolveLagrange_rcpp", (DL_FUNC) &_MYHfusionRcpp_AD_EXsubY_logistic_SolveLagrange_rcpp, 9},
     {"_MYHfusionRcpp_AD_EYsubX_logistic_Lagrange_rcpp", (DL_FUNC) &_MYHfusionRcpp_AD_EYsubX_logistic_Lagrange_rcpp, 6},
     {"_MYHfusionRcpp_AD_EYsubX_logistic_SolveLagrange_rcpp", (DL_FUNC) &_MYHfusionRcpp_AD_EYsubX_logistic_SolveLagrange_rcpp, 10},
     {"_MYHfusionRcpp_ADPPS_EX_logistic_Lagrange_rcpp", (DL_FUNC) &_MYHfusionRcpp_ADPPS_EX_logistic_Lagrange_rcpp, 6},
