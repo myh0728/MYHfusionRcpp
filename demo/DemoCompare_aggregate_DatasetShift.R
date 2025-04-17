@@ -1173,18 +1173,22 @@ ggplot2::autoplot(
   )
 )
 
-test1 <- AD_EXsubY_logistic(
-  X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi)
+test1 <- ADvar_EXsubY_logistic(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, eta = rep(0.1, length(phi)))
 
-test2 <- AD_EXsubY_logistic_rcpp(
-  X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi)
+test2 <- ADvar_EXsubY_logistic_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, eta = rep(0.1, length(phi)))
 
 ggplot2::autoplot(
   microbenchmark::microbenchmark(
-    "R" = AD_EXsubY_logistic(
-      X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi),
-    "Rcpp" = AD_EXsubY_logistic_rcpp(
-      X = X, alpha = theta0, beta = c(theta1, theta2), phi = phi)
+    "R" = ADvar_EXsubY_logistic(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, eta = rep(0.1, length(phi))),
+    "Rcpp" = ADvar_EXsubY_logistic_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, eta = rep(0.1, length(phi)))
   )
 )
 
@@ -1197,10 +1201,100 @@ phi <- c(mean(Y_shift[X_shift[, 1] > 0]),
 inclusion <- cbind(X[, 1] > 0,
                    X[, 1] <= 0)
 
+test1 <- AD_EYsubX_logistic_Lagrange(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, inclusion = inclusion, eta = rep(0.1, length(phi)))
 
+test2 <- AD_EYsubX_logistic_Lagrange_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, inclusion = inclusion, eta = rep(0.1, length(phi)))
 
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = AD_EYsubX_logistic_Lagrange(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, inclusion = inclusion, eta = rep(0.1, length(phi))),
+    "Rcpp" = AD_EYsubX_logistic_Lagrange_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, inclusion = inclusion, eta = rep(0.1, length(phi)))
+  )
+)
 
+test1 <- AD_EYsubX_logistic_SolveLagrange(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, inclusion = inclusion,
+  eta.initial = rep(0, length(phi)),
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
 
+test2 <- AD_EYsubX_logistic_SolveLagrange_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, inclusion = inclusion,
+  eta_initial = rep(0, length(phi)),
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7)
+
+test3 <- AD_EYsubX_logistic_SolveLagrange_v1(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, inclusion = inclusion,
+  eta.initial = rep(0, length(phi)),
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = AD_EYsubX_logistic_SolveLagrange(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, inclusion = inclusion,
+      eta.initial = rep(0, length(phi)),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7),
+    "Rcpp" = AD_EYsubX_logistic_SolveLagrange_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, inclusion = inclusion,
+      eta_initial = rep(0, length(phi)),
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7),
+    "R_Rcpp" = AD_EYsubX_logistic_SolveLagrange_v1(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, inclusion = inclusion,
+      eta.initial = rep(0, length(phi)),
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
+  )
+)
+
+test1 <- AD_EYsubX_logistic(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, inclusion = inclusion)
+
+test2 <- AD_EYsubX_logistic_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, inclusion = inclusion)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = AD_EYsubX_logistic(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, inclusion = inclusion),
+    "Rcpp" = AD_EYsubX_logistic_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, inclusion = inclusion)
+  )
+)
+
+test1 <- ADvar_EYsubX_logistic(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, inclusion = inclusion, eta = rep(0.1, length(phi)))
+
+test2 <- ADvar_EYsubX_logistic_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, inclusion = inclusion, eta = rep(0.1, length(phi)))
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = ADvar_EYsubX_logistic(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, inclusion = inclusion, eta = rep(0.1, length(phi))),
+    "Rcpp" = ADvar_EYsubX_logistic_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, inclusion = inclusion, eta = rep(0.1, length(phi)))
+  )
+)
 
 
 
@@ -1320,33 +1414,6 @@ ggplot2::autoplot(
 
 ### auxiliary information: average of Y given X
 
-
-test1 <- AD_EYsubX_logistic_SolveLagrange(
-  X = X, alpha = theta0, beta = c(theta1, theta2),
-  phi = phi, inclusion = inclusion,
-  eta.initial = rep(0, length(phi)),
-  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7)
-
-test2 <- AD_EYsubX_logistic_SolveLagrange_rcpp(
-  X = X, alpha = theta0, beta = c(theta1, theta2),
-  phi = phi, inclusion = inclusion,
-  eta_initial = rep(0, length(phi)),
-  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-
-ggplot2::autoplot(
-  microbenchmark::microbenchmark(
-    "R" = AD_EYsubX_logistic_SolveLagrange(
-      X = X, alpha = theta0, beta = c(theta1, theta2),
-      phi = phi, inclusion = inclusion,
-      eta.initial = rep(0, length(phi)),
-      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7),
-    "Rcpp" = AD_EYsubX_logistic_SolveLagrange_rcpp(
-      X = X, alpha = theta0, beta = c(theta1, theta2),
-      phi = phi, inclusion = inclusion,
-      eta_initial = rep(0, length(phi)),
-      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7)
-  )
-)
 
 test1 <- ADPPS_EYsubX_logistic_SolveLagrange(
   X = X, alpha = theta0, beta = c(theta1, theta2),

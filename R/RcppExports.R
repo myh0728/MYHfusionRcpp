@@ -329,6 +329,70 @@ ADvar_EXsubY_logistic_rcpp <- function(X, alpha, beta, phi, eta) {
     .Call(`_MYHfusionRcpp_ADvar_EXsubY_logistic_rcpp`, X, alpha, beta, phi, eta)
 }
 
+AD_EYsubX_logistic_Lagrange_rcpp <- function(X, alpha, beta, phi, inclusion, eta) {
+    .Call(`_MYHfusionRcpp_AD_EYsubX_logistic_Lagrange_rcpp`, X, alpha, beta, phi, inclusion, eta)
+}
+
+AD_EYsubX_logistic_SolveLagrange_rcpp <- function(X, alpha, beta, phi, inclusion, eta_initial, iter_max, step_rate, step_max, tol, eps_inv) {
+    .Call(`_MYHfusionRcpp_AD_EYsubX_logistic_SolveLagrange_rcpp`, X, alpha, beta, phi, inclusion, eta_initial, iter_max, step_rate, step_max, tol, eps_inv)
+}
+
+AD_EYsubX_logistic_rcpp <- function(X, alpha, beta, phi, inclusion) {
+    .Call(`_MYHfusionRcpp_AD_EYsubX_logistic_rcpp`, X, alpha, beta, phi, inclusion)
+}
+
+ADvar_EYsubX_logistic_rcpp <- function(X, alpha, beta, phi, inclusion, eta) {
+    .Call(`_MYHfusionRcpp_ADvar_EYsubX_logistic_rcpp`, X, alpha, beta, phi, inclusion, eta)
+}
+
+ADCS_EY_logistic_Lagrange_rcpp <- function(X, alpha, beta, phi, CS_beta, eta) {
+    .Call(`_MYHfusionRcpp_ADCS_EY_logistic_Lagrange_rcpp`, X, alpha, beta, phi, CS_beta, eta)
+}
+
+ADCS_EY_logistic_SolveLagrange_rcpp <- function(X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol) {
+    .Call(`_MYHfusionRcpp_ADCS_EY_logistic_SolveLagrange_rcpp`, X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol)
+}
+
+ADCS_EXsubY_logistic_Lagrange_rcpp <- function(X, alpha, beta, phi, CS_beta, eta) {
+    .Call(`_MYHfusionRcpp_ADCS_EXsubY_logistic_Lagrange_rcpp`, X, alpha, beta, phi, CS_beta, eta)
+}
+
+ADCS_EXsubY_logistic_SolveLagrange_rcpp <- function(X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol) {
+    .Call(`_MYHfusionRcpp_ADCS_EXsubY_logistic_SolveLagrange_rcpp`, X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol)
+}
+
+ADCS_EYsubX_logistic_Lagrange_rcpp <- function(X, alpha, beta, phi, CS_beta, inclusion, eta) {
+    .Call(`_MYHfusionRcpp_ADCS_EYsubX_logistic_Lagrange_rcpp`, X, alpha, beta, phi, CS_beta, inclusion, eta)
+}
+
+ADCS_EYsubX_logistic_SolveLagrange_rcpp <- function(X, alpha, beta, phi, CS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol) {
+    .Call(`_MYHfusionRcpp_ADCS_EYsubX_logistic_SolveLagrange_rcpp`, X, alpha, beta, phi, CS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol)
+}
+
+ADPPS_EX_logistic_Lagrange_rcpp <- function(X, alpha, beta, phi, PPS_beta, eta) {
+    .Call(`_MYHfusionRcpp_ADPPS_EX_logistic_Lagrange_rcpp`, X, alpha, beta, phi, PPS_beta, eta)
+}
+
+ADPPS_EX_logistic_SolveLagrange_rcpp <- function(X, alpha, beta, phi, PPS_beta, eta_initial, iter_max, step_rate, step_max, tol) {
+    .Call(`_MYHfusionRcpp_ADPPS_EX_logistic_SolveLagrange_rcpp`, X, alpha, beta, phi, PPS_beta, eta_initial, iter_max, step_rate, step_max, tol)
+}
+
+ADPPS_EY_logistic_Lagrange_rcpp <- function(X, alpha, beta, phi, PPS_beta, eta) {
+    .Call(`_MYHfusionRcpp_ADPPS_EY_logistic_Lagrange_rcpp`, X, alpha, beta, phi, PPS_beta, eta)
+}
+
+ADPPS_EY_logistic_SolveLagrange_rcpp <- function(X, alpha, beta, phi, PPS_beta, eta_initial, iter_max, step_rate, step_max, tol) {
+    .Call(`_MYHfusionRcpp_ADPPS_EY_logistic_SolveLagrange_rcpp`, X, alpha, beta, phi, PPS_beta, eta_initial, iter_max, step_rate, step_max, tol)
+}
+
+ADPPS_EYsubX_logistic_Lagrange_rcpp <- function(X, alpha, beta, phi, PPS_beta, inclusion, eta) {
+    .Call(`_MYHfusionRcpp_ADPPS_EYsubX_logistic_Lagrange_rcpp`, X, alpha, beta, phi, PPS_beta, inclusion, eta)
+}
+
+ADPPS_EYsubX_logistic_SolveLagrange_rcpp <- function(X, alpha, beta, phi, PPS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol) {
+    .Call(`_MYHfusionRcpp_ADPPS_EYsubX_logistic_SolveLagrange_rcpp`, X, alpha, beta, phi, PPS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol)
+}
+
 AD_EY_Gamma_Lagrange_rcpp <- function(X, alpha, beta, nu, phi, eta) {
     .Call(`_MYHfusionRcpp_AD_EY_Gamma_Lagrange_rcpp`, X, alpha, beta, nu, phi, eta)
 }
@@ -415,62 +479,6 @@ ADCS_EYsubX_Gamma_Lagrange_rcpp <- function(X, alpha, beta, nu, phi, CS_beta, in
 
 ADCS_EYsubX_Gamma_SolveLagrange_rcpp <- function(X, alpha, beta, nu, phi, CS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol) {
     .Call(`_MYHfusionRcpp_ADCS_EYsubX_Gamma_SolveLagrange_rcpp`, X, alpha, beta, nu, phi, CS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol)
-}
-
-AD_EYsubX_logistic_Lagrange_rcpp <- function(X, alpha, beta, phi, inclusion, eta) {
-    .Call(`_MYHfusionRcpp_AD_EYsubX_logistic_Lagrange_rcpp`, X, alpha, beta, phi, inclusion, eta)
-}
-
-AD_EYsubX_logistic_SolveLagrange_rcpp <- function(X, alpha, beta, phi, inclusion, eta_initial, iter_max, step_rate, step_max, tol) {
-    .Call(`_MYHfusionRcpp_AD_EYsubX_logistic_SolveLagrange_rcpp`, X, alpha, beta, phi, inclusion, eta_initial, iter_max, step_rate, step_max, tol)
-}
-
-ADPPS_EX_logistic_Lagrange_rcpp <- function(X, alpha, beta, phi, PPS_beta, eta) {
-    .Call(`_MYHfusionRcpp_ADPPS_EX_logistic_Lagrange_rcpp`, X, alpha, beta, phi, PPS_beta, eta)
-}
-
-ADPPS_EX_logistic_SolveLagrange_rcpp <- function(X, alpha, beta, phi, PPS_beta, eta_initial, iter_max, step_rate, step_max, tol) {
-    .Call(`_MYHfusionRcpp_ADPPS_EX_logistic_SolveLagrange_rcpp`, X, alpha, beta, phi, PPS_beta, eta_initial, iter_max, step_rate, step_max, tol)
-}
-
-ADPPS_EY_logistic_Lagrange_rcpp <- function(X, alpha, beta, phi, PPS_beta, eta) {
-    .Call(`_MYHfusionRcpp_ADPPS_EY_logistic_Lagrange_rcpp`, X, alpha, beta, phi, PPS_beta, eta)
-}
-
-ADPPS_EY_logistic_SolveLagrange_rcpp <- function(X, alpha, beta, phi, PPS_beta, eta_initial, iter_max, step_rate, step_max, tol) {
-    .Call(`_MYHfusionRcpp_ADPPS_EY_logistic_SolveLagrange_rcpp`, X, alpha, beta, phi, PPS_beta, eta_initial, iter_max, step_rate, step_max, tol)
-}
-
-ADPPS_EYsubX_logistic_Lagrange_rcpp <- function(X, alpha, beta, phi, PPS_beta, inclusion, eta) {
-    .Call(`_MYHfusionRcpp_ADPPS_EYsubX_logistic_Lagrange_rcpp`, X, alpha, beta, phi, PPS_beta, inclusion, eta)
-}
-
-ADPPS_EYsubX_logistic_SolveLagrange_rcpp <- function(X, alpha, beta, phi, PPS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol) {
-    .Call(`_MYHfusionRcpp_ADPPS_EYsubX_logistic_SolveLagrange_rcpp`, X, alpha, beta, phi, PPS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol)
-}
-
-ADCS_EY_logistic_Lagrange_rcpp <- function(X, alpha, beta, phi, CS_beta, eta) {
-    .Call(`_MYHfusionRcpp_ADCS_EY_logistic_Lagrange_rcpp`, X, alpha, beta, phi, CS_beta, eta)
-}
-
-ADCS_EY_logistic_SolveLagrange_rcpp <- function(X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol) {
-    .Call(`_MYHfusionRcpp_ADCS_EY_logistic_SolveLagrange_rcpp`, X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol)
-}
-
-ADCS_EXsubY_logistic_Lagrange_rcpp <- function(X, alpha, beta, phi, CS_beta, eta) {
-    .Call(`_MYHfusionRcpp_ADCS_EXsubY_logistic_Lagrange_rcpp`, X, alpha, beta, phi, CS_beta, eta)
-}
-
-ADCS_EXsubY_logistic_SolveLagrange_rcpp <- function(X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol) {
-    .Call(`_MYHfusionRcpp_ADCS_EXsubY_logistic_SolveLagrange_rcpp`, X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol)
-}
-
-ADCS_EYsubX_logistic_Lagrange_rcpp <- function(X, alpha, beta, phi, CS_beta, inclusion, eta) {
-    .Call(`_MYHfusionRcpp_ADCS_EYsubX_logistic_Lagrange_rcpp`, X, alpha, beta, phi, CS_beta, inclusion, eta)
-}
-
-ADCS_EYsubX_logistic_SolveLagrange_rcpp <- function(X, alpha, beta, phi, CS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol) {
-    .Call(`_MYHfusionRcpp_ADCS_EYsubX_logistic_SolveLagrange_rcpp`, X, alpha, beta, phi, CS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol)
 }
 
 pinv_rcpp <- function(M_A) {

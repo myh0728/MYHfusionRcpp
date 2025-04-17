@@ -2360,7 +2360,7 @@ ADvar_EXsubY_logistic <- function(X, alpha, beta, phi, eta)
   eSI_i <- as.vector(exp(alpha + X %*% beta))
   Psi_i <- cbind(t(t(X) - phi[1, ]) * eSI_i / (1 + eSI_i),
                  t(t(X) - phi[2, ]) / (1 + eSI_i))
-  p_i <- (1 / (1 + as.vector(t(Psi_i) %*% eta))) / n_n
+  p_i <- (1 / (1 + as.vector(Psi_i %*% eta))) / n_n
 
   var.A <- diag(rep(c(-sum(eSI_i / (1 + eSI_i) * p_i),
                       -sum(1 / (1 + eSI_i) * p_i)), each = n_p),
@@ -2374,8 +2374,197 @@ ADvar_EXsubY_logistic <- function(X, alpha, beta, phi, eta)
                                 nrow = n_p, ncol = n_p)
   var.B[(n_p + 1):(n_p * 2), (n_p + 1):(n_p * 2)] <- matrix(
     colSums(d_2_i[, rep(1:n_p, times = n_p)] *
-              d_1_i[, rep(1:n_p, each = n_p)] / (1 + eSI_i) * p_i),
+              d_2_i[, rep(1:n_p, each = n_p)] / (1 + eSI_i) * p_i),
     nrow = n_p, ncol = n_p)
+
+  results <- list(var.A = var.A,
+                  var.B = var.B)
+  return(results)
+}
+
+AD_EYsubX_logistic_Lagrange <- function(X, alpha, beta, phi, inclusion, eta)
+{
+  n_n <- dim(X)[1]
+  n_p <- dim(X)[2]
+  n_m <- length(phi)
+
+  eSI <- as.vector(exp(alpha + X %*% beta))
+  Psi <- t(t(outer_times_rcpp(eSI, 1 - phi)) - phi) / (1 + eSI) * inclusion
+  denominator = as.vector(1 + Psi %*% eta)
+  Psi_scaled <- Psi / denominator
+  value <- sum(log(denominator))
+  gradient <- as.matrix(colSums(Psi_scaled))
+  hessian <- matrix(-colSums(Psi_scaled[, rep(1:n_m, times = n_m)] *
+                               Psi_scaled[, rep(1:n_m, each = n_m)]),
+                    nrow = n_m, ncol = n_m)
+
+  if (any(!is.finite(value))|
+      any(!is.finite(gradient))|
+      any(!is.finite(hessian)))
+  {
+    value <- -10000 * n_n
+    gradient <- matrix(0, n_m, 1)
+    hessian <- matrix(0, n_m, n_m)
+  }
+
+  results <- list(value = value,
+                  gradient = gradient,
+                  hessian = hessian)
+  return(results)
+}
+
+AD_EYsubX_logistic_SolveLagrange <- function(X, alpha, beta,
+                                             phi, inclusion,
+                                             eta.initial, iter.max,
+                                             step.rate, step.max, tol, eps_inv)
+{
+  eta <- eta.initial
+  step <- AD_EYsubX_logistic_Lagrange(
+    X = X, alpha = alpha, beta = beta,
+    phi = phi, inclusion = inclusion, eta = eta)
+
+  for (k in 1:iter.max)
+  {
+    direction.step <- solve_rcpp(
+      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
+      step$gradient)
+
+    step.size <- 1
+    eta.new <- eta - direction.step
+    step.new <- AD_EYsubX_logistic_Lagrange(
+      X = X, alpha = alpha, beta = beta,
+      phi = phi, inclusion = inclusion, eta = eta.new)
+
+    for (iter.step in 1:step.max)
+    {
+      if (step.new$value <= step$value + tol)
+      {
+        step.size <- step.size / step.rate
+        eta.new <- eta - direction.step * step.size
+        step.new <- AD_EYsubX_logistic_Lagrange(
+          X = X, alpha = alpha, beta = beta,
+          phi = phi, inclusion = inclusion, eta = eta.new)
+      }else
+        break
+    }
+
+    if (step.new$value > step$value + tol)
+    {
+      eta <- eta.new
+      step <- step.new
+    }else
+      break
+  }
+
+  results <- list(eta = eta,
+                  value = step$value,
+                  gradient = step$gradient,
+                  hessian = step$hessian)
+  return(results)
+}
+
+AD_EYsubX_logistic_SolveLagrange_v1 <- function(X, alpha, beta,
+                                                phi, inclusion,
+                                                eta.initial, iter.max,
+                                                step.rate, step.max, tol, eps_inv)
+{
+  eta <- eta.initial
+  step <- AD_EYsubX_logistic_Lagrange_rcpp(
+    X = X, alpha = alpha, beta = beta,
+    phi = phi, inclusion = inclusion, eta = eta)
+
+  for (k in 1:iter.max)
+  {
+    direction.step <- solve_rcpp(
+      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
+      step$gradient)
+
+    step.size <- 1
+    eta.new <- eta - direction.step
+    step.new <- AD_EYsubX_logistic_Lagrange_rcpp(
+      X = X, alpha = alpha, beta = beta,
+      phi = phi, inclusion = inclusion, eta = eta.new)
+
+    for (iter.step in 1:step.max)
+    {
+      if (step.new$value <= step$value + tol)
+      {
+        step.size <- step.size / step.rate
+        eta.new <- eta - direction.step * step.size
+        step.new <- AD_EYsubX_logistic_Lagrange_rcpp(
+          X = X, alpha = alpha, beta = beta,
+          phi = phi, inclusion = inclusion, eta = eta.new)
+      }else
+        break
+    }
+
+    if (step.new$value > step$value + tol)
+    {
+      eta <- eta.new
+      step <- step.new
+    }else
+      break
+  }
+
+  results <- list(eta = eta,
+                  value = step$value,
+                  gradient = step$gradient,
+                  hessian = step$hessian)
+  return(results)
+}
+
+AD_EYsubX_logistic <- function(X, alpha, beta, phi, inclusion)
+{
+  n_n <- dim(X)[1]
+  n_p <- dim(X)[2]
+  n_m <- length(phi)
+
+  eSI_i <- as.vector(exp(alpha + X %*% beta))
+  Psi_i <- t(t(outer_times_rcpp(eSI_i, 1 - phi)) - phi) / (1 + eSI_i) * inclusion
+  Psi <- as.matrix(colSums(Psi_i) / n_n)
+  Psi_square <- matrix(colSums(Psi_i[, rep(1:n_m, times = n_m)] *
+                                 Psi_i[, rep(1:n_m, each = n_m)]) / n_n,
+                       nrow = n_m, ncol = n_m)
+  Psi_gradient <- cbind(
+    matrix(colSums(inclusion[, rep(1:n_m, times = n_p + 1)] *
+                     cbind(1, X)[, rep(1:(n_p + 1), each = n_m)] *
+                     eSI / ((1 + eSI) ^ 2)) / n_n,
+           nrow = n_m, ncol = n_p + 1),
+    diag(-colSums(inclusion) / n_n, nrow = n_m, ncol = n_m))
+
+  if (any(!is.finite(Psi))|
+      any(!is.finite(Psi_square))|
+      any(!is.finite(Psi_gradient)))
+  {
+    Psi <- matrix(0, n_m, 1)
+    Psi_square <- matrix(0, n_m, n_m)
+    Psi_gradient <- matrix(0, n_m, n_p + n_m + 2)
+  }
+
+  results <- list(score = Psi,
+                  score_square = Psi_square,
+                  score_gradient = Psi_gradient)
+  return(results)
+}
+
+ADvar_EYsubX_logistic <- function(X, alpha, beta, phi, inclusion, eta)
+{
+  n_n <- dim(X)[1]
+  n_p <- dim(X)[2]
+  n_m <- length(phi)
+
+  eSI_i <- as.vector(exp(alpha + X %*% beta))
+  Psi_i <- t(t(outer_times_rcpp(eSI_i, 1 - phi)) - phi) / (1 + eSI_i) * inclusion
+  p_i <- (1 / (1 + as.vector(Psi_i %*% eta))) / n_n
+
+  var.A <- diag(-colSums(inclusion * p_i), nrow = n_m, ncol = n_m)
+  var.B <- matrix(colSums((outer_times_rcpp(eSI_i / (1 + eSI_i),
+                                            as.vector(outer_times_rcpp(1 - phi, 1 - phi))) +
+                             outer_times_rcpp(1 / (1 + eSI_i),
+                                              as.vector(outer_times_rcpp(phi, phi)))) *
+                            inclusion[, rep(1:n_m, times = n_m)] *
+                            inclusion[, rep(1:n_m, each = n_m)] * p_i),
+                  nrow = n_m, ncol = n_m)
 
   results <- list(var.A = var.A,
                   var.B = var.B)
@@ -2387,6 +2576,337 @@ ADvar_EXsubY_logistic <- function(X, alpha, beta, phi, eta)
 
 
 
+
+
+
+
+
+
+##### Covariate shift, logistic regression model
+
+ADCS_EY_logistic_SolveLagrange <- function(X, alpha, beta,
+                                           phi, CS.beta,
+                                           eta.initial, iter.max,
+                                           step.rate, step.max, tol)
+{
+  eta <- eta.initial
+  step <- ADCS_EY_logistic_Lagrange_rcpp(
+    X = X, alpha = alpha, beta = beta,
+    phi = phi, CS_beta = CS.beta, eta = eta)
+
+  for (k in 1:iter.max)
+  {
+    step.size <- 1
+    if (step$hessian != 0)
+    {
+      direction.step <- step$gradient / step$hessian
+    }else
+    {
+      direction.step <- -step$gradient
+    }
+    eta.new <- eta - direction.step
+    step.new <- ADCS_EY_logistic_Lagrange_rcpp(
+      X = X, alpha = alpha, beta = beta,
+      phi = phi, CS_beta = CS.beta, eta = eta.new)
+
+    for (iter.step in 1:step.max)
+    {
+      if (step.new$value <= step$value + tol)
+      {
+        step.size <- step.size / step.rate
+        eta.new <- eta - direction.step * step.size
+        step.new <- ADCS_EY_logistic_Lagrange_rcpp(
+          X = X, alpha = alpha, beta = beta,
+          phi = phi, CS_beta = CS.beta, eta = eta.new)
+      }else
+        break
+    }
+
+    if (step.new$value > step$value + tol)
+    {
+      eta <- eta.new
+      step <- step.new
+    }else
+      break
+  }
+
+  results <- list(eta = eta,
+                  value = step$value,
+                  gradient = step$gradient,
+                  hessian = step$hessian)
+  return(results)
+}
+
+ADCS_EXsubY_logistic_SolveLagrange <- function(X, alpha, beta,
+                                               phi, CS.beta,
+                                               eta.initial, iter.max,
+                                               step.rate, step.max, tol)
+{
+  eta <- eta.initial
+  step <- ADCS_EXsubY_logistic_Lagrange_rcpp(
+    X = X, alpha = alpha, beta = beta,
+    phi = phi, CS_beta = CS.beta, eta = eta)
+
+  for (k in 1:iter.max)
+  {
+    step.size <- 1
+    ind.NT.GD <- rcond_rcpp(step$hessian)
+    if (ind.NT.GD > tol)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
+    eta.new <- eta - direction.step
+    step.new <- ADCS_EXsubY_logistic_Lagrange_rcpp(
+      X = X, alpha = alpha, beta = beta,
+      phi = phi, CS_beta = CS.beta, eta = eta.new)
+
+    for (iter.step in 1:step.max)
+    {
+      if (step.new$value <= step$value + tol)
+      {
+        step.size <- step.size / step.rate
+        eta.new <- eta - direction.step * step.size
+        step.new <- ADCS_EXsubY_logistic_Lagrange_rcpp(
+          X = X, alpha = alpha, beta = beta,
+          phi = phi, CS_beta = CS.beta, eta = eta.new)
+      }else
+        break
+    }
+
+    if (step.new$value > step$value + tol)
+    {
+      eta <- eta.new
+      step <- step.new
+    }else
+      break
+  }
+
+  results <- list(eta = eta,
+                  value = step$value,
+                  gradient = step$gradient,
+                  hessian = step$hessian)
+  return(results)
+}
+
+ADCS_EYsubX_logistic_SolveLagrange <- function(X, alpha, beta,
+                                               phi, CS.beta, inclusion,
+                                               eta.initial, iter.max,
+                                               step.rate, step.max, tol)
+{
+  eta <- eta.initial
+  step <- ADCS_EYsubX_logistic_Lagrange_rcpp(
+    X = X, alpha = alpha, beta = beta,
+    phi = phi, CS_beta = CS.beta, inclusion = inclusion, eta = eta)
+
+  for (k in 1:iter.max)
+  {
+    step.size <- 1
+    ind.NT.GD <- rcond_rcpp(step$hessian)
+    if (ind.NT.GD > tol)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
+    eta.new <- eta - direction.step
+    step.new <- ADCS_EYsubX_logistic_Lagrange_rcpp(
+      X = X, alpha = alpha, beta = beta,
+      phi = phi, CS_beta = CS.beta, inclusion = inclusion, eta = eta.new)
+
+    for (iter.step in 1:step.max)
+    {
+      if (step.new$value <= step$value + tol)
+      {
+        step.size <- step.size / step.rate
+        eta.new <- eta - direction.step * step.size
+        step.new <- ADCS_EYsubX_logistic_Lagrange_rcpp(
+          X = X, alpha = alpha, beta = beta,
+          phi = phi, CS_beta = CS.beta, inclusion = inclusion, eta = eta.new)
+      }else
+        break
+    }
+
+    if (step.new$value > step$value + tol)
+    {
+      eta <- eta.new
+      step <- step.new
+    }else
+      break
+  }
+
+  results <- list(eta = eta,
+                  value = step$value,
+                  gradient = step$gradient,
+                  hessian = step$hessian)
+  return(results)
+}
+
+##### Prior probability shift, logistic regression model
+
+ADPPS_EX_logistic_SolveLagrange <- function(X, alpha, beta,
+                                            phi, PPS.beta,
+                                            eta.initial, iter.max,
+                                            step.rate, step.max, tol)
+{
+  eta <- eta.initial
+  step <- ADPPS_EX_logistic_Lagrange_rcpp(
+    X = X, alpha = alpha, beta = beta,
+    phi = phi, PPS_beta = PPS.beta, eta = eta)
+
+  for (k in 1:iter.max)
+  {
+    step.size <- 1
+    ind.NT.GD <- rcond_rcpp(step$hessian)
+    if (ind.NT.GD > tol)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
+    eta.new <- eta - direction.step
+    step.new <- ADPPS_EX_logistic_Lagrange_rcpp(
+      X = X, alpha = alpha, beta = beta,
+      phi = phi, PPS_beta = PPS.beta, eta = eta.new)
+
+    for (iter.step in 1:step.max)
+    {
+      if (step.new$value <= step$value + tol)
+      {
+        step.size <- step.size / step.rate
+        eta.new <- eta - direction.step * step.size
+        step.new <- ADPPS_EX_logistic_Lagrange_rcpp(
+          X = X, alpha = alpha, beta = beta,
+          phi = phi, PPS_beta = PPS.beta, eta = eta.new)
+      }else
+        break
+    }
+
+    if (step.new$value > step$value + tol)
+    {
+      eta <- eta.new
+      step <- step.new
+    }else
+      break
+  }
+
+  results <- list(eta = eta,
+                  value = step$value,
+                  gradient = step$gradient,
+                  hessian = step$hessian)
+  return(results)
+}
+
+ADPPS_EY_logistic_SolveLagrange <- function(X, alpha, beta,
+                                            phi, PPS.beta,
+                                            eta.initial, iter.max,
+                                            step.rate, step.max, tol)
+{
+  eta <- eta.initial
+  step <- ADPPS_EY_logistic_Lagrange_rcpp(
+    X = X, alpha = alpha, beta = beta,
+    phi = phi, PPS_beta = PPS.beta, eta = eta)
+
+  for (k in 1:iter.max)
+  {
+    step.size <- 1
+    if (step$hessian != 0)
+    {
+      direction.step <- step$gradient / step$hessian
+    }else
+    {
+      direction.step <- -step$gradient
+    }
+    eta.new <- eta - direction.step
+    step.new <- ADPPS_EY_logistic_Lagrange_rcpp(
+      X = X, alpha = alpha, beta = beta,
+      phi = phi, PPS_beta = PPS.beta, eta = eta.new)
+
+    for (iter.step in 1:step.max)
+    {
+      if (step.new$value <= step$value + tol)
+      {
+        step.size <- step.size / step.rate
+        eta.new <- eta - direction.step * step.size
+        step.new <- ADPPS_EY_logistic_Lagrange_rcpp(
+          X = X, alpha = alpha, beta = beta,
+          phi = phi, PPS_beta = PPS.beta, eta = eta.new)
+      }else
+        break
+    }
+
+    if (step.new$value > step$value + tol)
+    {
+      eta <- eta.new
+      step <- step.new
+    }else
+      break
+  }
+
+  results <- list(eta = eta,
+                  value = step$value,
+                  gradient = step$gradient,
+                  hessian = step$hessian)
+  return(results)
+}
+
+ADPPS_EYsubX_logistic_SolveLagrange <- function(X, alpha, beta,
+                                                phi, PPS.beta, inclusion,
+                                                eta.initial, iter.max,
+                                                step.rate, step.max, tol)
+{
+  eta <- eta.initial
+  step <- ADPPS_EYsubX_logistic_Lagrange_rcpp(
+    X = X, alpha = alpha, beta = beta,
+    phi = phi, PPS_beta = PPS.beta, inclusion = inclusion, eta = eta)
+
+  for (k in 1:iter.max)
+  {
+    step.size <- 1
+    ind.NT.GD <- rcond_rcpp(step$hessian)
+    if (ind.NT.GD > tol)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
+    eta.new <- eta - direction.step
+    step.new <- ADPPS_EYsubX_logistic_Lagrange_rcpp(
+      X = X, alpha = alpha, beta = beta,
+      phi = phi, PPS_beta = PPS.beta, inclusion = inclusion, eta = eta.new)
+
+    for (iter.step in 1:step.max)
+    {
+      if (step.new$value <= step$value + tol)
+      {
+        step.size <- step.size / step.rate
+        eta.new <- eta - direction.step * step.size
+        step.new <- ADPPS_EYsubX_logistic_Lagrange_rcpp(
+          X = X, alpha = alpha, beta = beta,
+          phi = phi, PPS_beta = PPS.beta, inclusion = inclusion, eta = eta.new)
+      }else
+        break
+    }
+
+    if (step.new$value > step$value + tol)
+    {
+      eta <- eta.new
+      step <- step.new
+    }else
+      break
+  }
+
+  results <- list(eta = eta,
+                  value = step$value,
+                  gradient = step$gradient,
+                  hessian = step$hessian)
+  return(results)
+}
 
 
 
@@ -2949,382 +3469,7 @@ ADCS_EYsubX_Gamma_SolveLagrange <- function(X, alpha, beta, nu,
 
 
 
-AD_EYsubX_logistic_SolveLagrange <- function(X, alpha, beta,
-                                             phi, inclusion,
-                                             eta.initial, iter.max,
-                                             step.rate, step.max, tol)
-{
-  eta <- eta.initial
-  step <- AD_EYsubX_logistic_Lagrange_rcpp(
-    X = X, alpha = alpha, beta = beta,
-    phi = phi, inclusion = inclusion, eta = eta)
 
-  for (k in 1:iter.max)
-  {
-    step.size <- 1
-    ind.NT.GD <- rcond_rcpp(step$hessian)
-    if (ind.NT.GD > tol)
-    {
-      direction.step <- solve_rcpp(step$hessian, step$gradient)
-    }else
-    {
-      direction.step <- -step$gradient
-    }
-    eta.new <- eta - direction.step
-    step.new <- AD_EYsubX_logistic_Lagrange_rcpp(
-      X = X, alpha = alpha, beta = beta,
-      phi = phi, inclusion = inclusion, eta = eta.new)
 
-    for (iter.step in 1:step.max)
-    {
-      if (step.new$value <= step$value + tol)
-      {
-        step.size <- step.size / step.rate
-        eta.new <- eta - direction.step * step.size
-        step.new <- AD_EYsubX_logistic_Lagrange_rcpp(
-          X = X, alpha = alpha, beta = beta,
-          phi = phi, inclusion = inclusion, eta = eta.new)
-      }else
-        break
-    }
 
-    if (step.new$value > step$value + tol)
-    {
-      eta <- eta.new
-      step <- step.new
-    }else
-      break
-  }
 
-  results <- list(eta = eta,
-                  value = step$value,
-                  gradient = step$gradient,
-                  hessian = step$hessian)
-  return(results)
-}
-
-##### Prior probability shift, logistic regression model
-
-ADPPS_EX_logistic_SolveLagrange <- function(X, alpha, beta,
-                                            phi, PPS.beta,
-                                            eta.initial, iter.max,
-                                            step.rate, step.max, tol)
-{
-  eta <- eta.initial
-  step <- ADPPS_EX_logistic_Lagrange_rcpp(
-    X = X, alpha = alpha, beta = beta,
-    phi = phi, PPS_beta = PPS.beta, eta = eta)
-
-  for (k in 1:iter.max)
-  {
-    step.size <- 1
-    ind.NT.GD <- rcond_rcpp(step$hessian)
-    if (ind.NT.GD > tol)
-    {
-      direction.step <- solve_rcpp(step$hessian, step$gradient)
-    }else
-    {
-      direction.step <- -step$gradient
-    }
-    eta.new <- eta - direction.step
-    step.new <- ADPPS_EX_logistic_Lagrange_rcpp(
-      X = X, alpha = alpha, beta = beta,
-      phi = phi, PPS_beta = PPS.beta, eta = eta.new)
-
-    for (iter.step in 1:step.max)
-    {
-      if (step.new$value <= step$value + tol)
-      {
-        step.size <- step.size / step.rate
-        eta.new <- eta - direction.step * step.size
-        step.new <- ADPPS_EX_logistic_Lagrange_rcpp(
-          X = X, alpha = alpha, beta = beta,
-          phi = phi, PPS_beta = PPS.beta, eta = eta.new)
-      }else
-        break
-    }
-
-    if (step.new$value > step$value + tol)
-    {
-      eta <- eta.new
-      step <- step.new
-    }else
-      break
-  }
-
-  results <- list(eta = eta,
-                  value = step$value,
-                  gradient = step$gradient,
-                  hessian = step$hessian)
-  return(results)
-}
-
-ADPPS_EY_logistic_SolveLagrange <- function(X, alpha, beta,
-                                            phi, PPS.beta,
-                                            eta.initial, iter.max,
-                                            step.rate, step.max, tol)
-{
-  eta <- eta.initial
-  step <- ADPPS_EY_logistic_Lagrange_rcpp(
-    X = X, alpha = alpha, beta = beta,
-    phi = phi, PPS_beta = PPS.beta, eta = eta)
-
-  for (k in 1:iter.max)
-  {
-    step.size <- 1
-    if (step$hessian != 0)
-    {
-      direction.step <- step$gradient / step$hessian
-    }else
-    {
-      direction.step <- -step$gradient
-    }
-    eta.new <- eta - direction.step
-    step.new <- ADPPS_EY_logistic_Lagrange_rcpp(
-      X = X, alpha = alpha, beta = beta,
-      phi = phi, PPS_beta = PPS.beta, eta = eta.new)
-
-    for (iter.step in 1:step.max)
-    {
-      if (step.new$value <= step$value + tol)
-      {
-        step.size <- step.size / step.rate
-        eta.new <- eta - direction.step * step.size
-        step.new <- ADPPS_EY_logistic_Lagrange_rcpp(
-          X = X, alpha = alpha, beta = beta,
-          phi = phi, PPS_beta = PPS.beta, eta = eta.new)
-      }else
-        break
-    }
-
-    if (step.new$value > step$value + tol)
-    {
-      eta <- eta.new
-      step <- step.new
-    }else
-      break
-  }
-
-  results <- list(eta = eta,
-                  value = step$value,
-                  gradient = step$gradient,
-                  hessian = step$hessian)
-  return(results)
-}
-
-ADPPS_EYsubX_logistic_SolveLagrange <- function(X, alpha, beta,
-                                                phi, PPS.beta, inclusion,
-                                                eta.initial, iter.max,
-                                                step.rate, step.max, tol)
-{
-  eta <- eta.initial
-  step <- ADPPS_EYsubX_logistic_Lagrange_rcpp(
-    X = X, alpha = alpha, beta = beta,
-    phi = phi, PPS_beta = PPS.beta, inclusion = inclusion, eta = eta)
-
-  for (k in 1:iter.max)
-  {
-    step.size <- 1
-    ind.NT.GD <- rcond_rcpp(step$hessian)
-    if (ind.NT.GD > tol)
-    {
-      direction.step <- solve_rcpp(step$hessian, step$gradient)
-    }else
-    {
-      direction.step <- -step$gradient
-    }
-    eta.new <- eta - direction.step
-    step.new <- ADPPS_EYsubX_logistic_Lagrange_rcpp(
-      X = X, alpha = alpha, beta = beta,
-      phi = phi, PPS_beta = PPS.beta, inclusion = inclusion, eta = eta.new)
-
-    for (iter.step in 1:step.max)
-    {
-      if (step.new$value <= step$value + tol)
-      {
-        step.size <- step.size / step.rate
-        eta.new <- eta - direction.step * step.size
-        step.new <- ADPPS_EYsubX_logistic_Lagrange_rcpp(
-          X = X, alpha = alpha, beta = beta,
-          phi = phi, PPS_beta = PPS.beta, inclusion = inclusion, eta = eta.new)
-      }else
-        break
-    }
-
-    if (step.new$value > step$value + tol)
-    {
-      eta <- eta.new
-      step <- step.new
-    }else
-      break
-  }
-
-  results <- list(eta = eta,
-                  value = step$value,
-                  gradient = step$gradient,
-                  hessian = step$hessian)
-  return(results)
-}
-
-##### Covariate shift, logistic regression model
-
-ADCS_EY_logistic_SolveLagrange <- function(X, alpha, beta,
-                                           phi, CS.beta,
-                                           eta.initial, iter.max,
-                                           step.rate, step.max, tol)
-{
-  eta <- eta.initial
-  step <- ADCS_EY_logistic_Lagrange_rcpp(
-    X = X, alpha = alpha, beta = beta,
-    phi = phi, CS_beta = CS.beta, eta = eta)
-
-  for (k in 1:iter.max)
-  {
-    step.size <- 1
-    if (step$hessian != 0)
-    {
-      direction.step <- step$gradient / step$hessian
-    }else
-    {
-      direction.step <- -step$gradient
-    }
-    eta.new <- eta - direction.step
-    step.new <- ADCS_EY_logistic_Lagrange_rcpp(
-      X = X, alpha = alpha, beta = beta,
-      phi = phi, CS_beta = CS.beta, eta = eta.new)
-
-    for (iter.step in 1:step.max)
-    {
-      if (step.new$value <= step$value + tol)
-      {
-        step.size <- step.size / step.rate
-        eta.new <- eta - direction.step * step.size
-        step.new <- ADCS_EY_logistic_Lagrange_rcpp(
-          X = X, alpha = alpha, beta = beta,
-          phi = phi, CS_beta = CS.beta, eta = eta.new)
-      }else
-        break
-    }
-
-    if (step.new$value > step$value + tol)
-    {
-      eta <- eta.new
-      step <- step.new
-    }else
-      break
-  }
-
-  results <- list(eta = eta,
-                  value = step$value,
-                  gradient = step$gradient,
-                  hessian = step$hessian)
-  return(results)
-}
-
-ADCS_EXsubY_logistic_SolveLagrange <- function(X, alpha, beta,
-                                               phi, CS.beta,
-                                               eta.initial, iter.max,
-                                               step.rate, step.max, tol)
-{
-  eta <- eta.initial
-  step <- ADCS_EXsubY_logistic_Lagrange_rcpp(
-    X = X, alpha = alpha, beta = beta,
-    phi = phi, CS_beta = CS.beta, eta = eta)
-
-  for (k in 1:iter.max)
-  {
-    step.size <- 1
-    ind.NT.GD <- rcond_rcpp(step$hessian)
-    if (ind.NT.GD > tol)
-    {
-      direction.step <- solve_rcpp(step$hessian, step$gradient)
-    }else
-    {
-      direction.step <- -step$gradient
-    }
-    eta.new <- eta - direction.step
-    step.new <- ADCS_EXsubY_logistic_Lagrange_rcpp(
-      X = X, alpha = alpha, beta = beta,
-      phi = phi, CS_beta = CS.beta, eta = eta.new)
-
-    for (iter.step in 1:step.max)
-    {
-      if (step.new$value <= step$value + tol)
-      {
-        step.size <- step.size / step.rate
-        eta.new <- eta - direction.step * step.size
-        step.new <- ADCS_EXsubY_logistic_Lagrange_rcpp(
-          X = X, alpha = alpha, beta = beta,
-          phi = phi, CS_beta = CS.beta, eta = eta.new)
-      }else
-        break
-    }
-
-    if (step.new$value > step$value + tol)
-    {
-      eta <- eta.new
-      step <- step.new
-    }else
-      break
-  }
-
-  results <- list(eta = eta,
-                  value = step$value,
-                  gradient = step$gradient,
-                  hessian = step$hessian)
-  return(results)
-}
-
-ADCS_EYsubX_logistic_SolveLagrange <- function(X, alpha, beta,
-                                               phi, CS.beta, inclusion,
-                                               eta.initial, iter.max,
-                                               step.rate, step.max, tol)
-{
-  eta <- eta.initial
-  step <- ADCS_EYsubX_logistic_Lagrange_rcpp(
-    X = X, alpha = alpha, beta = beta,
-    phi = phi, CS_beta = CS.beta, inclusion = inclusion, eta = eta)
-
-  for (k in 1:iter.max)
-  {
-    step.size <- 1
-    ind.NT.GD <- rcond_rcpp(step$hessian)
-    if (ind.NT.GD > tol)
-    {
-      direction.step <- solve_rcpp(step$hessian, step$gradient)
-    }else
-    {
-      direction.step <- -step$gradient
-    }
-    eta.new <- eta - direction.step
-    step.new <- ADCS_EYsubX_logistic_Lagrange_rcpp(
-      X = X, alpha = alpha, beta = beta,
-      phi = phi, CS_beta = CS.beta, inclusion = inclusion, eta = eta.new)
-
-    for (iter.step in 1:step.max)
-    {
-      if (step.new$value <= step$value + tol)
-      {
-        step.size <- step.size / step.rate
-        eta.new <- eta - direction.step * step.size
-        step.new <- ADCS_EYsubX_logistic_Lagrange_rcpp(
-          X = X, alpha = alpha, beta = beta,
-          phi = phi, CS_beta = CS.beta, inclusion = inclusion, eta = eta.new)
-      }else
-        break
-    }
-
-    if (step.new$value > step$value + tol)
-    {
-      eta <- eta.new
-      step <- step.new
-    }else
-      break
-  }
-
-  results <- list(eta = eta,
-                  value = step$value,
-                  gradient = step$gradient,
-                  hessian = step$hessian)
-  return(results)
-}

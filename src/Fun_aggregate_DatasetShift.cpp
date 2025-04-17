@@ -3120,11 +3120,284 @@ List ADvar_EXsubY_logistic_rcpp(const arma::mat & X,
     p_i = 1.0 / (1.0 + arma::dot(Psi_i, eta)) / n_n;
 
     var_A.submat(0, 0, n_p - 1, n_p - 1).diag() += -eSI_i / (1 + eSI_i) * p_i;
-    var_A.submat(n_p, n_p, n_p * 2 - 1, n_p * 2 - 1) += -1 / (1 + eSI_i) * p_i;
+    var_A.submat(n_p, n_p, n_p * 2 - 1, n_p * 2 - 1).diag() += -1 / (1 + eSI_i) * p_i;
     var_B.submat(0, 0, n_p - 1, n_p - 1) += (Xrow_i.t() - phi.row(0)).t() *
       (Xrow_i.t() - phi.row(0)) * eSI_i / (1 + eSI_i) * p_i;
     var_B.submat(n_p, n_p, n_p * 2 - 1, n_p * 2 - 1) += (Xrow_i.t() - phi.row(1)).t() *
       (Xrow_i.t() - phi.row(1)) / (1 + eSI_i) * p_i;
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("diff") = var_A,
+    Rcpp::Named("var") = var_B
+  );
+}
+
+// [[Rcpp::export]]
+List AD_EYsubX_logistic_Lagrange_rcpp(const arma::mat & X,
+                                      const double & alpha,
+                                      const arma::vec & beta,
+                                      const arma::vec & phi,
+                                      const arma::umat & inclusion,
+                                      const arma::vec & eta) {
+
+  const arma::uword n_n = X.n_rows;
+  const arma::uword n_p = X.n_cols;
+  const arma::uword n_m = phi.n_elem;
+  double value = 0.0;
+  arma::vec gradient(n_m);
+  arma::mat hessian(n_m, n_m);
+
+  const arma::vec X_intercept = arma::vec({1});
+
+  arma::vec Xrow_i(n_p);
+  arma::vec extXrow_i(n_p + 1);
+  double eSI_i = 0.0;
+  arma::vec Psi_i(n_m);
+  double denominator = 0.0;
+
+  for (size_t i = 0; i < n_n; ++i) {
+
+    Xrow_i = X.row(i).t();
+    extXrow_i = arma::join_vert(X_intercept, Xrow_i);
+    eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
+    Psi_i.zeros();
+
+    for (size_t m = 0; m < n_m; ++m) {
+
+      if (inclusion(i, m) == 1) {
+
+        Psi_i(m) += ((1 - phi(m)) * eSI_i - phi(m)) / (1 + eSI_i);
+      }
+    }
+
+    denominator = 1.0 + arma::dot(eta, Psi_i);
+    if (denominator > 0.0) {
+
+      value += log(denominator);
+      gradient += Psi_i / denominator;
+      hessian += -Psi_i * Psi_i.t() / pow(denominator, 2);
+
+    } else {
+
+      value += -10000.0;
+    }
+  }
+
+  if (!std::isfinite(value) ||
+      !gradient.is_finite() ||
+      !hessian.is_finite()) {
+
+    value = -10000.0 * n_n;
+    gradient = arma::vec(n_m);
+    hessian = arma::mat(n_m, n_m);
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("value") = value,
+    Rcpp::Named("gradient") = gradient,
+    Rcpp::Named("hessian") = hessian
+  );
+}
+
+// [[Rcpp::export]]
+List AD_EYsubX_logistic_SolveLagrange_rcpp(const arma::mat & X,
+                                           const double & alpha,
+                                           const arma::vec & beta,
+                                           const arma::vec & phi,
+                                           const arma::umat & inclusion,
+                                           const arma::vec & eta_initial,
+                                           const size_t & iter_max,
+                                           const double & step_rate,
+                                           const size_t & step_max,
+                                           const double & tol,
+                                           const double & eps_inv) {
+
+  const arma::uword n_m = eta_initial.n_elem;
+  arma::vec eta = eta_initial;
+  List step = AD_EYsubX_logistic_Lagrange_rcpp(
+    X, alpha, beta, phi, inclusion, eta);
+
+  double step_value = 0.0;
+  arma::vec gradient(n_m);
+  arma::mat hessian(n_m, n_m);
+  arma::vec direction_step(n_m);
+  double step_size = 0.0;
+  arma::vec eta_new(n_m);
+  double step_new_value = 0.0;
+
+  for (size_t k = 0; k < iter_max; k++) {
+
+    step_value = step["value"];
+    gradient = as<arma::vec>(step["gradient"]);
+    hessian = as<arma::mat>(step["hessian"]);
+    hessian.diag() -= eps_inv;
+
+    direction_step = solve_rcpp(hessian, gradient);
+
+    step_size = 1.0;
+    eta_new = eta - direction_step;
+    List step_new = AD_EYsubX_logistic_Lagrange_rcpp(
+      X, alpha, beta, phi, inclusion, eta_new);
+
+    for (size_t iter_step = 0; iter_step < step_max; iter_step++) {
+
+      step_new_value = step_new["value"];
+
+      if (step_new_value <= step_value + tol) {
+
+        step_size /= step_rate;
+        eta_new = eta - direction_step * step_size;
+        step_new = AD_EYsubX_logistic_Lagrange_rcpp(
+          X, alpha, beta, phi, inclusion, eta_new);
+
+      } else {
+
+        break;
+      }
+    }
+
+    step_new_value = step_new["value"];
+
+    if (step_new_value > step_value + tol) {
+
+      eta = eta_new;
+      step = step_new;
+
+    } else {
+
+      break;
+    }
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("eta") = eta,
+    Rcpp::Named("value") = step["value"],
+    Rcpp::Named("gradient") = step["gradient"],
+    Rcpp::Named("hessian") = step["hessian"]
+  );
+}
+
+// [[Rcpp::export]]
+List AD_EYsubX_logistic_rcpp(const arma::mat & X,
+                             const double & alpha,
+                             const arma::vec & beta,
+                             const arma::vec & phi,
+                             const arma::umat & inclusion) {
+
+  const arma::uword n_n = X.n_rows;
+  const arma::uword n_p = X.n_cols;
+  const arma::uword n_m = phi.n_elem;
+  arma::vec Psi(n_m);
+  arma::mat Psi_square(n_m, n_m);
+  arma::mat Psi_gradient(n_m, n_p + n_m + 1);
+
+  const arma::vec X_intercept = arma::vec({1});
+
+  arma::vec Xrow_i(n_p);
+  arma::vec extXrow_i(n_p + 1);
+  double eSI_i = 0.0;
+  arma::vec Psi_i(n_m);
+
+  for (size_t i = 0; i < n_n; ++i) {
+
+    Xrow_i = X.row(i).t();
+    extXrow_i = arma::join_vert(X_intercept, Xrow_i);
+    eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
+    Psi_i.zeros();
+
+    for (size_t m = 0; m < n_m; ++m) {
+
+      if (inclusion(i, m) == 1) {
+
+        Psi_i(m) += ((1 - phi(m)) * eSI_i - phi(m)) / (1 + eSI_i);
+        Psi_gradient.submat(m, 0, m, n_p) += extXrow_i.t() * eSI_i / pow(1 + eSI_i, 2);
+        Psi_gradient(m, n_p + 1 + m) += -1;
+      }
+    }
+
+    Psi += Psi_i;
+    Psi_square += Psi_i * Psi_i.t();
+  }
+
+  Psi /= n_n;
+  Psi_square /= n_n;
+  Psi_gradient /= n_n;
+
+  if (!Psi.is_finite() ||
+      !Psi_square.is_finite() ||
+      !Psi_gradient.is_finite()) {
+
+    Psi = arma::vec(n_m);
+    Psi_square = arma::mat(n_m, n_m);
+    Psi_gradient = arma::mat(n_m, n_p + n_m + 2);
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("score") = Psi,
+    Rcpp::Named("score_square") = Psi_square,
+    Rcpp::Named("score_gradient") = Psi_gradient
+  );
+}
+
+// [[Rcpp::export]]
+List ADvar_EYsubX_logistic_rcpp(const arma::mat & X,
+                                const double & alpha,
+                                const arma::vec & beta,
+                                const arma::vec & phi,
+                                const arma::umat & inclusion,
+                                const arma::vec & eta) {
+
+  const arma::uword n_n = X.n_rows;
+  const arma::uword n_p = X.n_cols;
+  const arma::uword n_m = phi.n_elem;
+
+  const arma::vec X_intercept = arma::vec({1});
+
+  arma::vec Xrow_i(n_p);
+  arma::vec extXrow_i(n_p + 1);
+  double eSI_i = 0.0;
+  arma::vec Psi_i(n_m);
+  double p_i = 0.0;
+  arma::mat var_A(n_m, n_m);
+  arma::mat var_B(n_m, n_m);
+  double var_B_off_diag = 0.0;
+
+  for (size_t i = 0; i < n_n; ++i) {
+
+    Xrow_i = X.row(i).t();
+    extXrow_i = arma::join_vert(X_intercept, Xrow_i);
+    eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
+    Psi_i.zeros();
+    for (size_t m = 0; m < n_m; ++m) {
+
+      if (inclusion(i, m) == 1) {
+
+        Psi_i(m) += ((1 - phi(m)) * eSI_i - phi(m)) / (1 + eSI_i);
+      }
+    }
+    p_i = 1.0 / (1.0 + arma::dot(Psi_i, eta)) / n_n;
+
+    for (size_t m = 0; m < n_m; ++m) {
+
+      if (inclusion(i, m) == 1) {
+
+        var_A(m, m) += -p_i;
+        var_B(m, m) += (pow(1 - phi(m), 2) * eSI_i +
+          pow(phi(m), 2)) / (1 + eSI_i) * p_i;
+
+        for (size_t l = 0; l < m; ++l) {
+
+          if (inclusion(i, l) == 1) {
+
+            var_B_off_diag = ((1 - phi(l)) * (1 - phi(m)) * eSI_i +
+              phi(l) * phi(m)) / (1 + eSI_i) * p_i;
+            var_B(l, m) += var_B_off_diag;
+            var_B(m, l) += var_B_off_diag;
+          }
+        }
+      }
+    }
   }
 
   return Rcpp::List::create(
@@ -3160,6 +3433,819 @@ List ADvar_EXsubY_logistic_rcpp(const arma::mat & X,
 
 
 
+
+
+
+
+// Covariate shift, logistic regression model
+
+// [[Rcpp::export]]
+List ADCS_EY_logistic_Lagrange_rcpp(const arma::mat & X,
+                                    const double & alpha,
+                                    const arma::vec & beta,
+                                    const double & phi,
+                                    const arma::vec & CS_beta,
+                                    const double & eta) {
+
+  const arma::uword n_n = X.n_rows;
+  double value = 0.0;
+  double gradient = 0.0;
+  double hessian = 0.0;
+
+  const arma::vec X_intercept = arma::vec({1});
+
+  for (size_t i = 0; i < n_n; ++i) {
+
+    const arma::vec Xrow_i = X.row(i).t();
+    const arma::vec extXrow_i = arma::join_vert(X_intercept, Xrow_i);
+    const double eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
+    const double eSI_CS_i = exp(arma::dot(Xrow_i, CS_beta));
+    const double Psi_i = ((1 - phi) * eSI_i - phi) * eSI_CS_i / (1 + eSI_i);
+
+    const double denominator = 1.0 + eta * Psi_i;
+    if (denominator > 0.0) {
+
+      value += log(denominator);
+      gradient += Psi_i / denominator;
+      hessian += -pow(Psi_i, 2) / pow(denominator, 2);
+
+    } else {
+
+      value += -10000.0;
+    }
+  }
+
+  if (!std::isfinite(value) ||
+      !std::isfinite(gradient) ||
+      !std::isfinite(hessian)) {
+
+      value = -10000.0 * n_n;
+    gradient = 0.0;
+    hessian = 0.0;
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("value") = value,
+    Rcpp::Named("gradient") = gradient,
+    Rcpp::Named("hessian") = hessian
+  );
+}
+
+// [[Rcpp::export]]
+List ADCS_EY_logistic_SolveLagrange_rcpp(const arma::mat & X,
+                                         const double & alpha,
+                                         const arma::vec & beta,
+                                         const double & phi,
+                                         const arma::vec & CS_beta,
+                                         const double & eta_initial,
+                                         const size_t & iter_max,
+                                         const double & step_rate,
+                                         const size_t & step_max,
+                                         const double & tol) {
+
+  double eta = eta_initial;
+  List step = ADCS_EY_logistic_Lagrange_rcpp(
+    X, alpha, beta, phi, CS_beta, eta);
+
+  for (size_t k = 0; k < iter_max; k++) {
+
+    const double step_value = step["value"];
+    const double gradient = step["gradient"];
+    const double hessian = step["hessian"];
+
+    double direction_step;
+
+    if (hessian != 0) {
+
+      direction_step = gradient / hessian;
+
+    } else {
+
+      direction_step = -gradient;
+    }
+
+    double step_size = 1.0;
+    double eta_new = eta - direction_step;
+    List step_new = ADCS_EY_logistic_Lagrange_rcpp(
+      X, alpha, beta, phi, CS_beta, eta_new);
+
+    for (size_t iter_step = 0; iter_step < step_max; iter_step++) {
+
+      const double step_new_value = step_new["value"];
+
+      if (step_new_value <= step_value + tol) {
+
+        step_size /= step_rate;
+        eta_new = eta - direction_step * step_size;
+        step_new = ADCS_EY_logistic_Lagrange_rcpp(
+          X, alpha, beta, phi, CS_beta, eta_new);
+
+      } else {
+
+        break;
+      }
+    }
+
+    const double step_new_value = step_new["value"];
+
+    if (step_new_value > step_value + tol) {
+
+      eta = eta_new;
+      step = step_new;
+
+    } else {
+
+      break;
+    }
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("eta") = eta,
+    Rcpp::Named("value") = step["value"],
+                               Rcpp::Named("gradient") = step["gradient"],
+                                                             Rcpp::Named("hessian") = step["hessian"]
+  );
+}
+
+// [[Rcpp::export]]
+List ADCS_EXsubY_logistic_Lagrange_rcpp(const arma::mat & X,
+                                        const double & alpha,
+                                        const arma::vec & beta,
+                                        const arma::mat & phi,
+                                        const arma::vec & CS_beta,
+                                        const arma::vec & eta) {
+
+  const arma::uword n_n = X.n_rows;
+  const arma::uword n_p = X.n_cols;
+  const arma::uword n_m = n_p * 2;
+  double value = 0.0;
+  arma::vec gradient(n_m);
+  arma::mat hessian(n_m, n_m);
+
+  const arma::vec X_intercept = arma::vec({1});
+
+  for (size_t i = 0; i < n_n; ++i) {
+
+    const arma::vec Xrow_i = X.row(i).t();
+    const arma::vec extXrow_i = arma::join_vert(X_intercept, Xrow_i);
+    const double eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
+    const double eSI_CS_i = exp(arma::dot(Xrow_i, CS_beta));
+    arma::mat Psi_i_mat(2, n_p);
+    Psi_i_mat.row(0) = (Xrow_i.t() - phi.row(0)) * eSI_i * eSI_CS_i / (1 + eSI_i);
+    Psi_i_mat.row(1) = (Xrow_i.t() - phi.row(1)) * eSI_CS_i / (1 + eSI_i);
+    const arma::vec Psi_i = arma::reshape(
+      Psi_i_mat.t(), n_m, 1);
+
+    const double denominator = 1.0 + arma::dot(eta, Psi_i);
+    if (denominator > 0.0) {
+
+      value += log(denominator);
+      gradient += Psi_i / denominator;
+      hessian += -Psi_i * Psi_i.t() / pow(denominator, 2);
+
+    } else {
+
+      value += -10000.0;
+    }
+  }
+
+  if (!std::isfinite(value) ||
+      !gradient.is_finite() ||
+      !hessian.is_finite()) {
+
+      value = -10000.0 * n_n;
+    gradient = arma::vec(n_m);
+    hessian = arma::mat(n_m, n_m);
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("value") = value,
+    Rcpp::Named("gradient") = gradient,
+    Rcpp::Named("hessian") = hessian
+  );
+}
+
+// [[Rcpp::export]]
+List ADCS_EXsubY_logistic_SolveLagrange_rcpp(const arma::mat & X,
+                                             const double & alpha,
+                                             const arma::vec & beta,
+                                             const arma::mat & phi,
+                                             const arma::vec & CS_beta,
+                                             const arma::vec & eta_initial,
+                                             const size_t & iter_max,
+                                             const double & step_rate,
+                                             const size_t & step_max,
+                                             const double & tol) {
+
+  const arma::uword n_m = eta_initial.n_elem;
+  arma::vec eta = eta_initial;
+  List step = ADCS_EXsubY_logistic_Lagrange_rcpp(
+    X, alpha, beta, phi, CS_beta, eta);
+
+  for (size_t k = 0; k < iter_max; k++) {
+
+    const double step_value = step["value"];
+    const arma::vec gradient = step["gradient"];
+    const arma::mat hessian = step["hessian"];
+    const double ind_NT_GD = rcond_rcpp(hessian);
+
+    arma::vec direction_step(n_m);
+
+    if (ind_NT_GD > tol) {
+
+      direction_step = solve_rcpp(hessian, gradient);
+
+    } else {
+
+      direction_step = -gradient;
+    }
+
+    double step_size = 1.0;
+    arma::vec eta_new = eta - direction_step;
+    List step_new = ADCS_EXsubY_logistic_Lagrange_rcpp(
+      X, alpha, beta, phi, CS_beta, eta_new);
+
+    for (size_t iter_step = 0; iter_step < step_max; iter_step++) {
+
+      const double step_new_value = step_new["value"];
+
+      if (step_new_value <= step_value + tol) {
+
+        step_size /= step_rate;
+        eta_new = eta - direction_step * step_size;
+        step_new = ADCS_EXsubY_logistic_Lagrange_rcpp(
+          X, alpha, beta, phi, CS_beta, eta_new);
+
+      } else {
+
+        break;
+      }
+    }
+
+    const double step_new_value = step_new["value"];
+
+    if (step_new_value > step_value + tol) {
+
+      eta = eta_new;
+      step = step_new;
+
+    } else {
+
+      break;
+    }
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("eta") = eta,
+    Rcpp::Named("value") = step["value"],
+                               Rcpp::Named("gradient") = step["gradient"],
+                                                             Rcpp::Named("hessian") = step["hessian"]
+  );
+}
+
+// [[Rcpp::export]]
+List ADCS_EYsubX_logistic_Lagrange_rcpp(const arma::mat & X,
+                                        const double & alpha,
+                                        const arma::vec & beta,
+                                        const arma::vec & phi,
+                                        const arma::vec & CS_beta,
+                                        const arma::umat & inclusion,
+                                        const arma::vec & eta) {
+
+  const arma::uword n_n = X.n_rows;
+  const arma::uword n_m = phi.n_elem;
+  double value = 0.0;
+  arma::vec gradient(n_m);
+  arma::mat hessian(n_m, n_m);
+
+  const arma::vec X_intercept = arma::vec({1});
+
+  for (size_t i = 0; i < n_n; ++i) {
+
+    const arma::vec Xrow_i = X.row(i).t();
+    const arma::vec extXrow_i = arma::join_vert(X_intercept, Xrow_i);
+    const double eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
+    const double eSI_CS_i = exp(arma::dot(Xrow_i, CS_beta));
+    arma::vec Psi_i(n_m);
+
+    for (size_t m = 0; m < n_m; ++m) {
+
+      if (inclusion(i, m) == 1) {
+
+        Psi_i(m) += ((1 - phi(m)) * eSI_i * eSI_CS_i - phi(m)) / (1 + eSI_i);
+      }
+    }
+
+    const double denominator = 1.0 + arma::dot(eta, Psi_i);
+    if (denominator > 0.0) {
+
+      value += log(denominator);
+      gradient += Psi_i / denominator;
+      hessian += -Psi_i * Psi_i.t() / pow(denominator, 2);
+
+    } else {
+
+      value += -10000.0;
+    }
+  }
+
+  if (!std::isfinite(value) ||
+      !gradient.is_finite() ||
+      !hessian.is_finite()) {
+
+      value = -10000.0 * n_n;
+    gradient = arma::vec(n_m);
+    hessian = arma::mat(n_m, n_m);
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("value") = value,
+    Rcpp::Named("gradient") = gradient,
+    Rcpp::Named("hessian") = hessian
+  );
+}
+
+// [[Rcpp::export]]
+List ADCS_EYsubX_logistic_SolveLagrange_rcpp(const arma::mat & X,
+                                             const double & alpha,
+                                             const arma::vec & beta,
+                                             const arma::vec & phi,
+                                             const arma::vec & CS_beta,
+                                             const arma::umat & inclusion,
+                                             const arma::vec & eta_initial,
+                                             const size_t & iter_max,
+                                             const double & step_rate,
+                                             const size_t & step_max,
+                                             const double & tol) {
+
+  const arma::uword n_m = eta_initial.n_elem;
+  arma::vec eta = eta_initial;
+  List step = ADCS_EYsubX_logistic_Lagrange_rcpp(
+    X, alpha, beta, phi, CS_beta, inclusion, eta);
+
+  for (size_t k = 0; k < iter_max; k++) {
+
+    const double step_value = step["value"];
+    const arma::vec gradient = step["gradient"];
+    const arma::mat hessian = step["hessian"];
+    const double ind_NT_GD = rcond_rcpp(hessian);
+
+    arma::vec direction_step(n_m);
+
+    if (ind_NT_GD > tol) {
+
+      direction_step = solve_rcpp(hessian, gradient);
+
+    } else {
+
+      direction_step = -gradient;
+    }
+
+    double step_size = 1.0;
+    arma::vec eta_new = eta - direction_step;
+    List step_new = ADCS_EYsubX_logistic_Lagrange_rcpp(
+      X, alpha, beta, phi, CS_beta, inclusion, eta_new);
+
+    for (size_t iter_step = 0; iter_step < step_max; iter_step++) {
+
+      const double step_new_value = step_new["value"];
+
+      if (step_new_value <= step_value + tol) {
+
+        step_size /= step_rate;
+        eta_new = eta - direction_step * step_size;
+        step_new = ADCS_EYsubX_logistic_Lagrange_rcpp(
+          X, alpha, beta, phi, CS_beta, inclusion, eta_new);
+
+      } else {
+
+        break;
+      }
+    }
+
+    const double step_new_value = step_new["value"];
+
+    if (step_new_value > step_value + tol) {
+
+      eta = eta_new;
+      step = step_new;
+
+    } else {
+
+      break;
+    }
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("eta") = eta,
+    Rcpp::Named("value") = step["value"],
+                               Rcpp::Named("gradient") = step["gradient"],
+                                                             Rcpp::Named("hessian") = step["hessian"]
+  );
+}
+
+// Prior probability shift, logistic regression model
+
+// [[Rcpp::export]]
+List ADPPS_EX_logistic_Lagrange_rcpp(const arma::mat & X,
+                                     const double & alpha,
+                                     const arma::vec & beta,
+                                     const arma::vec & phi,
+                                     const double & PPS_beta,
+                                     const arma::vec & eta) {
+
+  const arma::uword n_n = X.n_rows;
+  const arma::uword n_p = X.n_cols;
+  double value = 0.0;
+  arma::vec gradient(n_p);
+  arma::mat hessian(n_p, n_p);
+
+  const arma::vec X_intercept = arma::vec({1});
+  const double ePPS_beta = exp(PPS_beta);
+
+  for (size_t i = 0; i < n_n; ++i) {
+
+    const arma::vec Xrow_i = X.row(i).t();
+    const arma::vec extXrow_i = arma::join_vert(X_intercept, Xrow_i);
+    const double eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
+    const arma::vec Psi_i = (Xrow_i - phi) *
+      (1 + eSI_i * ePPS_beta) / (1 + eSI_i);
+
+    const double denominator = 1.0 + arma::dot(eta, Psi_i);
+    if (denominator > 0.0) {
+
+      value += log(denominator);
+      gradient += Psi_i / denominator;
+      hessian += -Psi_i * Psi_i.t() / pow(denominator, 2);
+
+    } else {
+
+      value += -10000.0;
+    }
+  }
+
+  if (!std::isfinite(value) ||
+      !gradient.is_finite() ||
+      !hessian.is_finite()) {
+
+      value = -10000.0 * n_n;
+    gradient = arma::vec(n_p);
+    hessian = arma::mat(n_p, n_p);
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("value") = value,
+    Rcpp::Named("gradient") = gradient,
+    Rcpp::Named("hessian") = hessian
+  );
+}
+
+// [[Rcpp::export]]
+List ADPPS_EX_logistic_SolveLagrange_rcpp(const arma::mat & X,
+                                          const double & alpha,
+                                          const arma::vec & beta,
+                                          const arma::vec & phi,
+                                          const double & PPS_beta,
+                                          const arma::vec & eta_initial,
+                                          const size_t & iter_max,
+                                          const double & step_rate,
+                                          const size_t & step_max,
+                                          const double & tol) {
+
+  const arma::uword n_m = eta_initial.n_elem;
+  arma::vec eta = eta_initial;
+  List step = ADPPS_EX_logistic_Lagrange_rcpp(
+    X, alpha, beta, phi, PPS_beta, eta);
+
+  for (size_t k = 0; k < iter_max; k++) {
+
+    const double step_value = step["value"];
+    const arma::vec gradient = step["gradient"];
+    const arma::mat hessian = step["hessian"];
+    const double ind_NT_GD = rcond_rcpp(hessian);
+
+    arma::vec direction_step(n_m);
+
+    if (ind_NT_GD > tol) {
+
+      direction_step = solve_rcpp(hessian, gradient);
+
+    } else {
+
+      direction_step = -gradient;
+    }
+
+    double step_size = 1.0;
+    arma::vec eta_new = eta - direction_step;
+    List step_new = ADPPS_EX_logistic_Lagrange_rcpp(
+      X, alpha, beta, phi, PPS_beta, eta_new);
+
+    for (size_t iter_step = 0; iter_step < step_max; iter_step++) {
+
+      const double step_new_value = step_new["value"];
+
+      if (step_new_value <= step_value + tol) {
+
+        step_size /= step_rate;
+        eta_new = eta - direction_step * step_size;
+        step_new = ADPPS_EX_logistic_Lagrange_rcpp(
+          X, alpha, beta, phi, PPS_beta, eta_new);
+
+      } else {
+
+        break;
+      }
+    }
+
+    const double step_new_value = step_new["value"];
+
+    if (step_new_value > step_value + tol) {
+
+      eta = eta_new;
+      step = step_new;
+
+    } else {
+
+      break;
+    }
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("eta") = eta,
+    Rcpp::Named("value") = step["value"],
+                               Rcpp::Named("gradient") = step["gradient"],
+                                                             Rcpp::Named("hessian") = step["hessian"]
+  );
+}
+
+// [[Rcpp::export]]
+List ADPPS_EY_logistic_Lagrange_rcpp(const arma::mat & X,
+                                     const double & alpha,
+                                     const arma::vec & beta,
+                                     const double & phi,
+                                     const double & PPS_beta,
+                                     const double & eta) {
+
+  const arma::uword n_n = X.n_rows;
+  double value = 0.0;
+  double gradient = 0.0;
+  double hessian = 0.0;
+
+  const arma::vec X_intercept = arma::vec({1});
+  const double ePPS_beta = exp(PPS_beta);
+
+  for (size_t i = 0; i < n_n; ++i) {
+
+    const arma::vec Xrow_i = X.row(i).t();
+    const arma::vec extXrow_i = arma::join_vert(X_intercept, Xrow_i);
+    const double eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
+    const double Psi_i = ((1 - phi) * eSI_i * ePPS_beta - phi) / (1 + eSI_i);
+
+    const double denominator = 1.0 + eta * Psi_i;
+    if (denominator > 0.0) {
+
+      value += log(denominator);
+      gradient += Psi_i / denominator;
+      hessian += -pow(Psi_i, 2) / pow(denominator, 2);
+
+    } else {
+
+      value += -10000.0;
+    }
+  }
+
+  if (!std::isfinite(value) ||
+      !std::isfinite(gradient) ||
+      !std::isfinite(hessian)) {
+
+      value = -10000.0 * n_n;
+    gradient = 0.0;
+    hessian = 0.0;
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("value") = value,
+    Rcpp::Named("gradient") = gradient,
+    Rcpp::Named("hessian") = hessian
+  );
+}
+
+// [[Rcpp::export]]
+List ADPPS_EY_logistic_SolveLagrange_rcpp(const arma::mat & X,
+                                          const double & alpha,
+                                          const arma::vec & beta,
+                                          const double & phi,
+                                          const double & PPS_beta,
+                                          const double & eta_initial,
+                                          const size_t & iter_max,
+                                          const double & step_rate,
+                                          const size_t & step_max,
+                                          const double & tol) {
+
+  double eta = eta_initial;
+  List step = ADPPS_EY_logistic_Lagrange_rcpp(
+    X, alpha, beta, phi, PPS_beta, eta);
+
+  for (size_t k = 0; k < iter_max; k++) {
+
+    const double step_value = step["value"];
+    const double gradient = step["gradient"];
+    const double hessian = step["hessian"];
+
+    double direction_step;
+
+    if (hessian != 0) {
+
+      direction_step = gradient / hessian;
+
+    } else {
+
+      direction_step = -gradient;
+    }
+
+    double step_size = 1.0;
+    double eta_new = eta - direction_step;
+    List step_new = ADPPS_EY_logistic_Lagrange_rcpp(
+      X, alpha, beta, phi, PPS_beta, eta_new);
+
+    for (size_t iter_step = 0; iter_step < step_max; iter_step++) {
+
+      const double step_new_value = step_new["value"];
+
+      if (step_new_value <= step_value + tol) {
+
+        step_size /= step_rate;
+        eta_new = eta - direction_step * step_size;
+        step_new = ADPPS_EY_logistic_Lagrange_rcpp(
+          X, alpha, beta, phi, PPS_beta, eta_new);
+
+      } else {
+
+        break;
+      }
+    }
+
+    const double step_new_value = step_new["value"];
+
+    if (step_new_value > step_value + tol) {
+
+      eta = eta_new;
+      step = step_new;
+
+    } else {
+
+      break;
+    }
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("eta") = eta,
+    Rcpp::Named("value") = step["value"],
+                               Rcpp::Named("gradient") = step["gradient"],
+                                                             Rcpp::Named("hessian") = step["hessian"]
+  );
+}
+
+// [[Rcpp::export]]
+List ADPPS_EYsubX_logistic_Lagrange_rcpp(const arma::mat & X,
+                                         const double & alpha,
+                                         const arma::vec & beta,
+                                         const arma::vec & phi,
+                                         const double & PPS_beta,
+                                         const arma::umat & inclusion,
+                                         const arma::vec & eta) {
+
+  const arma::uword n_n = X.n_rows;
+  const arma::uword n_m = phi.n_elem;
+  double value = 0.0;
+  arma::vec gradient(n_m);
+  arma::mat hessian(n_m, n_m);
+
+  const arma::vec X_intercept = arma::vec({1});
+  const double ePPS_beta = exp(PPS_beta);
+
+  for (size_t i = 0; i < n_n; ++i) {
+
+    const arma::vec Xrow_i = X.row(i).t();
+    const arma::vec extXrow_i = arma::join_vert(X_intercept, Xrow_i);
+    const double eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
+    arma::vec Psi_i(n_m);
+
+    for (size_t m = 0; m < n_m; ++m) {
+
+      if (inclusion(i, m) == 1) {
+
+        Psi_i(m) += ((1 - phi(m)) * eSI_i * ePPS_beta - phi(m)) / (1 + eSI_i);
+      }
+    }
+
+    const double denominator = 1.0 + arma::dot(eta, Psi_i);
+    if (denominator > 0.0) {
+
+      value += log(denominator);
+      gradient += Psi_i / denominator;
+      hessian += -Psi_i * Psi_i.t() / pow(denominator, 2);
+
+    } else {
+
+      value += -10000.0;
+    }
+  }
+
+  if (!std::isfinite(value) ||
+      !gradient.is_finite() ||
+      !hessian.is_finite()) {
+
+      value = -10000.0 * n_n;
+    gradient = arma::vec(n_m);
+    hessian = arma::mat(n_m, n_m);
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("value") = value,
+    Rcpp::Named("gradient") = gradient,
+    Rcpp::Named("hessian") = hessian
+  );
+}
+
+// [[Rcpp::export]]
+List ADPPS_EYsubX_logistic_SolveLagrange_rcpp(const arma::mat & X,
+                                              const double & alpha,
+                                              const arma::vec & beta,
+                                              const arma::vec & phi,
+                                              const double & PPS_beta,
+                                              const arma::umat & inclusion,
+                                              const arma::vec & eta_initial,
+                                              const size_t & iter_max,
+                                              const double & step_rate,
+                                              const size_t & step_max,
+                                              const double & tol) {
+
+  const arma::uword n_m = eta_initial.n_elem;
+  arma::vec eta = eta_initial;
+  List step = ADPPS_EYsubX_logistic_Lagrange_rcpp(
+    X, alpha, beta, phi, PPS_beta, inclusion, eta);
+
+  for (size_t k = 0; k < iter_max; k++) {
+
+    const double step_value = step["value"];
+    const arma::vec gradient = step["gradient"];
+    const arma::mat hessian = step["hessian"];
+    const double ind_NT_GD = rcond_rcpp(hessian);
+
+    arma::vec direction_step(n_m);
+
+    if (ind_NT_GD > tol) {
+
+      direction_step = solve_rcpp(hessian, gradient);
+
+    } else {
+
+      direction_step = -gradient;
+    }
+
+    double step_size = 1.0;
+    arma::vec eta_new = eta - direction_step;
+    List step_new = ADPPS_EYsubX_logistic_Lagrange_rcpp(
+      X, alpha, beta, phi, PPS_beta, inclusion, eta_new);
+
+    for (size_t iter_step = 0; iter_step < step_max; iter_step++) {
+
+      const double step_new_value = step_new["value"];
+
+      if (step_new_value <= step_value + tol) {
+
+        step_size /= step_rate;
+        eta_new = eta - direction_step * step_size;
+        step_new = ADPPS_EYsubX_logistic_Lagrange_rcpp(
+          X, alpha, beta, phi, PPS_beta, inclusion, eta_new);
+
+      } else {
+
+        break;
+      }
+    }
+
+    const double step_new_value = step_new["value"];
+
+    if (step_new_value > step_value + tol) {
+
+      eta = eta_new;
+      step = step_new;
+
+    } else {
+
+      break;
+    }
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("eta") = eta,
+    Rcpp::Named("value") = step["value"],
+                               Rcpp::Named("gradient") = step["gradient"],
+                                                             Rcpp::Named("hessian") = step["hessian"]
+  );
+}
 
 
 
@@ -4694,953 +5780,12 @@ List ADCS_EYsubX_Gamma_SolveLagrange_rcpp(const arma::mat & X,
 
 
 
-// [[Rcpp::export]]
-List AD_EYsubX_logistic_Lagrange_rcpp(const arma::mat & X,
-                                      const double & alpha,
-                                      const arma::vec & beta,
-                                      const arma::vec & phi,
-                                      const arma::umat & inclusion,
-                                      const arma::vec & eta) {
 
-  const arma::uword n_n = X.n_rows;
-  const arma::uword n_m = phi.n_elem;
-  double value = 0.0;
-  arma::vec gradient(n_m);
-  arma::mat hessian(n_m, n_m);
 
-  const arma::vec X_intercept = arma::vec({1});
 
-  for (size_t i = 0; i < n_n; ++i) {
 
-    const arma::vec Xrow_i = X.row(i).t();
-    const arma::vec extXrow_i = arma::join_vert(X_intercept, Xrow_i);
-    const double eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
-    arma::vec Psi_i(n_m);
 
-    for (size_t m = 0; m < n_m; ++m) {
 
-      if (inclusion(i, m) == 1) {
-
-        Psi_i(m) += ((1 - phi(m)) * eSI_i - phi(m)) / (1 + eSI_i);
-      }
-    }
-
-    const double denominator = 1.0 + arma::dot(eta, Psi_i);
-    if (denominator > 0.0) {
-
-      value += log(denominator);
-      gradient += Psi_i / denominator;
-      hessian += -Psi_i * Psi_i.t() / pow(denominator, 2);
-
-    } else {
-
-      value += -10000.0;
-    }
-  }
-
-  if (!std::isfinite(value) ||
-      !gradient.is_finite() ||
-      !hessian.is_finite()) {
-
-    value = -10000.0 * n_n;
-    gradient = arma::vec(n_m);
-    hessian = arma::mat(n_m, n_m);
-  }
-
-  return Rcpp::List::create(
-    Rcpp::Named("value") = value,
-    Rcpp::Named("gradient") = gradient,
-    Rcpp::Named("hessian") = hessian
-  );
-}
-
-// [[Rcpp::export]]
-List AD_EYsubX_logistic_SolveLagrange_rcpp(const arma::mat & X,
-                                           const double & alpha,
-                                           const arma::vec & beta,
-                                           const arma::vec & phi,
-                                           const arma::umat & inclusion,
-                                           const arma::vec & eta_initial,
-                                           const size_t & iter_max,
-                                           const double & step_rate,
-                                           const size_t & step_max,
-                                           const double & tol) {
-
-  const arma::uword n_m = eta_initial.n_elem;
-  arma::vec eta = eta_initial;
-  List step = AD_EYsubX_logistic_Lagrange_rcpp(
-    X, alpha, beta, phi, inclusion, eta);
-
-  for (size_t k = 0; k < iter_max; k++) {
-
-    const double step_value = step["value"];
-    const arma::vec gradient = step["gradient"];
-    const arma::mat hessian = step["hessian"];
-    const double ind_NT_GD = rcond_rcpp(hessian);
-
-    arma::vec direction_step(n_m);
-
-    if (ind_NT_GD > tol) {
-
-      direction_step = solve_rcpp(hessian, gradient);
-
-    } else {
-
-      direction_step = -gradient;
-    }
-
-    double step_size = 1.0;
-    arma::vec eta_new = eta - direction_step;
-    List step_new = AD_EYsubX_logistic_Lagrange_rcpp(
-      X, alpha, beta, phi, inclusion, eta_new);
-
-    for (size_t iter_step = 0; iter_step < step_max; iter_step++) {
-
-      const double step_new_value = step_new["value"];
-
-      if (step_new_value <= step_value + tol) {
-
-        step_size /= step_rate;
-        eta_new = eta - direction_step * step_size;
-        step_new = AD_EYsubX_logistic_Lagrange_rcpp(
-          X, alpha, beta, phi, inclusion, eta_new);
-
-      } else {
-
-        break;
-      }
-    }
-
-    const double step_new_value = step_new["value"];
-
-    if (step_new_value > step_value + tol) {
-
-      eta = eta_new;
-      step = step_new;
-
-    } else {
-
-      break;
-    }
-  }
-
-  return Rcpp::List::create(
-    Rcpp::Named("eta") = eta,
-    Rcpp::Named("value") = step["value"],
-    Rcpp::Named("gradient") = step["gradient"],
-    Rcpp::Named("hessian") = step["hessian"]
-  );
-}
-
-// Prior probability shift, logistic regression model
-
-// [[Rcpp::export]]
-List ADPPS_EX_logistic_Lagrange_rcpp(const arma::mat & X,
-                                     const double & alpha,
-                                     const arma::vec & beta,
-                                     const arma::vec & phi,
-                                     const double & PPS_beta,
-                                     const arma::vec & eta) {
-
-  const arma::uword n_n = X.n_rows;
-  const arma::uword n_p = X.n_cols;
-  double value = 0.0;
-  arma::vec gradient(n_p);
-  arma::mat hessian(n_p, n_p);
-
-  const arma::vec X_intercept = arma::vec({1});
-  const double ePPS_beta = exp(PPS_beta);
-
-  for (size_t i = 0; i < n_n; ++i) {
-
-    const arma::vec Xrow_i = X.row(i).t();
-    const arma::vec extXrow_i = arma::join_vert(X_intercept, Xrow_i);
-    const double eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
-    const arma::vec Psi_i = (Xrow_i - phi) *
-      (1 + eSI_i * ePPS_beta) / (1 + eSI_i);
-
-    const double denominator = 1.0 + arma::dot(eta, Psi_i);
-    if (denominator > 0.0) {
-
-      value += log(denominator);
-      gradient += Psi_i / denominator;
-      hessian += -Psi_i * Psi_i.t() / pow(denominator, 2);
-
-    } else {
-
-      value += -10000.0;
-    }
-  }
-
-  if (!std::isfinite(value) ||
-      !gradient.is_finite() ||
-      !hessian.is_finite()) {
-
-    value = -10000.0 * n_n;
-    gradient = arma::vec(n_p);
-    hessian = arma::mat(n_p, n_p);
-  }
-
-  return Rcpp::List::create(
-    Rcpp::Named("value") = value,
-    Rcpp::Named("gradient") = gradient,
-    Rcpp::Named("hessian") = hessian
-  );
-}
-
-// [[Rcpp::export]]
-List ADPPS_EX_logistic_SolveLagrange_rcpp(const arma::mat & X,
-                                          const double & alpha,
-                                          const arma::vec & beta,
-                                          const arma::vec & phi,
-                                          const double & PPS_beta,
-                                          const arma::vec & eta_initial,
-                                          const size_t & iter_max,
-                                          const double & step_rate,
-                                          const size_t & step_max,
-                                          const double & tol) {
-
-  const arma::uword n_m = eta_initial.n_elem;
-  arma::vec eta = eta_initial;
-  List step = ADPPS_EX_logistic_Lagrange_rcpp(
-    X, alpha, beta, phi, PPS_beta, eta);
-
-  for (size_t k = 0; k < iter_max; k++) {
-
-    const double step_value = step["value"];
-    const arma::vec gradient = step["gradient"];
-    const arma::mat hessian = step["hessian"];
-    const double ind_NT_GD = rcond_rcpp(hessian);
-
-    arma::vec direction_step(n_m);
-
-    if (ind_NT_GD > tol) {
-
-      direction_step = solve_rcpp(hessian, gradient);
-
-    } else {
-
-      direction_step = -gradient;
-    }
-
-    double step_size = 1.0;
-    arma::vec eta_new = eta - direction_step;
-    List step_new = ADPPS_EX_logistic_Lagrange_rcpp(
-      X, alpha, beta, phi, PPS_beta, eta_new);
-
-    for (size_t iter_step = 0; iter_step < step_max; iter_step++) {
-
-      const double step_new_value = step_new["value"];
-
-      if (step_new_value <= step_value + tol) {
-
-        step_size /= step_rate;
-        eta_new = eta - direction_step * step_size;
-        step_new = ADPPS_EX_logistic_Lagrange_rcpp(
-          X, alpha, beta, phi, PPS_beta, eta_new);
-
-      } else {
-
-        break;
-      }
-    }
-
-    const double step_new_value = step_new["value"];
-
-    if (step_new_value > step_value + tol) {
-
-      eta = eta_new;
-      step = step_new;
-
-    } else {
-
-      break;
-    }
-  }
-
-  return Rcpp::List::create(
-    Rcpp::Named("eta") = eta,
-    Rcpp::Named("value") = step["value"],
-    Rcpp::Named("gradient") = step["gradient"],
-    Rcpp::Named("hessian") = step["hessian"]
-  );
-}
-
-// [[Rcpp::export]]
-List ADPPS_EY_logistic_Lagrange_rcpp(const arma::mat & X,
-                                     const double & alpha,
-                                     const arma::vec & beta,
-                                     const double & phi,
-                                     const double & PPS_beta,
-                                     const double & eta) {
-
-  const arma::uword n_n = X.n_rows;
-  double value = 0.0;
-  double gradient = 0.0;
-  double hessian = 0.0;
-
-  const arma::vec X_intercept = arma::vec({1});
-  const double ePPS_beta = exp(PPS_beta);
-
-  for (size_t i = 0; i < n_n; ++i) {
-
-    const arma::vec Xrow_i = X.row(i).t();
-    const arma::vec extXrow_i = arma::join_vert(X_intercept, Xrow_i);
-    const double eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
-    const double Psi_i = ((1 - phi) * eSI_i * ePPS_beta - phi) / (1 + eSI_i);
-
-    const double denominator = 1.0 + eta * Psi_i;
-    if (denominator > 0.0) {
-
-      value += log(denominator);
-      gradient += Psi_i / denominator;
-      hessian += -pow(Psi_i, 2) / pow(denominator, 2);
-
-    } else {
-
-      value += -10000.0;
-    }
-  }
-
-  if (!std::isfinite(value) ||
-      !std::isfinite(gradient) ||
-      !std::isfinite(hessian)) {
-
-    value = -10000.0 * n_n;
-    gradient = 0.0;
-    hessian = 0.0;
-  }
-
-  return Rcpp::List::create(
-    Rcpp::Named("value") = value,
-    Rcpp::Named("gradient") = gradient,
-    Rcpp::Named("hessian") = hessian
-  );
-}
-
-// [[Rcpp::export]]
-List ADPPS_EY_logistic_SolveLagrange_rcpp(const arma::mat & X,
-                                          const double & alpha,
-                                          const arma::vec & beta,
-                                          const double & phi,
-                                          const double & PPS_beta,
-                                          const double & eta_initial,
-                                          const size_t & iter_max,
-                                          const double & step_rate,
-                                          const size_t & step_max,
-                                          const double & tol) {
-
-  double eta = eta_initial;
-  List step = ADPPS_EY_logistic_Lagrange_rcpp(
-    X, alpha, beta, phi, PPS_beta, eta);
-
-  for (size_t k = 0; k < iter_max; k++) {
-
-    const double step_value = step["value"];
-    const double gradient = step["gradient"];
-    const double hessian = step["hessian"];
-
-    double direction_step;
-
-    if (hessian != 0) {
-
-      direction_step = gradient / hessian;
-
-    } else {
-
-      direction_step = -gradient;
-    }
-
-    double step_size = 1.0;
-    double eta_new = eta - direction_step;
-    List step_new = ADPPS_EY_logistic_Lagrange_rcpp(
-      X, alpha, beta, phi, PPS_beta, eta_new);
-
-    for (size_t iter_step = 0; iter_step < step_max; iter_step++) {
-
-      const double step_new_value = step_new["value"];
-
-      if (step_new_value <= step_value + tol) {
-
-        step_size /= step_rate;
-        eta_new = eta - direction_step * step_size;
-        step_new = ADPPS_EY_logistic_Lagrange_rcpp(
-          X, alpha, beta, phi, PPS_beta, eta_new);
-
-      } else {
-
-        break;
-      }
-    }
-
-    const double step_new_value = step_new["value"];
-
-    if (step_new_value > step_value + tol) {
-
-      eta = eta_new;
-      step = step_new;
-
-    } else {
-
-      break;
-    }
-  }
-
-  return Rcpp::List::create(
-    Rcpp::Named("eta") = eta,
-    Rcpp::Named("value") = step["value"],
-    Rcpp::Named("gradient") = step["gradient"],
-    Rcpp::Named("hessian") = step["hessian"]
-  );
-}
-
-// [[Rcpp::export]]
-List ADPPS_EYsubX_logistic_Lagrange_rcpp(const arma::mat & X,
-                                         const double & alpha,
-                                         const arma::vec & beta,
-                                         const arma::vec & phi,
-                                         const double & PPS_beta,
-                                         const arma::umat & inclusion,
-                                         const arma::vec & eta) {
-
-  const arma::uword n_n = X.n_rows;
-  const arma::uword n_m = phi.n_elem;
-  double value = 0.0;
-  arma::vec gradient(n_m);
-  arma::mat hessian(n_m, n_m);
-
-  const arma::vec X_intercept = arma::vec({1});
-  const double ePPS_beta = exp(PPS_beta);
-
-  for (size_t i = 0; i < n_n; ++i) {
-
-    const arma::vec Xrow_i = X.row(i).t();
-    const arma::vec extXrow_i = arma::join_vert(X_intercept, Xrow_i);
-    const double eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
-    arma::vec Psi_i(n_m);
-
-    for (size_t m = 0; m < n_m; ++m) {
-
-      if (inclusion(i, m) == 1) {
-
-        Psi_i(m) += ((1 - phi(m)) * eSI_i * ePPS_beta - phi(m)) / (1 + eSI_i);
-      }
-    }
-
-    const double denominator = 1.0 + arma::dot(eta, Psi_i);
-    if (denominator > 0.0) {
-
-      value += log(denominator);
-      gradient += Psi_i / denominator;
-      hessian += -Psi_i * Psi_i.t() / pow(denominator, 2);
-
-    } else {
-
-      value += -10000.0;
-    }
-  }
-
-  if (!std::isfinite(value) ||
-      !gradient.is_finite() ||
-      !hessian.is_finite()) {
-
-    value = -10000.0 * n_n;
-    gradient = arma::vec(n_m);
-    hessian = arma::mat(n_m, n_m);
-  }
-
-  return Rcpp::List::create(
-    Rcpp::Named("value") = value,
-    Rcpp::Named("gradient") = gradient,
-    Rcpp::Named("hessian") = hessian
-  );
-}
-
-// [[Rcpp::export]]
-List ADPPS_EYsubX_logistic_SolveLagrange_rcpp(const arma::mat & X,
-                                              const double & alpha,
-                                              const arma::vec & beta,
-                                              const arma::vec & phi,
-                                              const double & PPS_beta,
-                                              const arma::umat & inclusion,
-                                              const arma::vec & eta_initial,
-                                              const size_t & iter_max,
-                                              const double & step_rate,
-                                              const size_t & step_max,
-                                              const double & tol) {
-
-  const arma::uword n_m = eta_initial.n_elem;
-  arma::vec eta = eta_initial;
-  List step = ADPPS_EYsubX_logistic_Lagrange_rcpp(
-    X, alpha, beta, phi, PPS_beta, inclusion, eta);
-
-  for (size_t k = 0; k < iter_max; k++) {
-
-    const double step_value = step["value"];
-    const arma::vec gradient = step["gradient"];
-    const arma::mat hessian = step["hessian"];
-    const double ind_NT_GD = rcond_rcpp(hessian);
-
-    arma::vec direction_step(n_m);
-
-    if (ind_NT_GD > tol) {
-
-      direction_step = solve_rcpp(hessian, gradient);
-
-    } else {
-
-      direction_step = -gradient;
-    }
-
-    double step_size = 1.0;
-    arma::vec eta_new = eta - direction_step;
-    List step_new = ADPPS_EYsubX_logistic_Lagrange_rcpp(
-      X, alpha, beta, phi, PPS_beta, inclusion, eta_new);
-
-    for (size_t iter_step = 0; iter_step < step_max; iter_step++) {
-
-      const double step_new_value = step_new["value"];
-
-      if (step_new_value <= step_value + tol) {
-
-        step_size /= step_rate;
-        eta_new = eta - direction_step * step_size;
-        step_new = ADPPS_EYsubX_logistic_Lagrange_rcpp(
-          X, alpha, beta, phi, PPS_beta, inclusion, eta_new);
-
-      } else {
-
-        break;
-      }
-    }
-
-    const double step_new_value = step_new["value"];
-
-    if (step_new_value > step_value + tol) {
-
-      eta = eta_new;
-      step = step_new;
-
-    } else {
-
-      break;
-    }
-  }
-
-  return Rcpp::List::create(
-    Rcpp::Named("eta") = eta,
-    Rcpp::Named("value") = step["value"],
-    Rcpp::Named("gradient") = step["gradient"],
-    Rcpp::Named("hessian") = step["hessian"]
-  );
-}
-
-// Covariate shift, logistic regression model
-
-// [[Rcpp::export]]
-List ADCS_EY_logistic_Lagrange_rcpp(const arma::mat & X,
-                                    const double & alpha,
-                                    const arma::vec & beta,
-                                    const double & phi,
-                                    const arma::vec & CS_beta,
-                                    const double & eta) {
-
-  const arma::uword n_n = X.n_rows;
-  double value = 0.0;
-  double gradient = 0.0;
-  double hessian = 0.0;
-
-  const arma::vec X_intercept = arma::vec({1});
-
-  for (size_t i = 0; i < n_n; ++i) {
-
-    const arma::vec Xrow_i = X.row(i).t();
-    const arma::vec extXrow_i = arma::join_vert(X_intercept, Xrow_i);
-    const double eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
-    const double eSI_CS_i = exp(arma::dot(Xrow_i, CS_beta));
-    const double Psi_i = ((1 - phi) * eSI_i - phi) * eSI_CS_i / (1 + eSI_i);
-
-    const double denominator = 1.0 + eta * Psi_i;
-    if (denominator > 0.0) {
-
-      value += log(denominator);
-      gradient += Psi_i / denominator;
-      hessian += -pow(Psi_i, 2) / pow(denominator, 2);
-
-    } else {
-
-      value += -10000.0;
-    }
-  }
-
-  if (!std::isfinite(value) ||
-      !std::isfinite(gradient) ||
-      !std::isfinite(hessian)) {
-
-    value = -10000.0 * n_n;
-    gradient = 0.0;
-    hessian = 0.0;
-  }
-
-  return Rcpp::List::create(
-    Rcpp::Named("value") = value,
-    Rcpp::Named("gradient") = gradient,
-    Rcpp::Named("hessian") = hessian
-  );
-}
-
-// [[Rcpp::export]]
-List ADCS_EY_logistic_SolveLagrange_rcpp(const arma::mat & X,
-                                         const double & alpha,
-                                         const arma::vec & beta,
-                                         const double & phi,
-                                         const arma::vec & CS_beta,
-                                         const double & eta_initial,
-                                         const size_t & iter_max,
-                                         const double & step_rate,
-                                         const size_t & step_max,
-                                         const double & tol) {
-
-  double eta = eta_initial;
-  List step = ADCS_EY_logistic_Lagrange_rcpp(
-    X, alpha, beta, phi, CS_beta, eta);
-
-  for (size_t k = 0; k < iter_max; k++) {
-
-    const double step_value = step["value"];
-    const double gradient = step["gradient"];
-    const double hessian = step["hessian"];
-
-    double direction_step;
-
-    if (hessian != 0) {
-
-      direction_step = gradient / hessian;
-
-    } else {
-
-      direction_step = -gradient;
-    }
-
-    double step_size = 1.0;
-    double eta_new = eta - direction_step;
-    List step_new = ADCS_EY_logistic_Lagrange_rcpp(
-      X, alpha, beta, phi, CS_beta, eta_new);
-
-    for (size_t iter_step = 0; iter_step < step_max; iter_step++) {
-
-      const double step_new_value = step_new["value"];
-
-      if (step_new_value <= step_value + tol) {
-
-        step_size /= step_rate;
-        eta_new = eta - direction_step * step_size;
-        step_new = ADCS_EY_logistic_Lagrange_rcpp(
-          X, alpha, beta, phi, CS_beta, eta_new);
-
-      } else {
-
-        break;
-      }
-    }
-
-    const double step_new_value = step_new["value"];
-
-    if (step_new_value > step_value + tol) {
-
-      eta = eta_new;
-      step = step_new;
-
-    } else {
-
-      break;
-    }
-  }
-
-  return Rcpp::List::create(
-    Rcpp::Named("eta") = eta,
-    Rcpp::Named("value") = step["value"],
-    Rcpp::Named("gradient") = step["gradient"],
-    Rcpp::Named("hessian") = step["hessian"]
-  );
-}
-
-// [[Rcpp::export]]
-List ADCS_EXsubY_logistic_Lagrange_rcpp(const arma::mat & X,
-                                        const double & alpha,
-                                        const arma::vec & beta,
-                                        const arma::mat & phi,
-                                        const arma::vec & CS_beta,
-                                        const arma::vec & eta) {
-
-  const arma::uword n_n = X.n_rows;
-  const arma::uword n_p = X.n_cols;
-  const arma::uword n_m = n_p * 2;
-  double value = 0.0;
-  arma::vec gradient(n_m);
-  arma::mat hessian(n_m, n_m);
-
-  const arma::vec X_intercept = arma::vec({1});
-
-  for (size_t i = 0; i < n_n; ++i) {
-
-    const arma::vec Xrow_i = X.row(i).t();
-    const arma::vec extXrow_i = arma::join_vert(X_intercept, Xrow_i);
-    const double eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
-    const double eSI_CS_i = exp(arma::dot(Xrow_i, CS_beta));
-    arma::mat Psi_i_mat(2, n_p);
-    Psi_i_mat.row(0) = (Xrow_i.t() - phi.row(0)) * eSI_i * eSI_CS_i / (1 + eSI_i);
-    Psi_i_mat.row(1) = (Xrow_i.t() - phi.row(1)) * eSI_CS_i / (1 + eSI_i);
-    const arma::vec Psi_i = arma::reshape(
-      Psi_i_mat.t(), n_m, 1);
-
-    const double denominator = 1.0 + arma::dot(eta, Psi_i);
-    if (denominator > 0.0) {
-
-      value += log(denominator);
-      gradient += Psi_i / denominator;
-      hessian += -Psi_i * Psi_i.t() / pow(denominator, 2);
-
-    } else {
-
-      value += -10000.0;
-    }
-  }
-
-  if (!std::isfinite(value) ||
-      !gradient.is_finite() ||
-      !hessian.is_finite()) {
-
-    value = -10000.0 * n_n;
-    gradient = arma::vec(n_m);
-    hessian = arma::mat(n_m, n_m);
-  }
-
-  return Rcpp::List::create(
-    Rcpp::Named("value") = value,
-    Rcpp::Named("gradient") = gradient,
-    Rcpp::Named("hessian") = hessian
-  );
-}
-
-// [[Rcpp::export]]
-List ADCS_EXsubY_logistic_SolveLagrange_rcpp(const arma::mat & X,
-                                             const double & alpha,
-                                             const arma::vec & beta,
-                                             const arma::mat & phi,
-                                             const arma::vec & CS_beta,
-                                             const arma::vec & eta_initial,
-                                             const size_t & iter_max,
-                                             const double & step_rate,
-                                             const size_t & step_max,
-                                             const double & tol) {
-
-  const arma::uword n_m = eta_initial.n_elem;
-  arma::vec eta = eta_initial;
-  List step = ADCS_EXsubY_logistic_Lagrange_rcpp(
-    X, alpha, beta, phi, CS_beta, eta);
-
-  for (size_t k = 0; k < iter_max; k++) {
-
-    const double step_value = step["value"];
-    const arma::vec gradient = step["gradient"];
-    const arma::mat hessian = step["hessian"];
-    const double ind_NT_GD = rcond_rcpp(hessian);
-
-    arma::vec direction_step(n_m);
-
-    if (ind_NT_GD > tol) {
-
-      direction_step = solve_rcpp(hessian, gradient);
-
-    } else {
-
-      direction_step = -gradient;
-    }
-
-    double step_size = 1.0;
-    arma::vec eta_new = eta - direction_step;
-    List step_new = ADCS_EXsubY_logistic_Lagrange_rcpp(
-      X, alpha, beta, phi, CS_beta, eta_new);
-
-    for (size_t iter_step = 0; iter_step < step_max; iter_step++) {
-
-      const double step_new_value = step_new["value"];
-
-      if (step_new_value <= step_value + tol) {
-
-        step_size /= step_rate;
-        eta_new = eta - direction_step * step_size;
-        step_new = ADCS_EXsubY_logistic_Lagrange_rcpp(
-          X, alpha, beta, phi, CS_beta, eta_new);
-
-      } else {
-
-        break;
-      }
-    }
-
-    const double step_new_value = step_new["value"];
-
-    if (step_new_value > step_value + tol) {
-
-      eta = eta_new;
-      step = step_new;
-
-    } else {
-
-      break;
-    }
-  }
-
-  return Rcpp::List::create(
-    Rcpp::Named("eta") = eta,
-    Rcpp::Named("value") = step["value"],
-    Rcpp::Named("gradient") = step["gradient"],
-    Rcpp::Named("hessian") = step["hessian"]
-  );
-}
-
-// [[Rcpp::export]]
-List ADCS_EYsubX_logistic_Lagrange_rcpp(const arma::mat & X,
-                                        const double & alpha,
-                                        const arma::vec & beta,
-                                        const arma::vec & phi,
-                                        const arma::vec & CS_beta,
-                                        const arma::umat & inclusion,
-                                        const arma::vec & eta) {
-
-  const arma::uword n_n = X.n_rows;
-  const arma::uword n_m = phi.n_elem;
-  double value = 0.0;
-  arma::vec gradient(n_m);
-  arma::mat hessian(n_m, n_m);
-
-  const arma::vec X_intercept = arma::vec({1});
-
-  for (size_t i = 0; i < n_n; ++i) {
-
-    const arma::vec Xrow_i = X.row(i).t();
-    const arma::vec extXrow_i = arma::join_vert(X_intercept, Xrow_i);
-    const double eSI_i = exp(alpha + arma::dot(Xrow_i, beta));
-    const double eSI_CS_i = exp(arma::dot(Xrow_i, CS_beta));
-    arma::vec Psi_i(n_m);
-
-    for (size_t m = 0; m < n_m; ++m) {
-
-      if (inclusion(i, m) == 1) {
-
-        Psi_i(m) += ((1 - phi(m)) * eSI_i * eSI_CS_i - phi(m)) / (1 + eSI_i);
-      }
-    }
-
-    const double denominator = 1.0 + arma::dot(eta, Psi_i);
-    if (denominator > 0.0) {
-
-      value += log(denominator);
-      gradient += Psi_i / denominator;
-      hessian += -Psi_i * Psi_i.t() / pow(denominator, 2);
-
-    } else {
-
-      value += -10000.0;
-    }
-  }
-
-  if (!std::isfinite(value) ||
-      !gradient.is_finite() ||
-      !hessian.is_finite()) {
-
-    value = -10000.0 * n_n;
-    gradient = arma::vec(n_m);
-    hessian = arma::mat(n_m, n_m);
-  }
-
-  return Rcpp::List::create(
-    Rcpp::Named("value") = value,
-    Rcpp::Named("gradient") = gradient,
-    Rcpp::Named("hessian") = hessian
-  );
-}
-
-// [[Rcpp::export]]
-List ADCS_EYsubX_logistic_SolveLagrange_rcpp(const arma::mat & X,
-                                             const double & alpha,
-                                             const arma::vec & beta,
-                                             const arma::vec & phi,
-                                             const arma::vec & CS_beta,
-                                             const arma::umat & inclusion,
-                                             const arma::vec & eta_initial,
-                                             const size_t & iter_max,
-                                             const double & step_rate,
-                                             const size_t & step_max,
-                                             const double & tol) {
-
-  const arma::uword n_m = eta_initial.n_elem;
-  arma::vec eta = eta_initial;
-  List step = ADCS_EYsubX_logistic_Lagrange_rcpp(
-    X, alpha, beta, phi, CS_beta, inclusion, eta);
-
-  for (size_t k = 0; k < iter_max; k++) {
-
-    const double step_value = step["value"];
-    const arma::vec gradient = step["gradient"];
-    const arma::mat hessian = step["hessian"];
-    const double ind_NT_GD = rcond_rcpp(hessian);
-
-    arma::vec direction_step(n_m);
-
-    if (ind_NT_GD > tol) {
-
-      direction_step = solve_rcpp(hessian, gradient);
-
-    } else {
-
-      direction_step = -gradient;
-    }
-
-    double step_size = 1.0;
-    arma::vec eta_new = eta - direction_step;
-    List step_new = ADCS_EYsubX_logistic_Lagrange_rcpp(
-      X, alpha, beta, phi, CS_beta, inclusion, eta_new);
-
-    for (size_t iter_step = 0; iter_step < step_max; iter_step++) {
-
-      const double step_new_value = step_new["value"];
-
-      if (step_new_value <= step_value + tol) {
-
-        step_size /= step_rate;
-        eta_new = eta - direction_step * step_size;
-        step_new = ADCS_EYsubX_logistic_Lagrange_rcpp(
-          X, alpha, beta, phi, CS_beta, inclusion, eta_new);
-
-      } else {
-
-        break;
-      }
-    }
-
-    const double step_new_value = step_new["value"];
-
-    if (step_new_value > step_value + tol) {
-
-      eta = eta_new;
-      step = step_new;
-
-    } else {
-
-      break;
-    }
-  }
-
-  return Rcpp::List::create(
-    Rcpp::Named("eta") = eta,
-    Rcpp::Named("value") = step["value"],
-    Rcpp::Named("gradient") = step["gradient"],
-    Rcpp::Named("hessian") = step["hessian"]
-  );
-}
 
 
 
