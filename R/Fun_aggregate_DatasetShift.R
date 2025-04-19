@@ -74,7 +74,8 @@ GLMcombineADavar <- function(name.par,
         paste("eta", 1:number_m, sep = "")] <- as.vector(t(Psi.diff.theta))
   }
 
-  J.V.inv <- solve_rcpp(J.V, diag(number_total))
+  J.V.inv <- inv_sympd_rcpp(
+    t(J.V) %*% J.V + eps.inv * diag(number_total)) %*% t(J.V)
   asy.Cov <- J.V.inv %*% avar.S %*% J.V.inv
   dimnames(asy.Cov) <- list(M.name, M.name)
   asy.Cov.par <- asy.Cov[name.par, name.par]

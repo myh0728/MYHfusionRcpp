@@ -122,14 +122,16 @@ GLMcombineAD.DatasetShift <- function(
                                         paste("beta", 1:number_p, sep = ""),
                                         "sigma")]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
               MLE.hessian = MLE.score.H,
               Psi.square = AD.square,
-              Psi.diff.beta = AD.diff.beta)$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p + 2 + number_m))
+              Psi.diff.beta = AD.diff.beta,
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -338,7 +340,7 @@ GLMcombineAD.DatasetShift <- function(
                                         "sigma")]
             AD.diff.phi <- AD.diff[, paste("phi", 1:number_m, sep = "")]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
@@ -347,8 +349,10 @@ GLMcombineAD.DatasetShift <- function(
               Psi.diff.beta = AD.diff.beta,
               Psi.diff.phi = AD.diff.phi,
               kappa = info.EY$ext.size / number_n,
-              avar.phi = as.matrix(avar.phi))$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p + 2 + number_m * 2))
+              avar.phi = as.matrix(avar.phi),
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -487,14 +491,16 @@ GLMcombineAD.DatasetShift <- function(
                                         paste("beta", 1:number_p, sep = ""),
                                         "sigma")]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
               MLE.hessian = MLE.score.H,
               Psi.square = AD.square,
-              Psi.diff.beta = AD.diff.beta)$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p + 2 + number_m))
+              Psi.diff.beta = AD.diff.beta,
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -614,8 +620,10 @@ GLMcombineAD.DatasetShift <- function(
                                nrow = number_p, ncol = number_k)),
                 y_pts = info.EXsubY$y.pts,
                 eta = eta.tilde)
-              avar.phi <- solve_rcpp(avar.phi.AB$diff, diag(number_m)) %*%
-                avar.phi.AB$var %*% solve_rcpp(avar.phi.AB$diff, diag(number_m))
+              H.inv <- inv_sympd_rcpp(
+                t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_m)
+                ) %*% t(avar.phi.AB$diff)
+              avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
               ext.var.inv <- inv_sympd_rcpp(avar.phi + eps.inv * diag(number_m))
             }else
             {
@@ -706,8 +714,10 @@ GLMcombineAD.DatasetShift <- function(
               phi = info.EXsubY$phi,
               y_pts = info.EXsubY$y.pts,
               eta = eta.tilde)
-            avar.phi <- solve_rcpp(avar.phi.AB$diff, diag(number_m)) %*%
-              avar.phi.AB$var %*% solve_rcpp(avar.phi.AB$diff, diag(number_m))
+            H.inv <- inv_sympd_rcpp(
+              t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_m)
+              ) %*% t(avar.phi.AB$diff)
+            avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
 
             MLE.score.H <- MLE.score$hessian
             AD.diff <- AD.score$score_gradient
@@ -720,7 +730,7 @@ GLMcombineAD.DatasetShift <- function(
                                         "sigma")]
             AD.diff.phi <- AD.diff[, paste("phi", 1:number_m, sep = "")]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
@@ -729,8 +739,10 @@ GLMcombineAD.DatasetShift <- function(
               Psi.diff.beta = AD.diff.beta,
               Psi.diff.phi = AD.diff.phi,
               kappa = info.EXsubY$ext.size / number_n,
-              avar.phi = as.matrix(avar.phi))$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p + 2 + number_m * 2))
+              avar.phi = as.matrix(avar.phi),
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -869,14 +881,16 @@ GLMcombineAD.DatasetShift <- function(
                                         paste("beta", 1:number_p, sep = ""),
                                         "sigma")]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
               MLE.hessian = MLE.score.H,
               Psi.square = AD.square,
-              Psi.diff.beta = AD.diff.beta)$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p + 2 + number_m))
+              Psi.diff.beta = AD.diff.beta,
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -993,8 +1007,10 @@ GLMcombineAD.DatasetShift <- function(
                 phi = par.tilde[paste("phi", 1:number_m, sep = "")],
                 inclusion = info.EYsubX$inclusion,
                 eta = eta.tilde)
-              avar.phi <- solve_rcpp(avar.phi.AB$diff, diag(number_m)) %*%
-                avar.phi.AB$var %*% solve_rcpp(avar.phi.AB$diff, diag(number_m))
+              H.inv <- inv_sympd_rcpp(
+                t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_m)
+                ) %*% t(avar.phi.AB$diff)
+              avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
               ext.var.inv <- inv_sympd_rcpp(avar.phi + eps.inv * diag(number_m))
             }else
             {
@@ -1085,8 +1101,10 @@ GLMcombineAD.DatasetShift <- function(
               phi = info.EYsubX$phi,
               inclusion = info.EYsubX$inclusion,
               eta = eta.tilde)
-            avar.phi <- solve_rcpp(avar.phi.AB$diff, diag(number_m)) %*%
-              avar.phi.AB$var %*% solve_rcpp(avar.phi.AB$diff, diag(number_m))
+            H.inv <- inv_sympd_rcpp(
+              t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_m)
+              ) %*% t(avar.phi.AB$diff)
+            avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
 
             MLE.score.H <- MLE.score$hessian
             AD.diff <- AD.score$score_gradient
@@ -1099,7 +1117,7 @@ GLMcombineAD.DatasetShift <- function(
                                         "sigma")]
             AD.diff.phi <- AD.diff[, paste("phi", 1:number_m, sep = "")]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
@@ -1108,8 +1126,10 @@ GLMcombineAD.DatasetShift <- function(
               Psi.diff.beta = AD.diff.beta,
               Psi.diff.phi = AD.diff.phi,
               kappa = info.EYsubX$ext.size / number_n,
-              avar.phi = as.matrix(avar.phi))$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p + 2 + number_m * 2))
+              avar.phi = as.matrix(avar.phi),
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -1274,15 +1294,17 @@ GLMcombineAD.DatasetShift <- function(
                                         "sigma")]
             AD.diff.theta <- AD.diff[, paste("theta", 1:number_p, sep = "")]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
               MLE.hessian = MLE.score.H,
               Psi.square = AD.square,
               Psi.diff.beta = AD.diff.beta,
-              Psi.diff.theta = AD.diff.theta)$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p * 2 + 2 + number_m))
+              Psi.diff.theta = AD.diff.theta,
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -1533,7 +1555,7 @@ GLMcombineAD.DatasetShift <- function(
             AD.diff.phi <- AD.diff[, paste("phi", 1:number_m, sep = "")]
             AD.diff.theta <- AD.diff[, paste("theta", 1:number_p, sep = "")]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
@@ -1543,8 +1565,10 @@ GLMcombineAD.DatasetShift <- function(
               Psi.diff.phi = AD.diff.phi,
               Psi.diff.theta = AD.diff.theta,
               kappa = info.EY$ext.size / number_n,
-              avar.phi = as.matrix(avar.phi))$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p * 2 + 2 + number_m * 2))
+              avar.phi = as.matrix(avar.phi),
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -1711,15 +1735,17 @@ GLMcombineAD.DatasetShift <- function(
                                          "sigma")]
             AD.diff.theta <- AD.diff[, paste("theta", 1:number_p, sep = "")]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
               MLE.hessian = MLE.score.H,
               Psi.square = AD.square,
               Psi.diff.beta = AD.diff.beta,
-              Psi.diff.theta = AD.diff.theta)$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p * 2 + 2 + number_m))
+              Psi.diff.theta = AD.diff.theta,
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -1851,8 +1877,10 @@ GLMcombineAD.DatasetShift <- function(
                 CS_beta = par.tilde[paste("theta", 1:number_p, sep = "")],
                 y_pts = info.EXsubY$y.pts,
                 eta = eta.tilde)
-              avar.phi <- solve_rcpp(avar.phi.AB$diff, diag(number_m)) %*%
-                avar.phi.AB$var %*% solve_rcpp(avar.phi.AB$diff, diag(number_m))
+              H.inv <- inv_sympd_rcpp(
+                t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_m)
+              ) %*% t(avar.phi.AB$diff)
+              avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
               ext.var.inv <- inv_sympd_rcpp(avar.phi + eps.inv * diag(number_m))
             }else
             {
@@ -1967,8 +1995,10 @@ GLMcombineAD.DatasetShift <- function(
               CS_beta = initial.DRM,
               y_pts = info.EXsubY$y.pts,
               eta = eta.tilde)
-            avar.phi <- solve_rcpp(avar.phi.AB$diff, diag(number_m)) %*%
-              avar.phi.AB$var %*% solve_rcpp(avar.phi.AB$diff, diag(number_m))
+            H.inv <- inv_sympd_rcpp(
+              t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_m)
+            ) %*% t(avar.phi.AB$diff)
+            avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
 
             MLE.score.H <- MLE.score$hessian
             AD.diff <- AD.score$score_gradient
@@ -1983,7 +2013,7 @@ GLMcombineAD.DatasetShift <- function(
             AD.diff.phi <- AD.diff[, paste("phi", 1:number_m, sep = "")]
             AD.diff.theta <- AD.diff[, paste("theta", 1:number_p, sep = "")]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
@@ -1993,8 +2023,10 @@ GLMcombineAD.DatasetShift <- function(
               Psi.diff.phi = AD.diff.phi,
               Psi.diff.theta = AD.diff.theta,
               kappa = info.EXsubY$ext.size / number_n,
-              avar.phi = as.matrix(avar.phi))$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p * 2 + 2 + number_m * 2))
+              avar.phi = as.matrix(avar.phi),
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -2161,15 +2193,17 @@ GLMcombineAD.DatasetShift <- function(
                                         "sigma")]
             AD.diff.theta <- AD.diff[, paste("theta", 1:number_p, sep = "")]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
               MLE.hessian = MLE.score.H,
               Psi.square = AD.square,
               Psi.diff.beta = AD.diff.beta,
-              Psi.diff.theta = AD.diff.theta)$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p * 2 + 2 + number_m))
+              Psi.diff.theta = AD.diff.theta,
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -2300,8 +2334,10 @@ GLMcombineAD.DatasetShift <- function(
                 CS_beta = par.tilde[paste("theta", 1:number_p, sep = "")],
                 inclusion = info.EYsubX$inclusion,
                 eta = eta.tilde)
-              avar.phi <- solve_rcpp(avar.phi.AB$diff, diag(number_m)) %*%
-                avar.phi.AB$var %*% solve_rcpp(avar.phi.AB$diff, diag(number_m))
+              H.inv <- inv_sympd_rcpp(
+                t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_m)
+              ) %*% t(avar.phi.AB$diff)
+              avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
               ext.var.inv <- inv_sympd_rcpp(avar.phi + eps.inv * diag(number_m))
             }else
             {
@@ -2416,8 +2452,10 @@ GLMcombineAD.DatasetShift <- function(
               CS_beta = initial.DRM,
               inclusion = info.EYsubX$inclusion,
               eta = eta.tilde)
-            avar.phi <- solve_rcpp(avar.phi.AB$diff, diag(number_m)) %*%
-              avar.phi.AB$var %*% solve_rcpp(avar.phi.AB$diff, diag(number_m))
+            H.inv <- inv_sympd_rcpp(
+              t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_m)
+            ) %*% t(avar.phi.AB$diff)
+            avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
 
             MLE.score.H <- MLE.score$hessian
             AD.diff <- AD.score$score_gradient
@@ -2432,7 +2470,7 @@ GLMcombineAD.DatasetShift <- function(
             AD.diff.phi <- AD.diff[, paste("phi", 1:number_m, sep = "")]
             AD.diff.theta <- AD.diff[, paste("theta", 1:number_p, sep = "")]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
@@ -2442,8 +2480,10 @@ GLMcombineAD.DatasetShift <- function(
               Psi.diff.phi = AD.diff.phi,
               Psi.diff.theta = AD.diff.theta,
               kappa = info.EYsubX$ext.size / number_n,
-              avar.phi = as.matrix(avar.phi))$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p * 2 + 2 + number_m * 2))
+              avar.phi = as.matrix(avar.phi),
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -2614,15 +2654,17 @@ GLMcombineAD.DatasetShift <- function(
                                         "sigma")]
             AD.diff.theta <- AD.diff[, "theta"]
             AD.square <- AD.score$score_square
-            J.V  <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
               MLE.hessian = MLE.score.H,
               Psi.square = AD.square,
               Psi.diff.beta = AD.diff.beta,
-              Psi.diff.theta = AD.diff.theta)$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p + 3 + number_m))
+              Psi.diff.theta = AD.diff.theta,
+              eps.inv = eps.inv)
+            J.V  <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -2749,8 +2791,10 @@ GLMcombineAD.DatasetShift <- function(
                 phi = par.tilde[paste("phi", 1:number_p, sep = "")],
                 PPS_beta = par.tilde["theta"],
                 eta = eta.tilde)
-              avar.phi <- solve_rcpp(avar.phi.AB$diff, diag(number_p)) %*%
-                avar.phi.AB$var %*% solve_rcpp(avar.phi.AB$diff, diag(number_p))
+              H.inv <- inv_sympd_rcpp(
+                t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_p)
+              ) %*% t(avar.phi.AB$diff)
+              avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
               ext.var.inv <- inv_sympd_rcpp(avar.phi + eps.inv * diag(number_p))
             }else
             {
@@ -2860,8 +2904,10 @@ GLMcombineAD.DatasetShift <- function(
               phi = info.EX$phi,
               PPS_beta = initial.DRM,
               eta = eta.tilde)
-            avar.phi <- solve_rcpp(avar.phi.AB$diff, diag(number_p)) %*%
-              avar.phi.AB$var %*% solve_rcpp(avar.phi.AB$diff, diag(number_p))
+            H.inv <- inv_sympd_rcpp(
+              t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_p)
+            ) %*% t(avar.phi.AB$diff)
+            avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
 
             MLE.score.H <- MLE.score$hessian
             AD.diff <- AD.score$score_gradient
@@ -2876,7 +2922,7 @@ GLMcombineAD.DatasetShift <- function(
             AD.diff.phi <- AD.diff[, paste("phi", 1:number_p, sep = "")]
             AD.diff.theta <- AD.diff[, "theta"]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
@@ -2886,8 +2932,10 @@ GLMcombineAD.DatasetShift <- function(
               Psi.diff.phi = AD.diff.phi,
               Psi.diff.theta = AD.diff.theta,
               kappa = info.EX$ext.size / number_n,
-              avar.phi = as.matrix(avar.phi))$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p + 3 + number_m * 2))
+              avar.phi = as.matrix(avar.phi),
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -3048,15 +3096,17 @@ GLMcombineAD.DatasetShift <- function(
                                         "sigma")]
             AD.diff.theta <- AD.diff[, "theta"]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
               MLE.hessian = MLE.score.H,
               Psi.square = AD.square,
               Psi.diff.beta = AD.diff.beta,
-              Psi.diff.theta = AD.diff.theta)$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p + 3 + number_m))
+              Psi.diff.theta = AD.diff.theta,
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -3305,7 +3355,7 @@ GLMcombineAD.DatasetShift <- function(
             AD.diff.phi <- AD.diff[, paste("phi", 1:number_m, sep = "")]
             AD.diff.theta <- AD.diff[, "theta"]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
@@ -3315,8 +3365,10 @@ GLMcombineAD.DatasetShift <- function(
               Psi.diff.phi = AD.diff.phi,
               Psi.diff.theta = AD.diff.theta,
               kappa = info.EY$ext.size / number_n,
-              avar.phi = as.matrix(avar.phi))$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p + 3 + number_m * 2))
+              avar.phi = as.matrix(avar.phi),
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -3482,15 +3534,17 @@ GLMcombineAD.DatasetShift <- function(
                                          "sigma")]
             AD.diff.theta <- AD.diff[, "theta"]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
               MLE.hessian = MLE.score.H,
               Psi.square = AD.square,
               Psi.diff.beta = AD.diff.beta,
-              Psi.diff.theta = AD.diff.theta)$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p + 3 + number_m))
+              Psi.diff.theta = AD.diff.theta,
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -3622,8 +3676,10 @@ GLMcombineAD.DatasetShift <- function(
                 PPS_beta = par.tilde["theta"],
                 y_pts = info.EXsubY$y.pts,
                 eta = eta.tilde)
-              avar.phi <- solve_rcpp(avar.phi.AB$diff, diag(number_m)) %*%
-                avar.phi.AB$var %*% solve_rcpp(avar.phi.AB$diff, diag(number_m))
+              H.inv <- inv_sympd_rcpp(
+                t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_m)
+              ) %*% t(avar.phi.AB$diff)
+              avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
               ext.var.inv <- inv_sympd_rcpp(avar.phi + eps.inv * diag(number_m))
             }else
             {
@@ -3738,8 +3794,10 @@ GLMcombineAD.DatasetShift <- function(
               PPS_beta = initial.DRM,
               y_pts = info.EXsubY$y.pts,
               eta = eta.tilde)
-            avar.phi <- solve_rcpp(avar.phi.AB$diff, diag(number_m)) %*%
-              avar.phi.AB$var %*% solve_rcpp(avar.phi.AB$diff, diag(number_m))
+            H.inv <- inv_sympd_rcpp(
+              t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_m)
+            ) %*% t(avar.phi.AB$diff)
+            avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
 
             MLE.score.H <- MLE.score$hessian
             AD.diff <- AD.score$score_gradient
@@ -3754,7 +3812,7 @@ GLMcombineAD.DatasetShift <- function(
             AD.diff.phi <- AD.diff[, paste("phi", 1:number_m, sep = "")]
             AD.diff.theta <- AD.diff[, "theta"]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
@@ -3764,8 +3822,10 @@ GLMcombineAD.DatasetShift <- function(
               Psi.diff.phi = AD.diff.phi,
               Psi.diff.theta = AD.diff.theta,
               kappa = info.EXsubY$ext.size / number_n,
-              avar.phi = as.matrix(avar.phi))$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p + 3 + number_m * 2))
+              avar.phi = as.matrix(avar.phi),
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -3932,15 +3992,17 @@ GLMcombineAD.DatasetShift <- function(
                                         "sigma")]
             AD.diff.theta <- AD.diff[, "theta"]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
               MLE.hessian = MLE.score.H,
               Psi.square = AD.square,
               Psi.diff.beta = AD.diff.beta,
-              Psi.diff.theta = AD.diff.theta)$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p + 3 + number_m))
+              Psi.diff.theta = AD.diff.theta,
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
@@ -4071,8 +4133,10 @@ GLMcombineAD.DatasetShift <- function(
                 PPS_beta = par.tilde["theta"],
                 inclusion = info.EYsubX$inclusion,
                 eta = eta.tilde)
-              avar.phi <- solve_rcpp(avar.phi.AB$diff, diag(number_m)) %*%
-                avar.phi.AB$var %*% solve_rcpp(avar.phi.AB$diff, diag(number_m))
+              H.inv <- inv_sympd_rcpp(
+                t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_m)
+              ) %*% t(avar.phi.AB$diff)
+              avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
               ext.var.inv <- inv_sympd_rcpp(avar.phi + eps.inv * diag(number_m))
             }else
             {
@@ -4187,8 +4251,10 @@ GLMcombineAD.DatasetShift <- function(
               PPS_beta = initial.DRM,
               inclusion = info.EYsubX$inclusion,
               eta = eta.tilde)
-            avar.phi <- solve_rcpp(avar.phi.AB$diff, diag(number_m)) %*%
-              avar.phi.AB$var %*% solve_rcpp(avar.phi.AB$diff, diag(number_m))
+            H.inv <- inv_sympd_rcpp(
+              t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_m)
+            ) %*% t(avar.phi.AB$diff)
+            avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
 
             MLE.score.H <- MLE.score$hessian
             AD.diff <- AD.score$score_gradient
@@ -4203,7 +4269,7 @@ GLMcombineAD.DatasetShift <- function(
             AD.diff.phi <- AD.diff[, paste("phi", 1:number_m, sep = "")]
             AD.diff.theta <- AD.diff[, "theta"]
             AD.square <- AD.score$score_square
-            J.V <- GLMcombineADavar(
+            ADvar <- GLMcombineADavar(
               name.par = c("alpha",
                            paste("beta", 1:number_p, sep = ""),
                            "sigma"),
@@ -4213,8 +4279,10 @@ GLMcombineAD.DatasetShift <- function(
               Psi.diff.phi = AD.diff.phi,
               Psi.diff.theta = AD.diff.theta,
               kappa = info.EYsubX$ext.size / number_n,
-              avar.phi = as.matrix(avar.phi))$J.V
-            J.V.inv <- solve_rcpp(J.V, diag(number_p + 3 + number_m * 2))
+              avar.phi = as.matrix(avar.phi),
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
