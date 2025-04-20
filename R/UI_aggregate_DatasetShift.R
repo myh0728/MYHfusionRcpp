@@ -4451,17 +4451,1000 @@ GLMcombineAD.DatasetShift <- function(
     {
       if (!is.null(info.EY$phi))
       {
+        number_m <- 1
 
+        if (is.null(info.EY$ext.size))
+        {
+          if (method == "EL")
+          {
+            nll <- function(par)
+            {
+              alpha <- par[1]
+              beta <- par[2:(number_p + 1)]
+
+              ll <- lL_logistic_rcpp(X = X, Y = Y,
+                                     alpha = alpha, beta = beta) -
+                AD_EY_logistic_SolveLagrange_rcpp(
+                  X = X, alpha = alpha, beta = beta,
+                  phi = info.EY$phi, eta_initial = rep(0, number_m),
+                  iter_max = iter.max, step_rate = step.rate,
+                  step_max = step.max, tol = tol, eps_inv = eps.inv)$value
+
+              return(-ll)
+            }
+
+            estimation <- nlminb(start = c(alpha.initial, beta.initial),
+                                 objective = nll)
+            par.hat <- estimation$par
+            names(par.hat) <- c("alpha",
+                                paste("beta", 1:number_p, sep = ""))
+
+            results$EY <- list(
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              parameter = par.hat)
+          }
+
+          if (method == "fast")
+          {
+            MLE.score <- diff_lL_logistic_rcpp(
+              X = X, Y = Y,
+              alpha = alpha.initial,
+              beta = beta.initial)
+            AD.score <- AD_EY_logistic_rcpp(
+              X = X,
+              alpha = alpha.initial,
+              beta = beta.initial,
+              phi = info.EY$phi)
+
+            MLE.score.H <- MLE.score$hessian
+            AD.diff <- AD.score$score_gradient
+            colnames(AD.diff) <- c("alpha",
+                                   paste("beta", 1:number_p, sep = ""),
+                                   paste("phi", 1:number_m, sep = ""))
+            AD.diff.beta <- AD.diff[, c("alpha",
+                                        paste("beta", 1:number_p, sep = ""))]
+            AD.square <- AD.score$score_square
+            ADvar <- GLMcombineADavar(
+              name.par = c("alpha",
+                           paste("beta", 1:number_p, sep = "")),
+              MLE.hessian = MLE.score.H,
+              Psi.square = AD.square,
+              Psi.diff.beta = AD.diff.beta,
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
+            dimnames(J.V.inv) <- dimnames(J.V)
+
+            par.hat <- as.vector(
+              c(alpha.initial, beta.initial) +
+                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 1))) %*%
+                matrix(J.V[c("alpha",
+                             paste("beta", 1:number_p, sep = "")),
+                           paste("eta", 1:number_m, sep = "")],
+                       nrow = number_p + 1,
+                       ncol = number_m) %*%
+                J.V.inv[paste("eta", 1:number_m, sep = ""),
+                        paste("eta", 1:number_m, sep = "")] %*%
+                (-AD.score$score))
+            names(par.hat) <- c("alpha",
+                                paste("beta", 1:number_p, sep = ""))
+
+            results$EY <- list(
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              parameter = par.hat)
+          }
+
+          if (do.SE)
+          {
+            MLE.score <- diff_lL_logistic_rcpp(
+              X = X, Y = Y,
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")])
+            AD.score <- AD_EY_logistic_rcpp(
+              X = X,
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              phi = info.EY$phi)
+
+            MLE.score.H <- MLE.score$hessian
+            AD.diff <- AD.score$score_gradient
+            colnames(AD.diff) <- c("alpha",
+                                   paste("beta", 1:number_p, sep = ""),
+                                   paste("phi", 1:number_m, sep = ""))
+            AD.diff.beta <- AD.diff[, c("alpha",
+                                        paste("beta", 1:number_p, sep = ""))]
+            AD.square <- AD.score$score_square
+            asy.Cov.par <- GLMcombineADavar(
+              name.par = c("alpha",
+                           paste("beta", 1:number_p, sep = "")),
+              MLE.hessian = MLE.score.H,
+              Psi.square = AD.square,
+              Psi.diff.beta = AD.diff.beta)$asy.Cov.par
+
+            results$EY$Cov.coef <- asy.Cov.par / number_n
+          }
+        }else
+        {
+          if (method == "EL")
+          {
+            if (is.null(info.EY$ext.var))
+            {
+              nll <- function(par)
+              {
+                alpha <- par[1]
+                beta <- par[2:(number_p + 1)]
+                phi.par <- par[(number_p + 2):(number_p + 1 + number_m)]
+
+                ll <- lL_logistic_rcpp(X = X, Y = Y,
+                                       alpha = alpha, beta = beta) -
+                  AD_EY_logistic_SolveLagrange_rcpp(
+                    X = X, alpha = alpha, beta = beta,
+                    phi = info.EY$phi, eta_initial = rep(0, number_m),
+                    iter_max = iter.max, step_rate = step.rate,
+                    step_max = step.max, tol = tol, eps_inv = eps.inv)$value -
+                  info.EY$ext.size * (info.EY$phi - phi.par) ^ 2 / 2
+
+                return(-ll)
+              }
+
+              estimation <- nlminb(start = c(alpha.initial, beta.initial,
+                                             info.EY$phi),
+                                   objective = nll)
+
+              par.tilde <- estimation$par
+              names(par.tilde) <- c("alpha",
+                                    paste("beta", 1:number_p, sep = ""),
+                                    paste("phi", 1:number_m, sep = ""))
+              eta.tilde <- AD_EY_logistic_SolveLagrange_rcpp(
+                X = X,
+                alpha = par.tilde["alpha"],
+                beta = par.tilde[paste("beta", 1:number_p, sep = "")],
+                phi = par.tilde[paste("phi", 1:number_m, sep = "")],
+                eta_initial = rep(0, number_m),
+                iter_max = iter.max, step_rate = step.rate,
+                step_max = step.max, tol = tol, eps_inv = eps.inv)$eta
+              avar.phi.AB <- ADvar_EY_logistic_rcpp(
+                X = X,
+                alpha = par.tilde["alpha"],
+                beta = par.tilde[paste("beta", 1:number_p, sep = "")],
+                phi = par.tilde[paste("phi", 1:number_m, sep = "")],
+                eta = eta.tilde)
+              avar.phi <- avar.phi.AB$var / (avar.phi.AB$diff ^ 2)
+              ext.var.inv <- 1 / avar.phi
+            }else
+            {
+              avar.phi <- info.EY$ext.var
+              ext.var.inv <- 1 / avar.phi
+
+              par.tilde <- c(alpha.initial,
+                             beta.initial,
+                             info.EY)
+              names(par.tilde) <- c("alpha",
+                                    paste("beta", 1:number_p, sep = ""),
+                                    paste("phi", 1:number_m, sep = ""))
+            }
+
+            nll <- function(par)
+            {
+              alpha <- par[1]
+              beta <- par[2:(number_p + 1)]
+              phi.par <- par[(number_p + 2):(number_p + 1 + number_m)]
+
+              ll <- lL_logistic_rcpp(X = X, Y = Y,
+                                     alpha = alpha, beta = beta) -
+                AD_EY_logistic_SolveLagrange_rcpp(
+                  X = X, alpha = alpha, beta = beta,
+                  phi = info.EY$phi, eta_initial = rep(0, number_m),
+                  iter_max = iter.max, step_rate = step.rate,
+                  step_max = step.max, tol = tol, eps_inv = eps.inv)$value -
+                info.EY$ext.size * (info.EY$phi - phi.par) ^ 2 * ext.var.inv / 2
+
+              return(-ll)
+            }
+
+            estimation <- nlminb(
+              start = c(par.tilde["alpha"],
+                        par.tilde[paste("beta", 1:number_p, sep = "")],
+                        par.tilde[paste("phi", 1:number_m, sep = "")]),
+              objective = nll)
+            par.hat <- estimation$par
+            names(par.hat) <- c("alpha",
+                                paste("beta", 1:number_p, sep = ""),
+                                paste("phi", 1:number_m, sep = ""))
+
+            results$EY <- list(
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              parameter = par.hat)
+          }
+
+          if (method == "fast")
+          {
+            MLE.score <- diff_lL_logistic_rcpp(
+              X = X, Y = Y,
+              alpha = alpha.initial,
+              beta = beta.initial)
+            AD.score <- AD_EY_logistic_rcpp(
+              X = X,
+              alpha = alpha.initial,
+              beta = beta.initial,
+              phi = info.EY$phi)
+            eta.tilde <- AD_EY_logistic_SolveLagrange_rcpp(
+              X = X,
+              alpha = alpha.initial,
+              beta = beta.initial,
+              phi = info.EY$phi,
+              eta_initial = rep(0, number_m),
+              iter_max = iter.max, step_rate = step.rate,
+              step_max = step.max, tol = tol, eps_inv = eps.inv)$eta
+            avar.phi.AB <- ADvar_EY_logistic_rcpp(
+              X = X,
+              alpha = alpha.initial,
+              beta = beta.initial,
+              phi = info.EY$phi,
+              eta = eta.tilde)
+            avar.phi <- avar.phi.AB$var / (avar.phi.AB$diff ^ 2)
+
+            MLE.score.H <- MLE.score$hessian
+            AD.diff <- AD.score$score_gradient
+            colnames(AD.diff) <- c("alpha",
+                                   paste("beta", 1:number_p, sep = ""),
+                                   paste("phi", 1:number_m, sep = ""))
+            AD.diff.beta <- AD.diff[, c("alpha",
+                                        paste("beta", 1:number_p, sep = ""))]
+            AD.diff.phi <- AD.diff[, paste("phi", 1:number_m, sep = "")]
+            AD.square <- AD.score$score_square
+            ADvar <- GLMcombineADavar(
+              name.par = c("alpha",
+                           paste("beta", 1:number_p, sep = "")),
+              MLE.hessian = MLE.score.H,
+              Psi.square = AD.square,
+              Psi.diff.beta = AD.diff.beta,
+              Psi.diff.phi = AD.diff.phi,
+              kappa = info.EY$ext.size / number_n,
+              avar.phi = as.matrix(avar.phi),
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
+            dimnames(J.V.inv) <- dimnames(J.V)
+
+            par.hat <- as.vector(
+              c(alpha.initial, beta.initial) +
+                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 1))) %*%
+                matrix(J.V[c("alpha",
+                             paste("beta", 1:number_p, sep = "")),
+                           paste("eta", 1:number_m, sep = "")],
+                       nrow = number_p + 1,
+                       ncol = number_m) %*%
+                J.V.inv[paste("eta", 1:number_m, sep = ""),
+                        paste("eta", 1:number_m, sep = "")] %*%
+                (-AD.score$score))
+            par.hat <- c(par.hat, info.EY$phi)
+            names(par.hat) <- c("alpha",
+                                paste("beta", 1:number_p, sep = ""),
+                                paste("phi", 1:number_m, sep = ""))
+
+            results$EY <- list(
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              parameter = par.hat)
+          }
+
+          if (do.SE)
+          {
+            MLE.score <- diff_lL_logistic_rcpp(
+              X = X, Y = Y,
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")])
+            AD.score <- AD_EY_logistic_rcpp(
+              X = X,
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              phi = par.hat[paste("phi", 1:number_m, sep = "")])
+
+            MLE.score.H <- MLE.score$hessian
+            AD.diff <- AD.score$score_gradient
+            colnames(AD.diff) <- c("alpha",
+                                   paste("beta", 1:number_p, sep = ""),
+                                   paste("phi", 1:number_m, sep = ""))
+            AD.diff.beta <- AD.diff[, c("alpha",
+                                        paste("beta", 1:number_p, sep = ""))]
+            AD.diff.phi <- AD.diff[, paste("phi", 1:number_m, sep = "")]
+            AD.square <- AD.score$score_square
+            asy.Cov.par <- GLMcombineADavar(
+              name.par = c("alpha",
+                           paste("beta", 1:number_p, sep = "")),
+              MLE.hessian = MLE.score.H,
+              Psi.square = AD.square,
+              Psi.diff.beta = AD.diff.beta,
+              Psi.diff.phi = AD.diff.phi,
+              kappa = info.EY$ext.size / number_n,
+              avar.phi = as.matrix(avar.phi))$asy.Cov.par
+
+            results$EY$Cov.coef <- asy.Cov.par / number_n
+          }
+        }
       }
 
       if (!is.null(info.EXsubY$phi))
       {
+        number_k <- 2
+        number_m <- length(info.EXsubY$phi)
 
+        if (is.null(info.EXsubY$ext.size))
+        {
+          if (method == "EL")
+          {
+            nll <- function(par)
+            {
+              alpha <- par[1]
+              beta <- par[2:(number_p + 1)]
+
+              ll <- lL_logistic_rcpp(X = X, Y = Y,
+                                     alpha = alpha, beta = beta) -
+                AD_EXsubY_logistic_SolveLagrange_rcpp(
+                  X = X, alpha = alpha, beta = beta,
+                  phi = info.EXsubY$phi,
+                  eta_initial = rep(0, number_m),
+                  iter_max = iter.max, step_rate = step.rate,
+                  step_max = step.max, tol = tol, eps_inv = eps.inv)$value
+
+              return(-ll)
+            }
+
+            estimation <- nlminb(start = c(alpha.initial,
+                                           beta.initial),
+                                 objective = nll)
+
+            par.hat <- estimation$par
+            names(par.hat) <- c("alpha",
+                                paste("beta", 1:number_p, sep = ""))
+
+            results$EXsubY <- list(
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              parameter = par.hat)
+          }
+
+          if (method == "fast")
+          {
+            MLE.score <- diff_lL_logistic_rcpp(
+              X = X, Y = Y,
+              alpha = alpha.initial,
+              beta = beta.initial)
+            AD.score <- AD_EXsubY_logistic_rcpp(
+              X = X,
+              alpha = alpha.initial,
+              beta = beta.initial,
+              phi = info.EXsubY$phi)
+
+            MLE.score.H <- MLE.score$hessian
+            AD.diff <- AD.score$score_gradient
+            colnames(AD.diff) <- c("alpha",
+                                   paste("beta", 1:number_p, sep = ""),
+                                   paste("phi", 1:number_m, sep = ""))
+            AD.diff.beta <- AD.diff[, c("alpha",
+                                        paste("beta", 1:number_p, sep = ""))]
+            AD.square <- AD.score$score_square
+            ADvar <- GLMcombineADavar(
+              name.par = c("alpha",
+                           paste("beta", 1:number_p, sep = "")),
+              MLE.hessian = MLE.score.H,
+              Psi.square = AD.square,
+              Psi.diff.beta = AD.diff.beta,
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
+            dimnames(J.V.inv) <- dimnames(J.V)
+
+            par.hat <- as.vector(
+              c(alpha.initial, beta.initial) +
+                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 1))) %*%
+                matrix(J.V[c("alpha",
+                             paste("beta", 1:number_p, sep = "")),
+                           paste("eta", 1:number_m, sep = "")],
+                       nrow = number_p + 1,
+                       ncol = number_m) %*%
+                J.V.inv[paste("eta", 1:number_m, sep = ""),
+                        paste("eta", 1:number_m, sep = "")] %*%
+                (-AD.score$score))
+            names(par.hat) <- c("alpha",
+                                paste("beta", 1:number_p, sep = ""))
+
+            results$EXsubY <- list(
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              parameter = par.hat)
+          }
+
+          if (do.SE)
+          {
+            MLE.score <- diff_lL_logistic_rcpp(
+              X = X, Y = Y,
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")])
+            AD.score <- AD_EXsubY_logistic_rcpp(
+              X = X,
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              phi = info.EXsubY$phi)
+
+            MLE.score.H <- MLE.score$hessian
+            AD.diff <- AD.score$score_gradient
+            colnames(AD.diff) <- c("alpha",
+                                   paste("beta", 1:number_p, sep = ""),
+                                   paste("phi", 1:number_m, sep = ""))
+            AD.diff.beta <- AD.diff[, c("alpha",
+                                        paste("beta", 1:number_p, sep = ""))]
+            AD.square <- AD.score$score_square
+            asy.Cov.par <- GLMcombineADavar(
+              name.par = c("alpha",
+                           paste("beta", 1:number_p, sep = "")),
+              MLE.hessian = MLE.score.H,
+              Psi.square = AD.square,
+              Psi.diff.beta = AD.diff.beta)$asy.Cov.par
+
+            results$EXsubY$Cov.coef <- asy.Cov.par / number_n
+          }
+        }else
+        {
+          if (method == "EL")
+          {
+            if (is.null(info.EXsubY$ext.var))
+            {
+              nll <- function(par)
+              {
+                alpha <- par[1]
+                beta <- par[2:(number_p + 1)]
+                phi.par <- par[(number_p + 2):(number_p + 1 + number_m)]
+                phi.diff <- as.vector(t(info.EXsubY$phi) - phi.par)
+
+                ll <- lL_logistic_rcpp(X = X, Y = Y,
+                                       alpha = alpha, beta = beta) -
+                  AD_EXsubY_logistic_SolveLagrange_rcpp(
+                    X = X, alpha = alpha, beta = beta,
+                    phi = info.EXsubY$phi,
+                    eta_initial = rep(0, number_m),
+                    iter_max = iter.max, step_rate = step.rate,
+                    step_max = step.max, tol = tol, eps_inv = eps.inv)$value -
+                  info.EXsubY$ext.size * sum(phi.diff ^ 2) / 2
+
+                return(-ll)
+              }
+
+              estimation <- nlminb(start = c(alpha.initial,
+                                             beta.initial,
+                                             as.vector(t(info.EXsubY$phi))),
+                                   objective = nll)
+
+              par.tilde <- estimation$par
+              names(par.tilde) <- c("alpha",
+                                    paste("beta", 1:number_p, sep = ""),
+                                    paste("phi", 1:number_m, sep = ""))
+              eta.tilde <- AD_EXsubY_logistic_SolveLagrange_rcpp(
+                X = X,
+                alpha = par.tilde["alpha"],
+                beta = par.tilde[paste("beta", 1:number_p, sep = "")],
+                phi = t(matrix(par.tilde[paste("phi", 1:number_m, sep = "")],
+                               nrow = number_p, ncol = number_k)),
+                eta_initial = rep(0, number_m),
+                iter_max = iter.max, step_rate = step.rate,
+                step_max = step.max, tol = tol, eps_inv = eps.inv)$eta
+              avar.phi.AB <- ADvar_EXsubY_logistic_rcpp(
+                X = X,
+                alpha = par.tilde["alpha"],
+                beta = par.tilde[paste("beta", 1:number_p, sep = "")],
+                phi = t(matrix(par.tilde[paste("phi", 1:number_m, sep = "")],
+                               nrow = number_p, ncol = number_k)),
+                eta = eta.tilde)
+              H.inv <- inv_sympd_rcpp(
+                t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_m)
+              ) %*% t(avar.phi.AB$diff)
+              avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
+              ext.var.inv <- inv_sympd_rcpp(avar.phi + eps.inv * diag(number_m))
+            }else
+            {
+              avar.phi <- info.EXsubY$ext.var
+              ext.var.inv <- inv_sympd_rcpp(avar.phi + eps.inv * diag(number_m))
+
+              par.tilde <- c(alpha.initial,
+                             beta.initial,
+                             as.vector(t(info.EXsubY$phi)))
+              names(par.tilde) <- c("alpha",
+                                    paste("beta", 1:number_p, sep = ""),
+                                    paste("phi", 1:number_m, sep = ""))
+            }
+
+            nll <- function(par)
+            {
+              alpha <- par[1]
+              beta <- par[2:(number_p + 1)]
+              phi.par <- par[(number_p + 2):(number_p + 1 + number_m)]
+              phi.diff <- as.vector(t(info.EXsubY$phi) - phi.par)
+
+              ll <- lL_logistic_rcpp(X = X, Y = Y,
+                                     alpha = alpha, beta = beta) -
+                AD_EXsubY_logistic_SolveLagrange_rcpp(
+                  X = X, alpha = alpha, beta = beta,
+                  phi = info.EXsubY$phi,
+                  eta_initial = rep(0, number_m),
+                  iter_max = iter.max, step_rate = step.rate,
+                  step_max = step.max, tol = tol, eps_inv = eps.inv)$value -
+                info.EXsubY$ext.size * sum(t(ext.var.inv * phi.diff) * phi.diff) / 2
+
+              return(-ll)
+            }
+
+            estimation <- nlminb(
+              start = c(par.tilde["alpha"],
+                        par.tilde[paste("beta", 1:number_p, sep = "")],
+                        par.tilde[paste("phi", 1:number_m, sep = "")]),
+              objective = nll)
+
+            par.hat <- estimation$par
+            names(par.hat) <- c("alpha",
+                                paste("beta", 1:number_p, sep = ""),
+                                paste("phi", 1:number_m, sep = ""))
+
+            results$EXsubY <- list(
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              parameter = par.hat)
+          }
+
+          if (method == "fast")
+          {
+            MLE.score <- diff_lL_logistic_rcpp(
+              X = X, Y = Y,
+              alpha = alpha.initial,
+              beta = beta.initial)
+            AD.score <- AD_EXsubY_logistic_rcpp(
+              X = X,
+              alpha = alpha.initial,
+              beta = beta.initial,
+              phi = info.EXsubY$phi)
+            eta.tilde <- AD_EXsubY_logistic_SolveLagrange_rcpp(
+              X = X,
+              alpha = alpha.initial,
+              beta = beta.initial,
+              phi = info.EXsubY$phi,
+              eta_initial = rep(0, number_m),
+              iter_max = iter.max, step_rate = step.rate,
+              step_max = step.max, tol = tol, eps_inv = eps.inv)$eta
+            avar.phi.AB <- ADvar_EXsubY_logistic_rcpp(
+              X = X,
+              alpha = alpha.initial,
+              beta = beta.initial,
+              phi = info.EXsubY$phi,
+              eta = eta.tilde)
+            H.inv <- inv_sympd_rcpp(
+              t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_m)
+            ) %*% t(avar.phi.AB$diff)
+            avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
+
+            MLE.score.H <- MLE.score$hessian
+            AD.diff <- AD.score$score_gradient
+            colnames(AD.diff) <- c("alpha",
+                                   paste("beta", 1:number_p, sep = ""),
+                                   paste("phi", 1:number_m, sep = ""))
+            AD.diff.beta <- AD.diff[, c("alpha",
+                                        paste("beta", 1:number_p, sep = ""))]
+            AD.diff.phi <- AD.diff[, paste("phi", 1:number_m, sep = "")]
+            AD.square <- AD.score$score_square
+            ADvar <- GLMcombineADavar(
+              name.par = c("alpha",
+                           paste("beta", 1:number_p, sep = "")),
+              MLE.hessian = MLE.score.H,
+              Psi.square = AD.square,
+              Psi.diff.beta = AD.diff.beta,
+              Psi.diff.phi = AD.diff.phi,
+              kappa = info.EXsubY$ext.size / number_n,
+              avar.phi = as.matrix(avar.phi),
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
+            dimnames(J.V.inv) <- dimnames(J.V)
+
+            par.hat <- as.vector(
+              c(alpha.initial, beta.initial) +
+                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 1))) %*%
+                matrix(J.V[c("alpha",
+                             paste("beta", 1:number_p, sep = "")),
+                           paste("eta", 1:number_m, sep = "")],
+                       nrow = number_p + 1,
+                       ncol = number_m) %*%
+                J.V.inv[paste("eta", 1:number_m, sep = ""),
+                        paste("eta", 1:number_m, sep = "")] %*%
+                (-AD.score$score))
+            par.hat <- c(par.hat, t(info.EXsubY$phi))
+            names(par.hat) <- c("alpha",
+                                paste("beta", 1:number_p, sep = ""),
+                                paste("phi", 1:number_m, sep = ""))
+
+            results$EXsubY <- list(
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              parameter = par.hat)
+          }
+
+          if (do.SE)
+          {
+            MLE.score <- diff_lL_logistic_rcpp(
+              X = X, Y = Y,
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")])
+            AD.score <- AD_EXsubY_logistic_rcpp(
+              X = X,
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              phi = t(matrix(par.hat[paste("phi", 1:number_m, sep = "")],
+                             nrow = number_p, ncol = number_k)))
+
+            MLE.score.H <- MLE.score$hessian
+            AD.diff <- AD.score$score_gradient
+            colnames(AD.diff) <- c("alpha",
+                                   paste("beta", 1:number_p, sep = ""),
+                                   paste("phi", 1:number_m, sep = ""))
+            AD.diff.beta <- AD.diff[, c("alpha",
+                                        paste("beta", 1:number_p, sep = ""))]
+            AD.diff.phi <- AD.diff[, paste("phi", 1:number_m, sep = "")]
+            AD.square <- AD.score$score_square
+            asy.Cov.par <- GLMcombineADavar(
+              name.par = c("alpha",
+                           paste("beta", 1:number_p, sep = "")),
+              MLE.hessian = MLE.score.H,
+              Psi.square = AD.square,
+              Psi.diff.beta = AD.diff.beta,
+              Psi.diff.phi = AD.diff.phi,
+              kappa = info.EXsubY$ext.size / number_n,
+              avar.phi = as.matrix(avar.phi))$asy.Cov.par
+
+            results$EXsubY$Cov.coef <- asy.Cov.par / number_n
+          }
+        }
       }
 
       if (!is.null(info.EYsubX$phi))
       {
+        number_m <- length(info.EYsubX$phi)
 
+        if (is.null(info.EYsubX$ext.size))
+        {
+          if (method == "EL")
+          {
+            nll <- function(par)
+            {
+              alpha <- par[1]
+              beta <- par[2:(number_p + 1)]
+
+              ll <- lL_logistic_rcpp(X = X, Y = Y,
+                                     alpha = alpha, beta = beta) -
+                AD_EYsubX_logistic_SolveLagrange_rcpp(
+                  X = X, alpha = alpha, beta = beta,
+                  phi = info.EYsubX$phi, inclusion = info.EYsubX$inclusion,
+                  eta_initial = rep(0, number_m),
+                  iter_max = iter.max, step_rate = step.rate,
+                  step_max = step.max, tol = tol, eps_inv = eps.inv)$value
+
+              return(-ll)
+            }
+
+            estimation <- nlminb(start = c(alpha.initial, beta.initial),
+                                 objective = nll)
+
+            par.hat <- estimation$par
+            names(par.hat) <- c("alpha",
+                                paste("beta", 1:number_p, sep = ""))
+
+            results$EYsubX <- list(
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              parameter = par.hat)
+          }
+
+          if (method == "fast")
+          {
+            MLE.score <- diff_lL_logistic_rcpp(
+              X = X, Y = Y,
+              alpha = alpha.initial,
+              beta = beta.initial)
+            AD.score <- AD_EYsubX_logistic_rcpp(
+              X = X,
+              alpha = alpha.initial,
+              beta = beta.initial,
+              phi = info.EYsubX$phi,
+              inclusion = info.EYsubX$inclusion)
+
+            MLE.score.H <- MLE.score$hessian
+            AD.diff <- AD.score$score_gradient
+            colnames(AD.diff) <- c("alpha",
+                                   paste("beta", 1:number_p, sep = ""),
+                                   paste("phi", 1:number_m, sep = ""))
+            AD.diff.beta <- AD.diff[, c("alpha",
+                                        paste("beta", 1:number_p, sep = ""))]
+            AD.square <- AD.score$score_square
+            ADvar <- GLMcombineADavar(
+              name.par = c("alpha",
+                           paste("beta", 1:number_p, sep = "")),
+              MLE.hessian = MLE.score.H,
+              Psi.square = AD.square,
+              Psi.diff.beta = AD.diff.beta,
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
+            dimnames(J.V.inv) <- dimnames(J.V)
+
+            par.hat <- as.vector(
+              c(alpha.initial, beta.initial) +
+                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 1))) %*%
+                matrix(J.V[c("alpha",
+                             paste("beta", 1:number_p, sep = "")),
+                           paste("eta", 1:number_m, sep = "")],
+                       nrow = number_p + 1,
+                       ncol = number_m) %*%
+                J.V.inv[paste("eta", 1:number_m, sep = ""),
+                        paste("eta", 1:number_m, sep = "")] %*%
+                (-AD.score$score))
+            names(par.hat) <- c("alpha",
+                                paste("beta", 1:number_p, sep = ""))
+
+            results$EYsubX <- list(
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              parameter = par.hat)
+          }
+
+          if (do.SE)
+          {
+            MLE.score <- diff_lL_logistic_rcpp(
+              X = X, Y = Y,
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")])
+            AD.score <- AD_EYsubX_logistic_rcpp(
+              X = X,
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              phi = info.EYsubX$phi,
+              inclusion = info.EYsubX$inclusion)
+
+            MLE.score.H <- MLE.score$hessian
+            AD.diff <- AD.score$score_gradient
+            colnames(AD.diff) <- c("alpha",
+                                   paste("beta", 1:number_p, sep = ""),
+                                   paste("phi", 1:number_m, sep = ""))
+            AD.diff.beta <- AD.diff[, c("alpha",
+                                        paste("beta", 1:number_p, sep = ""))]
+            AD.square <- AD.score$score_square
+            asy.Cov.par <- GLMcombineADavar(
+              name.par = c("alpha",
+                           paste("beta", 1:number_p, sep = "")),
+              MLE.hessian = MLE.score.H,
+              Psi.square = AD.square,
+              Psi.diff.beta = AD.diff.beta)$asy.Cov.par
+
+            results$EYsubX$Cov.coef <- asy.Cov.par / number_n
+          }
+        }else
+        {
+          if (method == "EL")
+          {
+            if (is.null(info.EYsubX$ext.var))
+            {
+              nll <- function(par)
+              {
+                alpha <- par[1]
+                beta <- par[2:(number_p + 1)]
+                phi.par <- par[(number_p + 2):(number_p + 1 + number_m)]
+                phi.diff <- as.vector(info.EYsubX$phi - phi.par)
+
+                ll <- lL_logistic_rcpp(X = X, Y = Y,
+                                       alpha = alpha, beta = beta) -
+                  AD_EYsubX_logistic_SolveLagrange_rcpp(
+                    X = X, alpha = alpha, beta = beta,
+                    phi = info.EYsubX$phi, inclusion = info.EYsubX$inclusion,
+                    eta_initial = rep(0, number_m),
+                    iter_max = iter.max, step_rate = step.rate,
+                    step_max = step.max, tol = tol, eps_inv = eps.inv)$value -
+                  info.EYsubX$ext.size * sum(phi.diff ^ 2) / 2
+
+                return(-ll)
+              }
+
+              estimation <- nlminb(start = c(alpha.initial, beta.initial,
+                                             info.EYsubX$phi),
+                                   objective = nll)
+
+              par.tilde <- estimation$par
+              names(par.tilde) <- c("alpha",
+                                    paste("beta", 1:number_p, sep = ""),
+                                    paste("phi", 1:number_m, sep = ""))
+
+              eta.tilde <- AD_EYsubX_logistic_SolveLagrange_rcpp(
+                X = X,
+                alpha = par.tilde["alpha"],
+                beta = par.tilde[paste("beta", 1:number_p, sep = "")],
+                phi = par.tilde[paste("phi", 1:number_m, sep = "")],
+                inclusion = info.EYsubX$inclusion,
+                eta_initial = rep(0, number_m),
+                iter_max = iter.max, step_rate = step.rate,
+                step_max = step.max, tol = tol, eps_inv = eps.inv)$eta
+              avar.phi.AB <- ADvar_EYsubX_logistic_rcpp(
+                X = X,
+                alpha = par.tilde["alpha"],
+                beta = par.tilde[paste("beta", 1:number_p, sep = "")],
+                phi = par.tilde[paste("phi", 1:number_m, sep = "")],
+                inclusion = info.EYsubX$inclusion,
+                eta = eta.tilde)
+              H.inv <- inv_sympd_rcpp(
+                t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_m)
+              ) %*% t(avar.phi.AB$diff)
+              avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
+              ext.var.inv <- inv_sympd_rcpp(avar.phi + eps.inv * diag(number_m))
+            }else
+            {
+              avar.phi <- info.EYsubX$ext.var
+              ext.var.inv <- inv_sympd_rcpp(avar.phi + eps.inv * diag(number_m))
+
+              par.tilde <- c(alpha.initial,
+                             beta.initial,
+                             info.EYsubX$phi)
+              names(par.tilde) <- c("alpha",
+                                    paste("beta", 1:number_p, sep = ""),
+                                    paste("phi", 1:number_m, sep = ""))
+            }
+
+            nll <- function(par)
+            {
+              alpha <- par[1]
+              beta <- par[2:(number_p + 1)]
+              phi.par <- par[(number_p + 2):(number_p + 1 + number_m)]
+              phi.diff <- as.vector(info.EYsubX$phi - phi.par)
+
+              ll <- lL_logistic_rcpp(X = X, Y = Y,
+                                     alpha = alpha, beta = beta) -
+                AD_EYsubX_logistic_SolveLagrange_rcpp(
+                  X = X, alpha = alpha, beta = beta,
+                  phi = info.EYsubX$phi, inclusion = info.EYsubX$inclusion,
+                  eta_initial = rep(0, number_m),
+                  iter_max = iter.max, step_rate = step.rate,
+                  step_max = step.max, tol = tol, eps_inv = eps.inv)$value -
+                info.EYsubX$ext.size * sum(t(ext.var.inv * phi.diff) * phi.diff) / 2
+
+              return(-ll)
+            }
+
+            estimation <- nlminb(
+              start = c(par.tilde["alpha"],
+                        par.tilde[paste("beta", 1:number_p, sep = "")],
+                        par.tilde[paste("phi", 1:number_m, sep = "")]),
+              objective = nll)
+
+            par.hat <- estimation$par
+            names(par.hat) <- c("alpha",
+                                paste("beta", 1:number_p, sep = ""),
+                                paste("phi", 1:number_m, sep = ""))
+
+            results$EYsubX <- list(
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              parameter = par.hat)
+          }
+
+          if (method == "fast")
+          {
+            MLE.score <- diff_lL_logistic_rcpp(
+              X = X, Y = Y,
+              alpha = alpha.initial,
+              beta = beta.initial)
+            AD.score <- AD_EYsubX_logistic_rcpp(
+              X = X,
+              alpha = alpha.initial,
+              beta = beta.initial,
+              phi = info.EYsubX$phi,
+              inclusion = info.EYsubX$inclusion)
+            eta.tilde <- AD_EYsubX_logistic_SolveLagrange_rcpp(
+              X = X,
+              alpha = alpha.initial,
+              beta = beta.initial,
+              phi = info.EYsubX$phi,
+              inclusion = info.EYsubX$inclusion,
+              eta_initial = rep(0, number_m),
+              iter_max = iter.max, step_rate = step.rate,
+              step_max = step.max, tol = tol, eps_inv = eps.inv)$eta
+            avar.phi.AB <- ADvar_EYsubX_logistic_rcpp(
+              X = X,
+              alpha = alpha.initial,
+              beta = beta.initial,
+              phi = info.EYsubX$phi,
+              inclusion = info.EYsubX$inclusion,
+              eta = eta.tilde)
+            H.inv <- inv_sympd_rcpp(
+              t(avar.phi.AB$diff) %*% avar.phi.AB$diff + eps.inv * diag(number_m)
+            ) %*% t(avar.phi.AB$diff)
+            avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
+
+            MLE.score.H <- MLE.score$hessian
+            AD.diff <- AD.score$score_gradient
+            colnames(AD.diff) <- c("alpha",
+                                   paste("beta", 1:number_p, sep = ""),
+                                   paste("phi", 1:number_m, sep = ""))
+            AD.diff.beta <- AD.diff[, c("alpha",
+                                        paste("beta", 1:number_p, sep = ""))]
+            AD.diff.phi <- AD.diff[, paste("phi", 1:number_m, sep = "")]
+            AD.square <- AD.score$score_square
+            ADvar <- GLMcombineADavar(
+              name.par = c("alpha",
+                           paste("beta", 1:number_p, sep = "")),
+              MLE.hessian = MLE.score.H,
+              Psi.square = AD.square,
+              Psi.diff.beta = AD.diff.beta,
+              Psi.diff.phi = AD.diff.phi,
+              kappa = info.EYsubX$ext.size / number_n,
+              avar.phi = as.matrix(avar.phi),
+              eps.inv = eps.inv)
+            J.V <- ADvar$J.V
+            J.V.inv <- ADvar$J.V.inv
+            dimnames(J.V.inv) <- dimnames(J.V)
+
+            par.hat <- as.vector(
+              c(alpha.initial, beta.initial) +
+                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 1))) %*%
+                matrix(J.V[c("alpha",
+                             paste("beta", 1:number_p, sep = "")),
+                           paste("eta", 1:number_m, sep = "")],
+                       nrow = number_p + 1,
+                       ncol = number_m) %*%
+                J.V.inv[paste("eta", 1:number_m, sep = ""),
+                        paste("eta", 1:number_m, sep = "")] %*%
+                (-AD.score$score))
+            par.hat <- c(par.hat, t(info.EYsubX$phi))
+            names(par.hat) <- c("alpha",
+                                paste("beta", 1:number_p, sep = ""),
+                                paste("phi", 1:number_m, sep = ""))
+
+            results$EYsubX <- list(
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              parameter = par.hat)
+          }
+
+          if (do.SE)
+          {
+            MLE.score <- diff_lL_logistic_rcpp(
+              X = X, Y = Y,
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")])
+            AD.score <- AD_EYsubX_logistic_rcpp(
+              X = X,
+              alpha = par.hat["alpha"],
+              beta = par.hat[paste("beta", 1:number_p, sep = "")],
+              phi = par.hat[paste("phi", 1:number_m, sep = "")],
+              inclusion = info.EYsubX$inclusion)
+
+            MLE.score.H <- MLE.score$hessian
+            AD.diff <- AD.score$score_gradient
+            colnames(AD.diff) <- c("alpha",
+                                   paste("beta", 1:number_p, sep = ""),
+                                   paste("phi", 1:number_m, sep = ""))
+            AD.diff.beta <- AD.diff[, c("alpha",
+                                        paste("beta", 1:number_p, sep = ""))]
+            AD.diff.phi <- AD.diff[, paste("phi", 1:number_m, sep = "")]
+            AD.square <- AD.score$score_square
+            asy.Cov.par <- GLMcombineADavar(
+              name.par = c("alpha",
+                           paste("beta", 1:number_p, sep = "")),
+              MLE.hessian = MLE.score.H,
+              Psi.square = AD.square,
+              Psi.diff.beta = AD.diff.beta,
+              Psi.diff.phi = AD.diff.phi,
+              kappa = info.EYsubX$ext.size / number_n,
+              avar.phi = as.matrix(avar.phi))$asy.Cov.par
+
+            results$EYsubX$Cov.coef <- asy.Cov.par / number_n
+          }
+        }
       }
     }
 
