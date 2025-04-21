@@ -37,7 +37,13 @@ AD_EY_normal_SolveLagrange <- function(X, alpha, beta, sigma, phi,
 
   for (k in 1:iter.max)
   {
-    direction.step <- step$gradient / (step$hessian - eps_inv)
+    if (abs(step$hessian) > eps_inv)
+    {
+      direction.step <- step$gradient / step$hessian
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -85,7 +91,13 @@ AD_EY_normal_SolveLagrange_v1 <- function(X, alpha, beta, sigma, phi,
 
   for (k in 1:iter.max)
   {
-    direction.step <- step$gradient / (step$hessian - eps_inv)
+    if (abs(step$hessian) > eps_inv)
+    {
+      direction.step <- step$gradient / step$hessian
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -212,9 +224,13 @@ AD_EXsubY_normal_SolveLagrange <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -262,9 +278,13 @@ AD_EXsubY_normal_SolveLagrange_v1 <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -439,9 +459,13 @@ AD_EYsubX_normal_SolveLagrange <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -489,9 +513,13 @@ AD_EYsubX_normal_SolveLagrange_v1 <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -620,7 +648,13 @@ ADCS_EY_normal_SolveLagrange <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- step$gradient / (step$hessian - eps_inv)
+    if (abs(step$hessian) > eps_inv)
+    {
+      direction.step <- step$gradient / step$hessian
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -668,7 +702,13 @@ ADCS_EY_normal_SolveLagrange_v1 <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- step$gradient / (step$hessian - eps_inv)
+    if (abs(step$hessian) > eps_inv)
+    {
+      direction.step <- step$gradient / step$hessian
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -803,9 +843,13 @@ ADCS_EXsubY_normal_SolveLagrange <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -853,9 +897,13 @@ ADCS_EXsubY_normal_SolveLagrange_v1 <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -1039,9 +1087,13 @@ ADCS_EYsubX_normal_SolveLagrange <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -1089,9 +1141,13 @@ ADCS_EYsubX_normal_SolveLagrange_v1 <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -1239,9 +1295,13 @@ ADPPS_EX_normal_SolveLagrange <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -1289,9 +1349,13 @@ ADPPS_EX_normal_SolveLagrange_v1 <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -1430,7 +1494,13 @@ ADPPS_EY_normal_SolveLagrange <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- step$gradient / (step$hessian - eps_inv)
+    if (abs(step$hessian) > eps_inv)
+    {
+      direction.step <- step$gradient / step$hessian
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -1478,7 +1548,13 @@ ADPPS_EY_normal_SolveLagrange_v1 <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- step$gradient / (step$hessian - eps_inv)
+    if (abs(step$hessian) > eps_inv)
+    {
+      direction.step <- step$gradient / step$hessian
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -1621,9 +1697,13 @@ ADPPS_EXsubY_normal_SolveLagrange <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -1671,9 +1751,13 @@ ADPPS_EXsubY_normal_SolveLagrange_v1 <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -1857,9 +1941,13 @@ ADPPS_EYsubX_normal_SolveLagrange <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -1907,9 +1995,13 @@ ADPPS_EYsubX_normal_SolveLagrange_v1 <- function(X, alpha, beta, sigma,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -2053,7 +2145,13 @@ AD_EY_logistic_SolveLagrange <- function(X, alpha, beta, phi,
 
   for (k in 1:iter.max)
   {
-    direction.step <- step$gradient / (step$hessian - eps_inv)
+    if (abs(step$hessian) > eps_inv)
+    {
+      direction.step <- step$gradient / step$hessian
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -2101,7 +2199,13 @@ AD_EY_logistic_SolveLagrange_v1 <- function(X, alpha, beta, phi,
 
   for (k in 1:iter.max)
   {
-    direction.step <- step$gradient / (step$hessian - eps_inv)
+    if (abs(step$hessian) > eps_inv)
+    {
+      direction.step <- step$gradient / step$hessian
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -2224,9 +2328,13 @@ AD_EXsubY_logistic_SolveLagrange <- function(X, alpha, beta, phi,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -2273,9 +2381,13 @@ AD_EXsubY_logistic_SolveLagrange_v1 <- function(X, alpha, beta, phi,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -2425,9 +2537,13 @@ AD_EYsubX_logistic_SolveLagrange <- function(X, alpha, beta,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
@@ -2475,9 +2591,13 @@ AD_EYsubX_logistic_SolveLagrange_v1 <- function(X, alpha, beta,
 
   for (k in 1:iter.max)
   {
-    direction.step <- solve_rcpp(
-      step$hessian - eps_inv * diag(dim(step$hessian)[1]),
-      step$gradient)
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
 
     step.size <- 1
     eta.new <- eta - direction.step
