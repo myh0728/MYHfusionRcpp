@@ -1593,6 +1593,7 @@ List ADCSvar_EYsubX_normal_rcpp(const arma::mat & X,
   arma::vec extXrow_i(n_p + 1);
   double SI_i = 0.0;
   double eSI_CS_i = 0.0;
+  arma::vec Psi_diff_i(n_m);
   arma::vec Psi_i(n_m);
   double p_i = 0.0;
   arma::vec inclusion_i(n_m);
@@ -1608,7 +1609,8 @@ List ADCSvar_EYsubX_normal_rcpp(const arma::mat & X,
     extXrow_i = arma::join_vert(X_intercept, Xrow_i);
     SI_i = alpha + arma::dot(Xrow_i, beta);
     eSI_CS_i = exp(arma::dot(Xrow_i, CS_beta));
-    Psi_i = (SI_i - phi) * eSI_CS_i % inclusion.row(i).t();
+    Psi_diff_i = (SI_i - phi) % inclusion.row(i).t();
+    Psi_i = Psi_diff_i * eSI_CS_i;
     p_i = 1.0 / (1.0 + arma::dot(Psi_i, eta)) / n_n;
 
     for (size_t m = 0; m < n_m; ++m) {
@@ -1620,7 +1622,7 @@ List ADCSvar_EYsubX_normal_rcpp(const arma::mat & X,
     }
     inclusion_i = arma::conv_to<arma::vec>::from(inclusion.row(i).t());
     var_B_a += inclusion_i * inclusion_i.t() * eSI_CS_i * p_i;
-    var_B_b += Psi_i * Psi_i.t() / eSI_CS_i * p_i;
+    var_B_b += Psi_diff_i * Psi_diff_i.t() * eSI_CS_i * p_i;
     var_AB_Dtor += eSI_CS_i * p_i;
   }
 
@@ -2416,6 +2418,7 @@ List ADPPSvar_EXsubY_normal_rcpp(const arma::mat & X,
   arma::mat pdf_pts(n_k, 2);
   arma::vec cdf_dist(n_k);
   arma::vec pdf_dist(n_k);
+  arma::mat dist_x_phi(n_k, n_p);
   arma::mat dist_e_f(n_k, n_p);
   arma::vec Psi_i(n_m);
   double p_i = 0.0;
@@ -2434,8 +2437,10 @@ List ADPPSvar_EXsubY_normal_rcpp(const arma::mat & X,
     pdf_pts = arma::normpdf(q_pts);
     cdf_dist = cdf_pts.col(1) - cdf_pts.col(0);
     pdf_dist = pdf_pts.col(1) - pdf_pts.col(0);
-    dist_e_f = (arma::repmat(Xrow_i.t(), n_k, 1) - phi) * e_f;
-    Psi_i = arma::reshape((dist_e_f % arma::repmat(cdf_dist, 1, n_p)).t(), n_m, 1);
+    dist_x_phi = (arma::repmat(Xrow_i.t(), n_k, 1) - phi);
+    dist_e_f = dist_x_phi * e_f;
+    Psi_i = arma::reshape(
+      (dist_e_f % arma::repmat(cdf_dist, 1, n_p)).t(), n_m, 1);
     p_i = 1.0 / (1.0 + arma::dot(Psi_i, eta)) / n_n;
 
     var_A.diag() += -arma::reshape(arma::repmat(
@@ -2444,8 +2449,8 @@ List ADPPSvar_EXsubY_normal_rcpp(const arma::mat & X,
 
       var_B.submat(k * n_p, k * n_p,
                    (k + 1) * n_p - 1,
-                   (k + 1) * n_p - 1) += dist_e_f.row(k).t() *
-                     dist_e_f.row(k) * cdf_dist(k) / e_f * p_i;
+                   (k + 1) * n_p - 1) += dist_x_phi.row(k).t() *
+                     dist_x_phi.row(k) * cdf_dist(k) * e_f * p_i;
     }
     var_AB_Dtor += e_f * p_i;
   }
@@ -2707,6 +2712,7 @@ List ADPPSvar_EYsubX_normal_rcpp(const arma::mat & X,
   double SI_i = 0.0;
   arma::vec c_f(n_m);
   double e_f = 0.0;
+  arma::vec Psi_diff_i(n_m);
   arma::vec Psi_i(n_m);
   double p_i = 0.0;
   arma::vec inclusion_i(n_m);
@@ -2723,7 +2729,8 @@ List ADPPSvar_EYsubX_normal_rcpp(const arma::mat & X,
     SI_i = alpha + arma::dot(Xrow_i, beta);
     c_f = SI_i + pow(sigma, 2) * PPS_beta - phi;
     e_f = exp((SI_i * 2 + pow(sigma, 2) * PPS_beta) * PPS_beta / 2.0);
-    Psi_i = c_f * e_f % inclusion.row(i).t();
+    Psi_diff_i = c_f % inclusion.row(i).t();
+    Psi_i = Psi_diff_i * e_f;
     p_i = 1 / (1 + arma::dot(Psi_i, eta)) / n_n;
 
     for (size_t m = 0; m < n_m; ++m) {
@@ -2735,7 +2742,7 @@ List ADPPSvar_EYsubX_normal_rcpp(const arma::mat & X,
     }
     inclusion_i = arma::conv_to<arma::vec>::from(inclusion.row(i).t());
     var_B_a += inclusion_i * inclusion_i.t() * e_f * p_i;
-    var_B_b += Psi_i * Psi_i.t() / e_f * p_i;
+    var_B_b += Psi_diff_i * Psi_diff_i.t() * e_f * p_i;
     var_AB_Dtor += e_f * p_i;
   }
 
