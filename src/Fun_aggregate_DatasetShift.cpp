@@ -819,6 +819,10 @@ List ADCS_EY_normal_Lagrange_rcpp(const arma::mat & X,
     extXrow_i = arma::join_vert(X_intercept, Xrow_i);
     SI_i = alpha + arma::dot(Xrow_i, beta);
     eSI_CS_i = exp(arma::dot(Xrow_i, CS_beta));
+    if (eSI_CS_i > 1e10) {
+
+      eSI_CS_i = 1e10;
+    }
     Psi_i = eSI_CS_i * (SI_i - phi);
 
     denominator = 1.0 + eta * Psi_i;
@@ -960,6 +964,10 @@ List ADCS_EY_normal_rcpp(const arma::mat & X,
     extXrow_i = arma::join_vert(X_intercept, Xrow_i);
     SI_i = alpha + arma::dot(Xrow_i, beta);
     eSI_CS_i = exp(arma::dot(Xrow_i, CS_beta));
+    if (eSI_CS_i > 1e10) {
+
+      eSI_CS_i = 1e10;
+    }
 
     Psi += eSI_CS_i * (SI_i - phi);
     Psi_square += Psi * Psi.t();
@@ -1019,6 +1027,10 @@ List ADCSvar_EY_normal_rcpp(const arma::mat & X,
     extXrow_i = arma::join_vert(X_intercept, Xrow_i);
     SI_i = alpha + arma::dot(Xrow_i, beta);
     eSI_CS_i = exp(arma::dot(Xrow_i, CS_beta));
+    if (eSI_CS_i > 1e10) {
+
+      eSI_CS_i = 1e10;
+    }
     Psi_i = eSI_CS_i * (SI_i - phi);
     p_i = 1 / (1 + Psi_i * eta) / n_n;
 
@@ -1081,6 +1093,10 @@ List ADCS_EXsubY_normal_Lagrange_rcpp(const arma::mat & X,
     extXrow_i = arma::join_vert(X_intercept, Xrow_i);
     SI_i = alpha + arma::dot(Xrow_i, beta);
     eSI_CS_i = exp(arma::dot(Xrow_i, CS_beta));
+    if (eSI_CS_i > 1e10) {
+
+      eSI_CS_i = 1e10;
+    }
     q_pts = (y_pts - SI_i) / sigma;
     cdf_pts = arma::normcdf(q_pts);
     pdf_pts = arma::normpdf(q_pts);
@@ -1241,6 +1257,10 @@ List ADCS_EXsubY_normal_rcpp(const arma::mat & X,
     extXrow_i = arma::join_vert(X_intercept, Xrow_i);
     SI_i = alpha + arma::dot(Xrow_i, beta);
     eSI_CS_i = exp(arma::dot(Xrow_i, CS_beta));
+    if (eSI_CS_i > 1e10) {
+
+      eSI_CS_i = 1e10;
+    }
     q_pts = (y_pts - SI_i) / sigma;
     cdf_pts = arma::normcdf(q_pts);
     pdf_pts = arma::normpdf(q_pts);
@@ -1322,6 +1342,10 @@ List ADCSvar_EXsubY_normal_rcpp(const arma::mat & X,
     extXrow_i = arma::join_vert(X_intercept, Xrow_i);
     SI_i = alpha + arma::dot(Xrow_i, beta);
     eSI_CS_i = exp(arma::dot(Xrow_i, CS_beta));
+    if (eSI_CS_i > 1e10) {
+
+      eSI_CS_i = 1e10;
+    }
     q_pts = (y_pts - SI_i) / sigma;
     cdf_pts = arma::normcdf(q_pts);
     pdf_pts = arma::normpdf(q_pts);
@@ -1388,6 +1412,10 @@ List ADCS_EYsubX_normal_Lagrange_rcpp(const arma::mat & X,
     extXrow_i = arma::join_vert(X_intercept, Xrow_i);
     SI_i = alpha + arma::dot(Xrow_i, beta);
     eSI_CS_i = exp(arma::dot(Xrow_i, CS_beta));
+    if (eSI_CS_i > 1e10) {
+
+      eSI_CS_i = 1e10;
+    }
     Psi_i = (SI_i - phi) % inclusion.row(i).t() * eSI_CS_i;
 
     denominator = 1.0 + arma::dot(eta, Psi_i);
@@ -1535,6 +1563,10 @@ List ADCS_EYsubX_normal_rcpp(const arma::mat & X,
     extXrow_i = arma::join_vert(X_intercept, Xrow_i);
     SI_i = alpha + arma::dot(Xrow_i, beta);
     eSI_CS_i = exp(arma::dot(Xrow_i, CS_beta));
+    if (eSI_CS_i > 1e10) {
+
+      eSI_CS_i = 1e10;
+    }
     Psi_i.zeros();
 
     for (size_t m = 0; m < n_m; ++m) {
@@ -1609,6 +1641,10 @@ List ADCSvar_EYsubX_normal_rcpp(const arma::mat & X,
     extXrow_i = arma::join_vert(X_intercept, Xrow_i);
     SI_i = alpha + arma::dot(Xrow_i, beta);
     eSI_CS_i = exp(arma::dot(Xrow_i, CS_beta));
+    if (eSI_CS_i > 1e10) {
+
+      eSI_CS_i = 1e10;
+    }
     Psi_diff_i = (SI_i - phi) % inclusion.row(i).t();
     Psi_i = Psi_diff_i * eSI_CS_i;
     p_i = 1.0 / (1.0 + arma::dot(Psi_i, eta)) / n_n;
