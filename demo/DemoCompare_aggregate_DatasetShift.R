@@ -1099,6 +1099,95 @@ ggplot2::autoplot(
   )
 )
 
+test1 <- ADCS_EY_logistic_Lagrange(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, CS.beta = rep(0.1, p), eta = 0.1)
+
+test2 <- ADCS_EY_logistic_Lagrange_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, CS_beta = rep(0.1, p), eta = 0.1)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = ADCS_EY_logistic_Lagrange(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, CS.beta = rep(0.1, p), eta = 0.1),
+    "Rcpp" = ADCS_EY_logistic_Lagrange_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, CS_beta = rep(0.1, p), eta = 0.1)
+  )
+)
+
+test1 <- ADCS_EY_logistic_SolveLagrange(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, CS.beta = rep(0.1, p), eta.initial = 0,
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
+
+test2 <- ADCS_EY_logistic_SolveLagrange_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, CS_beta = rep(0.1, p), eta_initial = 0,
+  iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7)
+
+test3 <- ADCS_EY_logistic_SolveLagrange_v1(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, CS.beta = rep(0.1, p), eta.initial = 0,
+  iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = ADCS_EY_logistic_SolveLagrange(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, CS.beta = rep(0.1, p), eta.initial = 0,
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7),
+    "Rcpp" = ADCS_EY_logistic_SolveLagrange_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, CS_beta = rep(0.1, p), eta_initial = 0,
+      iter_max = 10, step_rate = 2, step_max = 5, tol = 1e-7, eps_inv = 1e-7),
+    "R_Rcpp" = ADCS_EY_logistic_SolveLagrange_v1(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, CS.beta = rep(0.1, p), eta.initial = 0,
+      iter.max = 10, step.rate = 2, step.max = 5, tol = 1e-7, eps_inv = 1e-7)
+  )
+)
+
+test1 <- ADCS_EY_logistic(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, CS.beta = rep(0.1, p))
+
+test2 <- ADCS_EY_logistic_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, CS_beta = rep(0.1, p))
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = ADCS_EY_logistic(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, CS.beta = rep(0.1, p)),
+    "Rcpp" = ADCS_EY_logistic_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, CS_beta = rep(0.1, p))
+  )
+)
+
+test1 <- ADCSvar_EY_logistic(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, CS.beta = rep(0.1, p), eta = 0.1)
+
+test2 <- ADCSvar_EY_logistic_rcpp(
+  X = X, alpha = theta0, beta = c(theta1, theta2),
+  phi = phi, CS_beta = rep(0.1, p), eta = 0.1)
+
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    "R" = ADCSvar_EY_logistic(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, CS.beta = rep(0.1, p), eta = 0.1),
+    "Rcpp" = ADCSvar_EY_logistic_rcpp(
+      X = X, alpha = theta0, beta = c(theta1, theta2),
+      phi = phi, CS_beta = rep(0.1, p), eta = 0.1)
+  )
+)
+
 ### auxiliary information: average of X given Y
 
 X <- as.matrix(X)

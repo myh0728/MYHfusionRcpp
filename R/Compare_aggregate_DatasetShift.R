@@ -2691,23 +2691,93 @@ ADvar_EYsubX_logistic <- function(X, alpha, beta, phi, inclusion, eta)
   return(results)
 }
 
-
-
-
-
-
-
-
-
-
-
-
 ##### Covariate shift, logistic regression model
+
+ADCS_EY_logistic_Lagrange <- function(X, alpha, beta, phi, CS.beta, eta)
+{
+  n_n <- dim(X)[1]
+
+  eSI <- as.vector(exp(alpha + X %*% beta))
+  eSI_CS <- as.vector(exp(X %*% CS.beta))
+  Psi <- ((1 - phi) * eSI - phi) / (1 + eSI) * eSI_CS
+  denominator = 1 + eta * Psi
+  value <- sum(log(denominator))
+  gradient <- sum(Psi / denominator)
+  hessian <- -sum((Psi / denominator) ^ 2)
+
+  if (any(!is.finite(value))|
+      any(!is.finite(gradient))|
+      any(!is.finite(hessian)))
+  {
+    value <- -10000 * n_n
+    gradient <- 0
+    hessian <- 0
+  }
+
+  results <- list(value = value,
+                  gradient = gradient,
+                  hessian = hessian)
+  return(results)
+}
 
 ADCS_EY_logistic_SolveLagrange <- function(X, alpha, beta,
                                            phi, CS.beta,
                                            eta.initial, iter.max,
-                                           step.rate, step.max, tol)
+                                           step.rate, step.max, tol, eps_inv)
+{
+  eta <- eta.initial
+  step <- ADCS_EY_logistic_Lagrange(
+    X = X, alpha = alpha, beta = beta,
+    phi = phi, CS.beta = CS.beta, eta = eta)
+
+  for (k in 1:iter.max)
+  {
+    if (abs(step$hessian) > eps_inv)
+    {
+      direction.step <- step$gradient / step$hessian
+    }else
+    {
+      direction.step <- -step$gradient
+    }
+
+    step.size <- 1
+    eta.new <- eta - direction.step
+    step.new <- ADCS_EY_logistic_Lagrange(
+      X = X, alpha = alpha, beta = beta,
+      phi = phi, CS.beta = CS.beta, eta = eta.new)
+
+    for (iter.step in 1:step.max)
+    {
+      if (step.new$value <= step$value + tol)
+      {
+        step.size <- step.size / step.rate
+        eta.new <- eta - direction.step * step.size
+        step.new <- ADCS_EY_logistic_Lagrange(
+          X = X, alpha = alpha, beta = beta,
+          phi = phi, CS.beta = CS.beta, eta = eta.new)
+      }else
+        break
+    }
+
+    if (step.new$value > step$value + tol)
+    {
+      eta <- eta.new
+      step <- step.new
+    }else
+      break
+  }
+
+  results <- list(eta = eta,
+                  value = step$value,
+                  gradient = step$gradient,
+                  hessian = step$hessian)
+  return(results)
+}
+
+ADCS_EY_logistic_SolveLagrange_v1 <- function(X, alpha, beta,
+                                              phi, CS.beta,
+                                              eta.initial, iter.max,
+                                              step.rate, step.max, tol, eps_inv)
 {
   eta <- eta.initial
   step <- ADCS_EY_logistic_Lagrange_rcpp(
@@ -2716,14 +2786,15 @@ ADCS_EY_logistic_SolveLagrange <- function(X, alpha, beta,
 
   for (k in 1:iter.max)
   {
-    step.size <- 1
-    if (step$hessian != 0)
+    if (abs(step$hessian) > eps_inv)
     {
       direction.step <- step$gradient / step$hessian
     }else
     {
       direction.step <- -step$gradient
     }
+
+    step.size <- 1
     eta.new <- eta - direction.step
     step.new <- ADCS_EY_logistic_Lagrange_rcpp(
       X = X, alpha = alpha, beta = beta,
@@ -2756,6 +2827,64 @@ ADCS_EY_logistic_SolveLagrange <- function(X, alpha, beta,
                   hessian = step$hessian)
   return(results)
 }
+
+ADCS_EY_logistic <- function(X, alpha, beta, phi, CS.beta)
+{
+  n_n <- dim(X)[1]
+  n_p <- dim(X)[2]
+
+  eSI_i <- as.vector(exp(alpha + X %*% beta))
+  eSI_CS_i <- as.vector(exp(X %*% CS.beta))
+  Psi_i <- ((1 - phi) * eSI_i - phi) / (1 + eSI_i) * eSI_CS_i
+  Psi <- sum(Psi_i) / n_n
+  Psi_square <- sum(Psi_i ^ 2) / n_n
+
+  Psi_gradient <- c(
+    colSums(cbind(1, X) * eSI_i / ((1 + eSI_i) ^ 2) * eSI_CS_i) / n_n,
+    sum(-eSI_CS_i) / n_n,
+    colSums(X * Psi_i) / n_n)
+
+  if (any(!is.finite(Psi))|
+      any(!is.finite(Psi_square))|
+      any(!is.finite(Psi_gradient)))
+  {
+    Psi <- 0
+    Psi_square <- 0
+    Psi_gradient <- rep(0, n_p + 3)
+  }
+
+  results <- list(score = Psi,
+                  score_square = Psi_square,
+                  score_gradient = Psi_gradient)
+  return(results)
+}
+
+ADCSvar_EY_logistic <- function(X, alpha, beta, phi, CS.beta, eta)
+{
+  n_n <- dim(X)[1]
+  n_p <- dim(X)[2]
+
+  eSI_i <- as.vector(exp(alpha + X %*% beta))
+  eSI_CS_i <- as.vector(exp(X %*% CS.beta))
+  Psi_i <- ((1 - phi) * eSI_i - phi) / (1 + eSI_i) * eSI_CS_i
+  p_i <- (1 / (1 + Psi_i * eta)) / n_n
+
+  var.A <- -1
+  var.B <- sum(((1 - phi) ^ 2 * eSI_i + phi ^ 2) /
+                 (1 + eSI_i) * eSI_CS_i * p_i) /
+    sum(eSI_CS_i * p_i)
+
+  results <- list(var.A = var.A,
+                  var.B = var.B)
+  return(results)
+}
+
+
+
+
+
+
+
 
 ADCS_EXsubY_logistic_SolveLagrange <- function(X, alpha, beta,
                                                phi, CS.beta,
