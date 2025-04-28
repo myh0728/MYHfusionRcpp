@@ -2879,17 +2879,97 @@ ADCSvar_EY_logistic <- function(X, alpha, beta, phi, CS.beta, eta)
   return(results)
 }
 
+ADCS_EXsubY_logistic_Lagrange <- function(X, alpha, beta, phi, CS.beta, eta)
+{
+  n_n <- dim(X)[1]
+  n_p <- dim(X)[2]
+  n_m <- 2 * n_p
 
+  eSI_i <- as.vector(exp(alpha + X %*% beta))
+  eSI_CS_i <- as.vector(exp(X %*% CS.beta))
+  Psi_i <- cbind(t(t(X) - phi[1, ]) * eSI_i / (1 + eSI_i) * eSI_CS_i,
+                 t(t(X) - phi[2, ]) / (1 + eSI_i) * eSI_CS_i)
+  denominator <- as.vector(1 + Psi_i %*% eta)
+  value <- sum(log(denominator))
+  Psi_i_scaled <- Psi_i / denominator
+  gradient <- as.matrix(colSums(Psi_i_scaled))
+  hessian <- -matrix(colSums(Psi_i_scaled[, rep(1:n_m, times = n_m)] *
+                               Psi_i_scaled[, rep(1:n_m, each = n_m)]),
+                     nrow = n_m, ncol = n_m)
 
+  if (any(!is.finite(value))|
+      any(!is.finite(gradient))|
+      any(!is.finite(hessian)))
+  {
+    value <- -10000 * n_n
+    gradient <- matrix(0, n_m, 1)
+    hessian <- matrix(0, n_m, n_m)
+  }
 
-
-
-
+  results <- list(value = value,
+                  gradient = gradient,
+                  hessian = hessian)
+  return(results)
+}
 
 ADCS_EXsubY_logistic_SolveLagrange <- function(X, alpha, beta,
                                                phi, CS.beta,
                                                eta.initial, iter.max,
-                                               step.rate, step.max, tol)
+                                               step.rate, step.max, tol, eps_inv)
+{
+  eta <- eta.initial
+  step <- ADCS_EXsubY_logistic_Lagrange(
+    X = X, alpha = alpha, beta = beta,
+    phi = phi, CS.beta = CS.beta, eta = eta)
+
+  for (k in 1:iter.max)
+  {
+    if (rcond_rcpp(step$hessian) > eps_inv)
+    {
+      direction.step <- solve_rcpp(step$hessian, step$gradient)
+    }else
+    {
+      direction.step <- -step$gradient
+    }
+
+    step.size <- 1
+    eta.new <- eta - direction.step
+    step.new <- ADCS_EXsubY_logistic_Lagrange(
+      X = X, alpha = alpha, beta = beta,
+      phi = phi, CS.beta = CS.beta, eta = eta.new)
+
+    for (iter.step in 1:step.max)
+    {
+      if (step.new$value <= step$value + tol)
+      {
+        step.size <- step.size / step.rate
+        eta.new <- eta - direction.step * step.size
+        step.new <- ADCS_EXsubY_logistic_Lagrange(
+          X = X, alpha = alpha, beta = beta,
+          phi = phi, CS.beta = CS.beta, eta = eta.new)
+      }else
+        break
+    }
+
+    if (step.new$value > step$value + tol)
+    {
+      eta <- eta.new
+      step <- step.new
+    }else
+      break
+  }
+
+  results <- list(eta = eta,
+                  value = step$value,
+                  gradient = step$gradient,
+                  hessian = step$hessian)
+  return(results)
+}
+
+ADCS_EXsubY_logistic_SolveLagrange_v1 <- function(X, alpha, beta,
+                                                  phi, CS.beta,
+                                                  eta.initial, iter.max,
+                                                  step.rate, step.max, tol, eps_inv)
 {
   eta <- eta.initial
   step <- ADCS_EXsubY_logistic_Lagrange_rcpp(
@@ -2898,15 +2978,15 @@ ADCS_EXsubY_logistic_SolveLagrange <- function(X, alpha, beta,
 
   for (k in 1:iter.max)
   {
-    step.size <- 1
-    ind.NT.GD <- rcond_rcpp(step$hessian)
-    if (ind.NT.GD > tol)
+    if (rcond_rcpp(step$hessian) > eps_inv)
     {
       direction.step <- solve_rcpp(step$hessian, step$gradient)
     }else
     {
       direction.step <- -step$gradient
     }
+
+    step.size <- 1
     eta.new <- eta - direction.step
     step.new <- ADCS_EXsubY_logistic_Lagrange_rcpp(
       X = X, alpha = alpha, beta = beta,
@@ -2939,6 +3019,97 @@ ADCS_EXsubY_logistic_SolveLagrange <- function(X, alpha, beta,
                   hessian = step$hessian)
   return(results)
 }
+
+ADCS_EXsubY_logistic <- function(X, alpha, beta, phi, CS.beta)
+{
+  n_n <- dim(X)[1]
+  n_p <- dim(X)[2]
+  n_m <- 2 * n_p
+
+  Psi_gradient <- matrix(0, nrow = n_m, ncol = n_p * 2 + n_m + 1)
+
+  eSI_i <- as.vector(exp(alpha + X %*% beta))
+  eSI_CS_i <- as.vector(exp(X %*% CS.beta))
+  Psi_i <- cbind(t(t(X) - phi[1, ]) * eSI_i / (1 + eSI_i) * eSI_CS_i,
+                 t(t(X) - phi[2, ]) / (1 + eSI_i) * eSI_CS_i)
+
+  Psi <- as.matrix(colSums(Psi_i) / n_n)
+  Psi_square <- matrix(colSums(Psi_i[, rep(1:n_m, times = n_m)] *
+                                 Psi_i[, rep(1:n_m, each = n_m)]) / n_n,
+                       nrow = n_m, ncol = n_m)
+  Psi_beta.1 <- cbind(t(t(X) - phi[1, ]) * eSI_i / ((1 + eSI_i) ^ 2) * eSI_CS_i,
+                      -t(t(X) - phi[2, ]) * eSI_i / ((1 + eSI_i) ^ 2) * eSI_CS_i)
+  Psi_gradient[, 1:(n_p + 1)] <- matrix(
+    colSums(Psi_beta.1[, rep(1:n_m, times = n_p + 1)] *
+              cbind(1, X)[, rep(1:(n_p + 1), each = n_m)]) / n_n,
+    nrow = n_m, ncol = n_p + 1)
+  Psi_gradient[1:n_p, (n_p + 2):(n_p * 2 + 1)] <- sum(
+    -eSI_i / (1 + eSI_i) * eSI_CS_i) / n_n * diag(n_p)
+  Psi_gradient[(n_p + 1):(n_p * 2), (n_p * 2 + 2):(n_p * 3 + 1)] <- sum(
+    -1 / (1 + eSI_i) * eSI_CS_i) / n_n * diag(n_p)
+  Psi_gradient[, (n_p * 3 + 2):(n_p * 4 + 1)] <- matrix(
+    colSums(Psi_i[, rep(1:n_m, times = n_p)] *
+              X[, rep(1:n_p, each = n_m)]) / n_n,
+    nrow = n_m, ncol = n_p)
+
+  if (any(!is.finite(Psi))|
+      any(!is.finite(Psi_square))|
+      any(!is.finite(Psi_gradient)))
+  {
+    Psi <- matrix(0, n_m, 1)
+    Psi_square <- matrix(0, n_m, n_m)
+    Psi_gradient <- matrix(0, nrow = n_m, ncol = n_p + n_m + 2)
+  }
+
+  results <- list(score = Psi,
+                  score_square = Psi_square,
+                  score_gradient = Psi_gradient)
+  return(results)
+}
+
+ADCSvar_EXsubY_logistic <- function(X, alpha, beta, phi, CS.beta, eta)
+{
+  n_n <- dim(X)[1]
+  n_p <- dim(X)[2]
+  n_m <- 2 * n_p
+
+  eSI_i <- as.vector(exp(alpha + X %*% beta))
+  eSI_CS_i <- as.vector(exp(X %*% CS.beta))
+  Psi_i <- cbind(t(t(X) - phi[1, ]) * eSI_i / (1 + eSI_i) * eSI_CS_i,
+                 t(t(X) - phi[2, ]) / (1 + eSI_i) * eSI_CS_i)
+  p_i <- (1 / (1 + as.vector(Psi_i %*% eta))) / n_n
+
+  var.A <- diag(rep(c(-sum(eSI_i / (1 + eSI_i) * eSI_CS_i * p_i),
+                      -sum(1 / (1 + eSI_i) * eSI_CS_i * p_i)), each = n_p),
+                nrow = n_m, ncol = n_m)
+  var.B <- matrix(0, n_m, n_m)
+  d_1_i <- t(t(X) - phi[1, ])
+  d_2_i <- t(t(X) - phi[2, ])
+  var.B[1:n_p, 1:n_p] <- matrix(colSums(d_1_i[, rep(1:n_p, times = n_p)] *
+                                          d_1_i[, rep(1:n_p, each = n_p)] *
+                                          eSI_i / (1 + eSI_i) * eSI_CS_i * p_i),
+                                nrow = n_p, ncol = n_p)
+  var.B[(n_p + 1):(n_p * 2), (n_p + 1):(n_p * 2)] <- matrix(
+    colSums(d_2_i[, rep(1:n_p, times = n_p)] *
+              d_2_i[, rep(1:n_p, each = n_p)] / (1 + eSI_i) * eSI_CS_i * p_i),
+    nrow = n_p, ncol = n_p)
+  var.AB.Dtor <- sum(eSI_CS_i * p_i)
+  var.A <- var.A / var.AB.Dtor
+  var.B <- var.B / var.AB.Dtor
+
+  results <- list(var.A = var.A,
+                  var.B = var.B)
+  return(results)
+}
+
+
+
+
+
+
+
+
+
 
 ADCS_EYsubX_logistic_SolveLagrange <- function(X, alpha, beta,
                                                phi, CS.beta, inclusion,

@@ -365,8 +365,16 @@ ADCS_EXsubY_logistic_Lagrange_rcpp <- function(X, alpha, beta, phi, CS_beta, eta
     .Call(`_MYHfusionRcpp_ADCS_EXsubY_logistic_Lagrange_rcpp`, X, alpha, beta, phi, CS_beta, eta)
 }
 
-ADCS_EXsubY_logistic_SolveLagrange_rcpp <- function(X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol) {
-    .Call(`_MYHfusionRcpp_ADCS_EXsubY_logistic_SolveLagrange_rcpp`, X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol)
+ADCS_EXsubY_logistic_SolveLagrange_rcpp <- function(X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol, eps_inv) {
+    .Call(`_MYHfusionRcpp_ADCS_EXsubY_logistic_SolveLagrange_rcpp`, X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol, eps_inv)
+}
+
+ADCS_EXsubY_logistic_rcpp <- function(X, alpha, beta, phi, CS_beta) {
+    .Call(`_MYHfusionRcpp_ADCS_EXsubY_logistic_rcpp`, X, alpha, beta, phi, CS_beta)
+}
+
+ADCSvar_EXsubY_logistic_rcpp <- function(X, alpha, beta, phi, CS_beta, eta) {
+    .Call(`_MYHfusionRcpp_ADCSvar_EXsubY_logistic_rcpp`, X, alpha, beta, phi, CS_beta, eta)
 }
 
 ADCS_EYsubX_logistic_Lagrange_rcpp <- function(X, alpha, beta, phi, CS_beta, inclusion, eta) {
