@@ -45,14 +45,26 @@ GLMcombineADavar <- function(name.par,
   {
     if (is.null(avar.working))
     {
-      avar.inv <- inv_sympd_rcpp(avar.phi + eps.inv * diag(number_m))
+      if (rcond_rcpp(avar.phi) > eps.inv)
+      {
+        avar.inv <- inv_sympd_rcpp(avar.phi)
+      }else
+      {
+        avar.inv <- diag(number_m)
+      }
       avar.S[paste("phi", 1:number_m, sep = ""),
              paste("phi", 1:number_m, sep = "")] <- kappa * avar.inv
       J.V[paste("phi", 1:number_m, sep = ""),
           paste("phi", 1:number_m, sep = "")] <- kappa * avar.inv
     }else
     {
-      avar.working.inv <- inv_sympd_rcpp(avar.working + eps.inv * diag(number_m))
+      if (rcond_rcpp(avar.working) > eps.inv)
+      {
+        avar.working.inv <- inv_sympd_rcpp(avar.working)
+      }else
+      {
+        avar.working.inv <- diag(number_m)
+      }
       avar.S[paste("phi", 1:number_m, sep = ""),
              paste("phi", 1:number_m, sep = "")] <- kappa * avar.working.inv %*%
         avar.phi %*% avar.working.inv
@@ -74,8 +86,22 @@ GLMcombineADavar <- function(name.par,
         paste("eta", 1:number_m, sep = "")] <- as.vector(t(Psi.diff.theta))
   }
 
-  J.V.inv <- inv_sympd_rcpp(
-    t(J.V) %*% J.V + eps.inv * diag(number_total)) %*% t(J.V)
+  if (rcond_rcpp(J.V) > eps.inv)
+  {
+    J.V.inv <- solve_rcpp(J.V, diag(number_total))
+  }else
+  {
+    J.V.eigen <- eigen_rcpp(J.V)
+    J.V.eigen.value <- as.vector(J.V.eigen$value)
+    J.V.eigen.vector <- J.V.eigen$vector
+    J.V.eigen.value[abs(J.V.eigen.value) < eps.inv] <- 0
+    J.V.eigen.value.inv <- (J.V.eigen.value != 0) /
+      (J.V.eigen.value + (J.V.eigen.value == 0))
+    J.V.inv <- J.V.eigen.vector %*%
+      diag(J.V.eigen.value.inv,
+           nrow = number_total,
+           ncol = number_total) %*% t(J.V.eigen.vector)
+  }
   asy.Cov <- J.V.inv %*% avar.S %*% J.V.inv
   dimnames(asy.Cov) <- list(M.name, M.name)
   asy.Cov.par <- asy.Cov[name.par, name.par]

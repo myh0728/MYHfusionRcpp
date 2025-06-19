@@ -113,6 +113,23 @@ GLMcombineAD.DatasetShift <- function(
               phi = info.EY$phi)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -135,8 +152,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -330,6 +346,23 @@ GLMcombineAD.DatasetShift <- function(
             avar.phi <- avar.phi.AB$var / (avar.phi.AB$diff ^ 2)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -356,8 +389,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -482,6 +514,23 @@ GLMcombineAD.DatasetShift <- function(
               y_pts = info.EXsubY$y.pts)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -504,8 +553,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv%*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -720,6 +768,23 @@ GLMcombineAD.DatasetShift <- function(
             avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -746,8 +811,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -872,6 +936,23 @@ GLMcombineAD.DatasetShift <- function(
               inclusion = info.EYsubX$inclusion)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -894,8 +975,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -1107,6 +1187,23 @@ GLMcombineAD.DatasetShift <- function(
             avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -1133,8 +1230,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -1283,6 +1379,23 @@ GLMcombineAD.DatasetShift <- function(
               CS_beta = initial.DRM)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -1308,8 +1421,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -1543,6 +1655,23 @@ GLMcombineAD.DatasetShift <- function(
             avar.phi <- avar.phi.AB$var / (avar.phi.AB$diff ^ 2)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -1572,8 +1701,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -1724,6 +1852,23 @@ GLMcombineAD.DatasetShift <- function(
               y_pts = info.EXsubY$y.pts)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -1749,8 +1894,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -2001,6 +2145,23 @@ GLMcombineAD.DatasetShift <- function(
             avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -2030,8 +2191,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -2182,6 +2342,23 @@ GLMcombineAD.DatasetShift <- function(
               inclusion = info.EYsubX$inclusion)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -2207,8 +2384,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -2458,6 +2634,23 @@ GLMcombineAD.DatasetShift <- function(
             avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -2487,8 +2680,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -2643,6 +2835,23 @@ GLMcombineAD.DatasetShift <- function(
               PPS_beta = initial.DRM)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -2668,8 +2877,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -2910,6 +3118,23 @@ GLMcombineAD.DatasetShift <- function(
             avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -2939,8 +3164,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -3085,6 +3309,23 @@ GLMcombineAD.DatasetShift <- function(
               PPS_beta = initial.DRM)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -3110,8 +3351,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -3343,6 +3583,23 @@ GLMcombineAD.DatasetShift <- function(
             avar.phi <- avar.phi.AB$var / (avar.phi.AB$diff ^ 2)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -3372,8 +3629,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -3523,6 +3779,23 @@ GLMcombineAD.DatasetShift <- function(
               y_pts = info.EXsubY$y.pts)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -3548,8 +3821,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -3800,6 +4072,23 @@ GLMcombineAD.DatasetShift <- function(
             avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -3829,8 +4118,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -3981,6 +4269,23 @@ GLMcombineAD.DatasetShift <- function(
               inclusion = info.EYsubX$inclusion)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -4006,8 +4311,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -4257,6 +4561,23 @@ GLMcombineAD.DatasetShift <- function(
             avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -4286,8 +4607,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial, sigma.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 2))) %*%
+              c(alpha.initial, beta.initial, sigma.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = ""),
                              "sigma"),
@@ -4498,6 +4818,23 @@ GLMcombineAD.DatasetShift <- function(
               phi = info.EY$phi)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -4517,8 +4854,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 1))) %*%
+              c(alpha.initial, beta.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = "")),
                            paste("eta", 1:number_m, sep = "")],
@@ -4688,6 +5024,23 @@ GLMcombineAD.DatasetShift <- function(
             avar.phi <- avar.phi.AB$var / (avar.phi.AB$diff ^ 2)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -4711,8 +5064,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 1))) %*%
+              c(alpha.initial, beta.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = "")),
                            paste("eta", 1:number_m, sep = "")],
@@ -4821,6 +5173,23 @@ GLMcombineAD.DatasetShift <- function(
               phi = info.EXsubY$phi)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -4840,8 +5209,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 1))) %*%
+              c(alpha.initial, beta.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = "")),
                            paste("eta", 1:number_m, sep = "")],
@@ -5025,6 +5393,23 @@ GLMcombineAD.DatasetShift <- function(
             avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -5048,8 +5433,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 1))) %*%
+              c(alpha.initial, beta.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = "")),
                            paste("eta", 1:number_m, sep = "")],
@@ -5158,6 +5542,23 @@ GLMcombineAD.DatasetShift <- function(
               inclusion = info.EYsubX$inclusion)
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -5177,8 +5578,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 1))) %*%
+              c(alpha.initial, beta.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = "")),
                            paste("eta", 1:number_m, sep = "")],
@@ -5366,6 +5766,23 @@ GLMcombineAD.DatasetShift <- function(
             avar.phi <- H.inv %*% avar.phi.AB$var %*% H.inv
 
             MLE.score.H <- MLE.score$hessian
+            if (rcond_rcpp(MLE.score.H) > eps.inv)
+            {
+              MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score.H)
+            }else
+            {
+              MLE.score.H.eigen <- eigen_rcpp(MLE.score.H)
+              MLE.score.H.eigen.value <- as.vector(MLE.score.H.eigen$value)
+              MLE.score.H.eigen.vector <- MLE.score.H.eigen$vector
+              MLE.score.H.eigen.value[abs(MLE.score.H.eigen.value) < eps.inv] <- 0
+              MLE.score.H.eigen.value.inv <- (MLE.score.H.eigen.value !=0) /
+                (MLE.score.H.eigen.value + (MLE.score.H.eigen.value == 0))
+              MLE.score.H.inv <- MLE.score.H.eigen.vector %*%
+                diag(MLE.score.H.eigen.value.inv,
+                     nrow = length(MLE.score.H.eigen.value),
+                     ncol = length(MLE.score.H.eigen.value)) %*%
+                t( MLE.score.H.eigen.vector)
+            }
             AD.diff <- AD.score$score_gradient
             colnames(AD.diff) <- c("alpha",
                                    paste("beta", 1:number_p, sep = ""),
@@ -5389,8 +5806,7 @@ GLMcombineAD.DatasetShift <- function(
             dimnames(J.V.inv) <- dimnames(J.V)
 
             par.hat <- as.vector(
-              c(alpha.initial, beta.initial) +
-                (-inv_sympd_rcpp(-MLE.score.H + eps.inv * diag(number_p + 1))) %*%
+              c(alpha.initial, beta.initial) + MLE.score.H.inv %*%
                 matrix(J.V[c("alpha",
                              paste("beta", 1:number_p, sep = "")),
                            paste("eta", 1:number_m, sep = "")],
