@@ -91,16 +91,7 @@ GLMcombineADavar <- function(name.par,
     J.V.inv <- solve_rcpp(J.V, diag(number_total))
   }else
   {
-    J.V.eigen <- eigen_rcpp(J.V)
-    J.V.eigen.value <- as.vector(J.V.eigen$value)
-    J.V.eigen.vector <- J.V.eigen$vector
-    J.V.eigen.value[abs(J.V.eigen.value) < eps.inv] <- 0
-    J.V.eigen.value.inv <- (J.V.eigen.value != 0) /
-      (J.V.eigen.value + (J.V.eigen.value == 0))
-    J.V.inv <- J.V.eigen.vector %*%
-      diag(J.V.eigen.value.inv,
-           nrow = number_total,
-           ncol = number_total) %*% t(J.V.eigen.vector)
+    J.V.inv <- ginv.sym.eigen(M = J.V, eps.inv = eps.inv)
   }
   asy.Cov <- J.V.inv %*% avar.S %*% J.V.inv
   dimnames(asy.Cov) <- list(M.name, M.name)
