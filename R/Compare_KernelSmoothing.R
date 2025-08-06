@@ -42,3 +42,62 @@ KDE_w_R <- function(X, x, K, h, w){
 
   return(Dhat)
 }
+
+KNW_R <- function(Y, X, x, K, h){
+
+  number_n <- dim(X)[1]
+  number_p <- dim(X)[2]
+  number_k <- dim(x)[1]
+
+  Xik <- X[rep(1:number_n, times = number_k), ] -
+    x[rep(1:number_k, each = number_n), ]
+  dim(Xik) <- c(number_n, number_k, number_p)
+  Kik <- apply(K(aperm(Xik, c(3, 1, 2)) / h) / h, c(2, 3), prod)
+  Dhat <- colSums(Kik)
+  Nhat <- colSums(Kik * Y)
+  mhat <- Nhat * (Dhat != 0) / (Dhat + (Dhat == 0))
+
+  return(mhat)
+}
+
+KNW_w_R <- function(Y, X, x, K, h, w){
+
+  number_n <- dim(X)[1]
+  number_p <- dim(X)[2]
+  number_k <- dim(x)[1]
+
+  Xik <- X[rep(1:number_n, times = number_k), ] -
+    x[rep(1:number_k, each = number_n), ]
+  dim(Xik) <- c(number_n, number_k, number_p)
+  Kik <- apply(K(aperm(Xik, c(3, 1, 2)) / h) / h, c(2, 3), prod)
+  Dhat <- colSums(Kik * w)
+  Nhat <- colSums(Kik * Y * w)
+  mhat <- Nhat * (Dhat != 0) / (Dhat + (Dhat == 0))
+
+  return(mhat)
+}
+
+CVKNW_R <- function(Y, X, K, h){
+
+  number_n <- dim(X)[1]
+  number_p <- dim(X)[2]
+
+  Xij <- X[rep(1:number_n, times = number_n), ] -
+    X[rep(1:number_n, each = number_n), ]
+  dim(Xij) <- c(number_n, number_n, number_p)
+  Kij <- apply(K(aperm(Xij, c(3, 1, 2)) / h) / h, c(2, 3), prod)
+  diag(Kij) <- 0
+  Dhat <- colSums(Kij)
+  Nhat <- colSums(Kij * Y)
+  mhat <- Nhat * (Dhat != 0) / (Dhat + (Dhat == 0))
+  cv_value <- sum((Y - mhat) ^ 2) / number_n
+
+  return(cv_value)
+}
+
+
+
+
+
+
+
