@@ -703,6 +703,110 @@ double CVKNW_K2Ep_rcpp(const arma::vec & Y,
   return cv_value;
 }
 
+// [[Rcpp::export]]
+double CVKNW_K2Bw_rcpp(const arma::vec & Y,
+                       const arma::mat & X,
+                       const arma::vec & h) {
+
+  const arma::uword n_n = X.n_rows;
+  const arma::uword n_p = X.n_cols;
+  arma::vec Dhat(n_n);
+  arma::vec Nhat(n_n);
+  arma::vec mhat(n_n);
+  double cv_value = 0.0;
+
+  arma::vec Xrow_i(n_p);
+  arma::vec Xrow_j(n_p);
+  arma::vec Dij_h(n_p);
+  double Kij_h = 1.0;
+
+  for (size_t j = 0; j < n_n; ++j) {
+
+    Xrow_j = X.row(j).t();
+
+    for (size_t i = 0; i < n_n; ++i) {
+
+      if (i != j) {
+
+        Xrow_i = X.row(i).t();
+        Dij_h = (Xrow_i - Xrow_j) / h;
+        Kij_h = 1.0;
+
+        for (size_t l = 0; l < n_p; ++l) {
+
+          Kij_h *= K2_Bw_rcpp(Dij_h(l)) / h(l);
+        }
+
+        Dhat(j) += Kij_h;
+        Nhat(j) += Kij_h * Y(i);
+      }
+    }
+
+    if (Dhat(j) != 0) {
+
+      mhat(j) = Nhat(j) / Dhat(j);
+    }
+
+    cv_value += pow(Y(j) - mhat(j), 2);
+  }
+
+  cv_value /= n_n;
+
+  return cv_value;
+}
+
+// [[Rcpp::export]]
+double CVKNW_K4Bw_rcpp(const arma::vec & Y,
+                       const arma::mat & X,
+                       const arma::vec & h) {
+
+  const arma::uword n_n = X.n_rows;
+  const arma::uword n_p = X.n_cols;
+  arma::vec Dhat(n_n);
+  arma::vec Nhat(n_n);
+  arma::vec mhat(n_n);
+  double cv_value = 0.0;
+
+  arma::vec Xrow_i(n_p);
+  arma::vec Xrow_j(n_p);
+  arma::vec Dij_h(n_p);
+  double Kij_h = 1.0;
+
+  for (size_t j = 0; j < n_n; ++j) {
+
+    Xrow_j = X.row(j).t();
+
+    for (size_t i = 0; i < n_n; ++i) {
+
+      if (i != j) {
+
+        Xrow_i = X.row(i).t();
+        Dij_h = (Xrow_i - Xrow_j) / h;
+        Kij_h = 1.0;
+
+        for (size_t l = 0; l < n_p; ++l) {
+
+          Kij_h *= K4_Bw_rcpp(Dij_h(l)) / h(l);
+        }
+
+        Dhat(j) += Kij_h;
+        Nhat(j) += Kij_h * Y(i);
+      }
+    }
+
+    if (Dhat(j) != 0) {
+
+      mhat(j) = Nhat(j) / Dhat(j);
+    }
+
+    cv_value += pow(Y(j) - mhat(j), 2);
+  }
+
+  cv_value /= n_n;
+
+  return cv_value;
+}
+
 
 
 

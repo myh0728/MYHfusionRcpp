@@ -150,12 +150,37 @@ ggplot2::autoplot(
   )
 )
 
-cv_fun <- function(h.log) {
+test1 <- CVKNW_K2Bw_rcpp(Y = Y, X = X, h = 0.5)
+test2 <- CVKNW_R(Y = Y, X = X, K = K2_Bw, h = 0.5)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = CVKNW_K2Bw_rcpp(Y = Y, X = X, h = 0.5),
+    R = CVKNW_R(Y = Y, X = X, K = K2_Bw, h = 0.5)
+  )
+)
+
+test1 <- CVKNW_K4Bw_rcpp(Y = Y, X = X, h = 0.5)
+test2 <- CVKNW_R(Y = Y, X = X, K = K4_Bw, h = 0.5)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = CVKNW_K4Bw_rcpp(Y = Y, X = X, h = 0.5),
+    R = CVKNW_R(Y = Y, X = X, K = K4_Bw, h = 0.5)
+  )
+)
+
+#
+
+cv_fun_K2Ep <- function(h.log) {
 
   cv_value <- CVKNW_K2Ep_rcpp(Y = Y, X = X, h = exp(h.log))
 
   return(cv_value)
 }
+
+nlminb(start = 0,
+       objective = cv_fun_K2Ep)
 
 h.grid <- seq(0.01, 1, 0.01)
 cv.grid <- rep(0, length(h.grid))
@@ -165,8 +190,48 @@ for (l in 1:length(h.grid))
 }
 plot(h.grid, cv.grid, type = 'l')
 
+#
+
+cv_fun_K2Bw <- function(h.log) {
+
+  cv_value <- CVKNW_K2Bw_rcpp(Y = Y, X = X, h = exp(h.log))
+
+  return(cv_value)
+}
+
 nlminb(start = 0,
-       objective = cv_fun)
+       objective = cv_fun_K2Bw)
+
+h.grid <- seq(0.01, 1, 0.01)
+cv.grid <- rep(0, length(h.grid))
+for (l in 1:length(h.grid))
+{
+  cv.grid[l] <- CVKNW_K2Bw_rcpp(Y = Y, X = X, h = h.grid[l])
+}
+plot(h.grid, cv.grid, type = 'l')
+
+#
+
+cv_fun_K4Bw <- function(h.log) {
+
+  cv_value <- CVKNW_K4Bw_rcpp(Y = Y, X = X, h = exp(h.log))
+
+  return(cv_value)
+}
+
+nlminb(start = 0,
+       objective = cv_fun_K4Bw)
+
+h.grid <- seq(0.01, 2, 0.01)
+cv.grid <- rep(0, length(h.grid))
+for (l in 1:length(h.grid))
+{
+  cv.grid[l] <- CVKNW_K4Bw_rcpp(Y = Y, X = X, h = h.grid[l])
+}
+plot(h.grid, cv.grid, type = 'l', ylim = c(0, 0.2))
+
+#
+
 
 
 

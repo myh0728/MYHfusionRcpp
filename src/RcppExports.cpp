@@ -291,6 +291,32 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// CVKNW_K2Bw_rcpp
+double CVKNW_K2Bw_rcpp(const arma::vec& Y, const arma::mat& X, const arma::vec& h);
+RcppExport SEXP _MYHfusionRcpp_CVKNW_K2Bw_rcpp(SEXP YSEXP, SEXP XSEXP, SEXP hSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type h(hSEXP);
+    rcpp_result_gen = Rcpp::wrap(CVKNW_K2Bw_rcpp(Y, X, h));
+    return rcpp_result_gen;
+END_RCPP
+}
+// CVKNW_K4Bw_rcpp
+double CVKNW_K4Bw_rcpp(const arma::vec& Y, const arma::mat& X, const arma::vec& h);
+RcppExport SEXP _MYHfusionRcpp_CVKNW_K4Bw_rcpp(SEXP YSEXP, SEXP XSEXP, SEXP hSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type h(hSEXP);
+    rcpp_result_gen = Rcpp::wrap(CVKNW_K4Bw_rcpp(Y, X, h));
+    return rcpp_result_gen;
+END_RCPP
+}
 // K2_Ep_rcpp_v1
 double K2_Ep_rcpp_v1(const double& u);
 RcppExport SEXP _MYHfusionRcpp_K2_Ep_rcpp_v1(SEXP uSEXP) {
@@ -2607,6 +2633,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_MYHfusionRcpp_KNW_K4Bw_rcpp", (DL_FUNC) &_MYHfusionRcpp_KNW_K4Bw_rcpp, 4},
     {"_MYHfusionRcpp_KNW_K4Bw_w_rcpp", (DL_FUNC) &_MYHfusionRcpp_KNW_K4Bw_w_rcpp, 5},
     {"_MYHfusionRcpp_CVKNW_K2Ep_rcpp", (DL_FUNC) &_MYHfusionRcpp_CVKNW_K2Ep_rcpp, 3},
+    {"_MYHfusionRcpp_CVKNW_K2Bw_rcpp", (DL_FUNC) &_MYHfusionRcpp_CVKNW_K2Bw_rcpp, 3},
+    {"_MYHfusionRcpp_CVKNW_K4Bw_rcpp", (DL_FUNC) &_MYHfusionRcpp_CVKNW_K4Bw_rcpp, 3},
     {"_MYHfusionRcpp_K2_Ep_rcpp_v1", (DL_FUNC) &_MYHfusionRcpp_K2_Ep_rcpp_v1, 1},
     {"_MYHfusionRcpp_lL_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_normal_rcpp, 5},
     {"_MYHfusionRcpp_lL_normal_w_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_normal_w_rcpp, 6},

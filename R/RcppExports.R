@@ -89,6 +89,14 @@ CVKNW_K2Ep_rcpp <- function(Y, X, h) {
     .Call(`_MYHfusionRcpp_CVKNW_K2Ep_rcpp`, Y, X, h)
 }
 
+CVKNW_K2Bw_rcpp <- function(Y, X, h) {
+    .Call(`_MYHfusionRcpp_CVKNW_K2Bw_rcpp`, Y, X, h)
+}
+
+CVKNW_K4Bw_rcpp <- function(Y, X, h) {
+    .Call(`_MYHfusionRcpp_CVKNW_K4Bw_rcpp`, Y, X, h)
+}
+
 K2_Ep_rcpp_v1 <- function(u) {
     .Call(`_MYHfusionRcpp_K2_Ep_rcpp_v1`, u)
 }
