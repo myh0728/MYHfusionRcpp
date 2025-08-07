@@ -170,6 +170,18 @@ ggplot2::autoplot(
   )
 )
 
+test1 <- CVKNWcdf_K2Ep_rcpp(Y = Y, X = X, h = 0.5)
+test2 <- CVKNWcdf_R(Y = Y, X = X, K = K2_Ep, h = 0.5)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = CVKNWcdf_K2Ep_rcpp(Y = Y, X = X, h = 0.5),
+    R = CVKNWcdf_R(Y = Y, X = X, K = K2_Ep, h = 0.5)
+  )
+)
+
+
+
 #
 
 cv_fun_K2Ep <- function(h.log) {
