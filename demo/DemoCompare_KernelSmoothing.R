@@ -180,6 +180,28 @@ ggplot2::autoplot(
   )
 )
 
+test1 <- CVKNWcdf_K2Bw_rcpp(Y = Y, X = X, h = 0.5)
+test2 <- CVKNWcdf_R(Y = Y, X = X, K = K2_Bw, h = 0.5)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = CVKNWcdf_K2Bw_rcpp(Y = Y, X = X, h = 0.5),
+    R = CVKNWcdf_R(Y = Y, X = X, K = K2_Bw, h = 0.5)
+  )
+)
+
+test1 <- CVKNWcdf_K4Bw_rcpp(Y = Y, X = X, h = 0.5)
+test2 <- CVKNWcdf_R(Y = Y, X = X, K = K4_Bw, h = 0.5)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = CVKNWcdf_K4Bw_rcpp(Y = Y, X = X, h = 0.5),
+    R = CVKNWcdf_R(Y = Y, X = X, K = K4_Bw, h = 0.5)
+  )
+)
+
+
+
 
 
 #
