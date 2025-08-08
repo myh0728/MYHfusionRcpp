@@ -77,6 +77,44 @@ KNW_w_R <- function(Y, X, x, K, h, w){
   return(mhat)
 }
 
+KNWcdf_R <- function(Y, y, X, x, K, h){
+
+  number_n <- dim(X)[1]
+  number_p <- dim(X)[2]
+  number_k <- dim(x)[1]
+  number_l <- length(y)
+
+  Xik <- X[rep(1:number_n, times = number_k), ] -
+    x[rep(1:number_k, each = number_n), ]
+  dim(Xik) <- c(number_n, number_k, number_p)
+  Kik <- apply(K(aperm(Xik, c(3, 1, 2)) / h) / h, c(2, 3), prod)
+  Dhat <- colSums(Kik)
+  Nhat <- t(Kik) %*% outer_leq_rcpp(Y, y)
+  mhat <- Nhat * (Dhat != 0) / (Dhat + (Dhat == 0))
+  mhat <- mhat * (mhat > 0) * (mhat < 1) + (mhat >= 1)
+
+  return(mhat)
+}
+
+KNWcdf_w_R <- function(Y, y, X, x, K, h, w){
+
+  number_n <- dim(X)[1]
+  number_p <- dim(X)[2]
+  number_k <- dim(x)[1]
+  number_l <- length(y)
+
+  Xik <- X[rep(1:number_n, times = number_k), ] -
+    x[rep(1:number_k, each = number_n), ]
+  dim(Xik) <- c(number_n, number_k, number_p)
+  Kik <- apply(K(aperm(Xik, c(3, 1, 2)) / h) / h, c(2, 3), prod)
+  Dhat <- colSums(Kik * w)
+  Nhat <- t(Kik) %*% (outer_leq_rcpp(Y, y) * w)
+  mhat <- Nhat * (Dhat != 0) / (Dhat + (Dhat == 0))
+  mhat <- mhat * (mhat > 0) * (mhat < 1) + (mhat >= 1)
+
+  return(mhat)
+}
+
 CVKNW_R <- function(Y, X, K, h){
 
   number_n <- dim(X)[1]

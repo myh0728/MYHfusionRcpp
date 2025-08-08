@@ -278,6 +278,99 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// KNWcdf_K2Ep_rcpp
+arma::mat KNWcdf_K2Ep_rcpp(const arma::vec& Y, const arma::vec& y, const arma::mat& X, const arma::mat& x, const arma::vec& h);
+RcppExport SEXP _MYHfusionRcpp_KNWcdf_K2Ep_rcpp(SEXP YSEXP, SEXP ySEXP, SEXP XSEXP, SEXP xSEXP, SEXP hSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type h(hSEXP);
+    rcpp_result_gen = Rcpp::wrap(KNWcdf_K2Ep_rcpp(Y, y, X, x, h));
+    return rcpp_result_gen;
+END_RCPP
+}
+// KNWcdf_K2Ep_w_rcpp
+arma::mat KNWcdf_K2Ep_w_rcpp(const arma::vec& Y, const arma::vec& y, const arma::mat& X, const arma::mat& x, const arma::vec& h, const arma::vec& w);
+RcppExport SEXP _MYHfusionRcpp_KNWcdf_K2Ep_w_rcpp(SEXP YSEXP, SEXP ySEXP, SEXP XSEXP, SEXP xSEXP, SEXP hSEXP, SEXP wSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type h(hSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(KNWcdf_K2Ep_w_rcpp(Y, y, X, x, h, w));
+    return rcpp_result_gen;
+END_RCPP
+}
+// KNWcdf_K2Bw_rcpp
+arma::mat KNWcdf_K2Bw_rcpp(const arma::vec& Y, const arma::vec& y, const arma::mat& X, const arma::mat& x, const arma::vec& h);
+RcppExport SEXP _MYHfusionRcpp_KNWcdf_K2Bw_rcpp(SEXP YSEXP, SEXP ySEXP, SEXP XSEXP, SEXP xSEXP, SEXP hSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type h(hSEXP);
+    rcpp_result_gen = Rcpp::wrap(KNWcdf_K2Bw_rcpp(Y, y, X, x, h));
+    return rcpp_result_gen;
+END_RCPP
+}
+// KNWcdf_K2Bw_w_rcpp
+arma::mat KNWcdf_K2Bw_w_rcpp(const arma::vec& Y, const arma::vec& y, const arma::mat& X, const arma::mat& x, const arma::vec& h, const arma::vec& w);
+RcppExport SEXP _MYHfusionRcpp_KNWcdf_K2Bw_w_rcpp(SEXP YSEXP, SEXP ySEXP, SEXP XSEXP, SEXP xSEXP, SEXP hSEXP, SEXP wSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type h(hSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(KNWcdf_K2Bw_w_rcpp(Y, y, X, x, h, w));
+    return rcpp_result_gen;
+END_RCPP
+}
+// KNWcdf_K4Bw_rcpp
+arma::mat KNWcdf_K4Bw_rcpp(const arma::vec& Y, const arma::vec& y, const arma::mat& X, const arma::mat& x, const arma::vec& h);
+RcppExport SEXP _MYHfusionRcpp_KNWcdf_K4Bw_rcpp(SEXP YSEXP, SEXP ySEXP, SEXP XSEXP, SEXP xSEXP, SEXP hSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type h(hSEXP);
+    rcpp_result_gen = Rcpp::wrap(KNWcdf_K4Bw_rcpp(Y, y, X, x, h));
+    return rcpp_result_gen;
+END_RCPP
+}
+// KNWcdf_K4Bw_w_rcpp
+arma::mat KNWcdf_K4Bw_w_rcpp(const arma::vec& Y, const arma::vec& y, const arma::mat& X, const arma::mat& x, const arma::vec& h, const arma::vec& w);
+RcppExport SEXP _MYHfusionRcpp_KNWcdf_K4Bw_w_rcpp(SEXP YSEXP, SEXP ySEXP, SEXP XSEXP, SEXP xSEXP, SEXP hSEXP, SEXP wSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type h(hSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(KNWcdf_K4Bw_w_rcpp(Y, y, X, x, h, w));
+    return rcpp_result_gen;
+END_RCPP
+}
 // CVKNW_K2Ep_rcpp
 double CVKNW_K2Ep_rcpp(const arma::vec& Y, const arma::mat& X, const arma::vec& h);
 RcppExport SEXP _MYHfusionRcpp_CVKNW_K2Ep_rcpp(SEXP YSEXP, SEXP XSEXP, SEXP hSEXP) {
@@ -2671,6 +2764,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_MYHfusionRcpp_KNW_K2Bw_w_rcpp", (DL_FUNC) &_MYHfusionRcpp_KNW_K2Bw_w_rcpp, 5},
     {"_MYHfusionRcpp_KNW_K4Bw_rcpp", (DL_FUNC) &_MYHfusionRcpp_KNW_K4Bw_rcpp, 4},
     {"_MYHfusionRcpp_KNW_K4Bw_w_rcpp", (DL_FUNC) &_MYHfusionRcpp_KNW_K4Bw_w_rcpp, 5},
+    {"_MYHfusionRcpp_KNWcdf_K2Ep_rcpp", (DL_FUNC) &_MYHfusionRcpp_KNWcdf_K2Ep_rcpp, 5},
+    {"_MYHfusionRcpp_KNWcdf_K2Ep_w_rcpp", (DL_FUNC) &_MYHfusionRcpp_KNWcdf_K2Ep_w_rcpp, 6},
+    {"_MYHfusionRcpp_KNWcdf_K2Bw_rcpp", (DL_FUNC) &_MYHfusionRcpp_KNWcdf_K2Bw_rcpp, 5},
+    {"_MYHfusionRcpp_KNWcdf_K2Bw_w_rcpp", (DL_FUNC) &_MYHfusionRcpp_KNWcdf_K2Bw_w_rcpp, 6},
+    {"_MYHfusionRcpp_KNWcdf_K4Bw_rcpp", (DL_FUNC) &_MYHfusionRcpp_KNWcdf_K4Bw_rcpp, 5},
+    {"_MYHfusionRcpp_KNWcdf_K4Bw_w_rcpp", (DL_FUNC) &_MYHfusionRcpp_KNWcdf_K4Bw_w_rcpp, 6},
     {"_MYHfusionRcpp_CVKNW_K2Ep_rcpp", (DL_FUNC) &_MYHfusionRcpp_CVKNW_K2Ep_rcpp, 3},
     {"_MYHfusionRcpp_CVKNW_K2Bw_rcpp", (DL_FUNC) &_MYHfusionRcpp_CVKNW_K2Bw_rcpp, 3},
     {"_MYHfusionRcpp_CVKNW_K4Bw_rcpp", (DL_FUNC) &_MYHfusionRcpp_CVKNW_K4Bw_rcpp, 3},

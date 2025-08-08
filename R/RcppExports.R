@@ -85,6 +85,30 @@ KNW_K4Bw_w_rcpp <- function(Y, X, x, h, w) {
     .Call(`_MYHfusionRcpp_KNW_K4Bw_w_rcpp`, Y, X, x, h, w)
 }
 
+KNWcdf_K2Ep_rcpp <- function(Y, y, X, x, h) {
+    .Call(`_MYHfusionRcpp_KNWcdf_K2Ep_rcpp`, Y, y, X, x, h)
+}
+
+KNWcdf_K2Ep_w_rcpp <- function(Y, y, X, x, h, w) {
+    .Call(`_MYHfusionRcpp_KNWcdf_K2Ep_w_rcpp`, Y, y, X, x, h, w)
+}
+
+KNWcdf_K2Bw_rcpp <- function(Y, y, X, x, h) {
+    .Call(`_MYHfusionRcpp_KNWcdf_K2Bw_rcpp`, Y, y, X, x, h)
+}
+
+KNWcdf_K2Bw_w_rcpp <- function(Y, y, X, x, h, w) {
+    .Call(`_MYHfusionRcpp_KNWcdf_K2Bw_w_rcpp`, Y, y, X, x, h, w)
+}
+
+KNWcdf_K4Bw_rcpp <- function(Y, y, X, x, h) {
+    .Call(`_MYHfusionRcpp_KNWcdf_K4Bw_rcpp`, Y, y, X, x, h)
+}
+
+KNWcdf_K4Bw_w_rcpp <- function(Y, y, X, x, h, w) {
+    .Call(`_MYHfusionRcpp_KNWcdf_K4Bw_w_rcpp`, Y, y, X, x, h, w)
+}
+
 CVKNW_K2Ep_rcpp <- function(Y, X, h) {
     .Call(`_MYHfusionRcpp_CVKNW_K2Ep_rcpp`, Y, X, h)
 }

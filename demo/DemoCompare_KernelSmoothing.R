@@ -6,13 +6,14 @@ ggplot2::autoplot(
   )
 )
 
-n <- 100
+n <- 200
 p <- 1
 
 X <- matrix(rnorm(n * p), nrow = n, ncol = p)
 x <- as.matrix(seq(-3, 3, 0.1))
 w <- rexp(n = n, rate = 1)
 Y <- as.vector(sin(X[, 1] * 2)) + rnorm(n, mean = 0, sd = 0.2)
+y <- seq(min(Y), max(Y), length.out = 50)
 
 test1 <- KDE_K2Ep_rcpp(X = X, x = x, h = 1.5)
 test2 <- KDE_R(X = X, x = x, K = K2_Ep, h = 1.5)
@@ -137,6 +138,46 @@ ggplot2::autoplot(
   microbenchmark::microbenchmark(
     Rcpp = KNW_K4Bw_w_rcpp(Y = Y, X = X, x = x, h = 0.5, w = w),
     R = KNW_w_R(Y = Y, X = X, x = x, K = K4_Bw, h = 0.5, w = w)
+  )
+)
+
+test1 <- KNWcdf_K2Ep_rcpp(Y = Y, y = y , X = X, x = x, h = 0.5)
+test2 <- KNWcdf_R(Y = Y, y = y , X = X, x = x, K = K2_Ep, h = 0.5)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = KNWcdf_K2Ep_rcpp(Y = Y, y = y , X = X, x = x, h = 0.5),
+    R = KNWcdf_R(Y = Y, y = y , X = X, x = x, K = K2_Ep, h = 0.5)
+  )
+)
+
+test1 <- KNWcdf_K2Bw_rcpp(Y = Y, y = y , X = X, x = x, h = 0.5)
+test2 <- KNWcdf_R(Y = Y, y = y , X = X, x = x, K = K2_Bw, h = 0.5)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = KNWcdf_K2Bw_rcpp(Y = Y, y = y , X = X, x = x, h = 0.5),
+    R = KNWcdf_R(Y = Y, y = y , X = X, x = x, K = K2_Bw, h = 0.5)
+  )
+)
+
+test1 <- KNWcdf_K4Bw_rcpp(Y = Y, y = y , X = X, x = x, h = 0.5)
+test2 <- KNWcdf_R(Y = Y, y = y , X = X, x = x, K = K4_Bw, h = 0.5)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = KNWcdf_K4Bw_rcpp(Y = Y, y = y , X = X, x = x, h = 0.5),
+    R = KNWcdf_R(Y = Y, y = y , X = X, x = x, K = K4_Bw, h = 0.5)
+  )
+)
+
+test1 <- KNWcdf_K2Ep_w_rcpp(Y = Y, y = y , X = X, x = x, h = 0.5, w = w)
+test2 <- KNWcdf_w_R(Y = Y, y = y , X = X, x = x, K = K2_Ep, h = 0.5, w = w)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = KNWcdf_K2Ep_w_rcpp(Y = Y, y = y , X = X, x = x, h = 0.5, w = w),
+    R = KNWcdf_w_R(Y = Y, y = y , X = X, x = x, K = K2_Ep, h = 0.5, w = w)
   )
 )
 

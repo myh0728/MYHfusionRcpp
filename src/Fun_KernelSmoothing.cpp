@@ -652,6 +652,375 @@ arma::vec KNW_K4Bw_w_rcpp(const arma::vec & Y,
 }
 
 // [[Rcpp::export]]
+arma::mat KNWcdf_K2Ep_rcpp(const arma::vec & Y,
+                           const arma::vec & y,
+                           const arma::mat & X,
+                           const arma::mat & x,
+                           const arma::vec & h) {
+
+  const arma::uword n_n = X.n_rows;
+  const arma::uword n_p = X.n_cols;
+  const arma::uword n_k = x.n_rows;
+  const arma::uword n_l = y.n_elem;
+  arma::vec Dhat(n_k);
+  arma::mat Nhat(n_k, n_l);
+  arma::mat mhat(n_k, n_l);
+
+  arma::vec xrow_k(n_p);
+  arma::vec Xrow_i(n_p);
+  arma::vec Dik_h(n_p);
+  double Kik_h = 1.0;
+
+  for (size_t k = 0; k < n_k; ++k) {
+
+    xrow_k = x.row(k).t();
+
+    for (size_t i = 0; i < n_n; ++i) {
+
+      Xrow_i = X.row(i).t();
+      Dik_h = (Xrow_i - xrow_k) / h;
+      Kik_h = 1.0;
+
+      for (size_t l = 0; l < n_p; ++l) {
+
+        Kik_h *= K2_Ep_rcpp(Dik_h(l)) / h(l);
+      }
+
+      Dhat(k) += Kik_h;
+
+      for (size_t l = 0; l < n_l; ++l) {
+
+        Nhat(k, l) += Kik_h * (Y(i) <= y(l));
+      }
+    }
+  }
+
+  for (size_t k = 0; k < n_k; ++k) {
+
+    if (Dhat(k) != 0) {
+
+      for (size_t l = 0; l < n_l; ++l) {
+
+        mhat(k, l) = Nhat(k, l) / Dhat(k);
+      }
+    }
+  }
+
+  mhat.elem(arma::find(mhat < 0)).fill(0);
+  mhat.elem(arma::find(mhat > 1)).fill(1);
+
+  return mhat;
+}
+
+// [[Rcpp::export]]
+arma::mat KNWcdf_K2Ep_w_rcpp(const arma::vec & Y,
+                             const arma::vec & y,
+                             const arma::mat & X,
+                             const arma::mat & x,
+                             const arma::vec & h,
+                             const arma::vec & w) {
+
+  const arma::uword n_n = X.n_rows;
+  const arma::uword n_p = X.n_cols;
+  const arma::uword n_k = x.n_rows;
+  const arma::uword n_l = y.n_elem;
+  arma::vec Dhat(n_k);
+  arma::mat Nhat(n_k, n_l);
+  arma::mat mhat(n_k, n_l);
+
+  arma::vec xrow_k(n_p);
+  arma::vec Xrow_i(n_p);
+  arma::vec Dik_h(n_p);
+  double Kik_h = 1.0;
+
+  for (size_t k = 0; k < n_k; ++k) {
+
+    xrow_k = x.row(k).t();
+
+    for (size_t i = 0; i < n_n; ++i) {
+
+      Xrow_i = X.row(i).t();
+      Dik_h = (Xrow_i - xrow_k) / h;
+      Kik_h = 1.0;
+
+      for (size_t l = 0; l < n_p; ++l) {
+
+        Kik_h *= K2_Ep_rcpp(Dik_h(l)) / h(l);
+      }
+
+      Dhat(k) += Kik_h * w(i);
+
+      for (size_t l = 0; l < n_l; ++l) {
+
+        Nhat(k, l) += Kik_h * (Y(i) <= y(l)) * w(i);
+      }
+    }
+  }
+
+  for (size_t k = 0; k < n_k; ++k) {
+
+    if (Dhat(k) != 0) {
+
+      for (size_t l = 0; l < n_l; ++l) {
+
+        mhat(k, l) = Nhat(k, l) / Dhat(k);
+      }
+    }
+  }
+
+  mhat.elem(arma::find(mhat < 0)).fill(0);
+  mhat.elem(arma::find(mhat > 1)).fill(1);
+
+  return mhat;
+}
+
+// [[Rcpp::export]]
+arma::mat KNWcdf_K2Bw_rcpp(const arma::vec & Y,
+                           const arma::vec & y,
+                           const arma::mat & X,
+                           const arma::mat & x,
+                           const arma::vec & h) {
+
+  const arma::uword n_n = X.n_rows;
+  const arma::uword n_p = X.n_cols;
+  const arma::uword n_k = x.n_rows;
+  const arma::uword n_l = y.n_elem;
+  arma::vec Dhat(n_k);
+  arma::mat Nhat(n_k, n_l);
+  arma::mat mhat(n_k, n_l);
+
+  arma::vec xrow_k(n_p);
+  arma::vec Xrow_i(n_p);
+  arma::vec Dik_h(n_p);
+  double Kik_h = 1.0;
+
+  for (size_t k = 0; k < n_k; ++k) {
+
+    xrow_k = x.row(k).t();
+
+    for (size_t i = 0; i < n_n; ++i) {
+
+      Xrow_i = X.row(i).t();
+      Dik_h = (Xrow_i - xrow_k) / h;
+      Kik_h = 1.0;
+
+      for (size_t l = 0; l < n_p; ++l) {
+
+        Kik_h *= K2_Bw_rcpp(Dik_h(l)) / h(l);
+      }
+
+      Dhat(k) += Kik_h;
+
+      for (size_t l = 0; l < n_l; ++l) {
+
+        Nhat(k, l) += Kik_h * (Y(i) <= y(l));
+      }
+    }
+  }
+
+  for (size_t k = 0; k < n_k; ++k) {
+
+    if (Dhat(k) != 0) {
+
+      for (size_t l = 0; l < n_l; ++l) {
+
+        mhat(k, l) = Nhat(k, l) / Dhat(k);
+      }
+    }
+  }
+
+  mhat.elem(arma::find(mhat < 0)).fill(0);
+  mhat.elem(arma::find(mhat > 1)).fill(1);
+
+  return mhat;
+}
+
+// [[Rcpp::export]]
+arma::mat KNWcdf_K2Bw_w_rcpp(const arma::vec & Y,
+                             const arma::vec & y,
+                             const arma::mat & X,
+                             const arma::mat & x,
+                             const arma::vec & h,
+                             const arma::vec & w) {
+
+  const arma::uword n_n = X.n_rows;
+  const arma::uword n_p = X.n_cols;
+  const arma::uword n_k = x.n_rows;
+  const arma::uword n_l = y.n_elem;
+  arma::vec Dhat(n_k);
+  arma::mat Nhat(n_k, n_l);
+  arma::mat mhat(n_k, n_l);
+
+  arma::vec xrow_k(n_p);
+  arma::vec Xrow_i(n_p);
+  arma::vec Dik_h(n_p);
+  double Kik_h = 1.0;
+
+  for (size_t k = 0; k < n_k; ++k) {
+
+    xrow_k = x.row(k).t();
+
+    for (size_t i = 0; i < n_n; ++i) {
+
+      Xrow_i = X.row(i).t();
+      Dik_h = (Xrow_i - xrow_k) / h;
+      Kik_h = 1.0;
+
+      for (size_t l = 0; l < n_p; ++l) {
+
+        Kik_h *= K2_Bw_rcpp(Dik_h(l)) / h(l);
+      }
+
+      Dhat(k) += Kik_h * w(i);
+
+      for (size_t l = 0; l < n_l; ++l) {
+
+        Nhat(k, l) += Kik_h * (Y(i) <= y(l)) * w(i);
+      }
+    }
+  }
+
+  for (size_t k = 0; k < n_k; ++k) {
+
+    if (Dhat(k) != 0) {
+
+      for (size_t l = 0; l < n_l; ++l) {
+
+        mhat(k, l) = Nhat(k, l) / Dhat(k);
+      }
+    }
+  }
+
+  mhat.elem(arma::find(mhat < 0)).fill(0);
+  mhat.elem(arma::find(mhat > 1)).fill(1);
+
+  return mhat;
+}
+
+// [[Rcpp::export]]
+arma::mat KNWcdf_K4Bw_rcpp(const arma::vec & Y,
+                           const arma::vec & y,
+                           const arma::mat & X,
+                           const arma::mat & x,
+                           const arma::vec & h) {
+
+  const arma::uword n_n = X.n_rows;
+  const arma::uword n_p = X.n_cols;
+  const arma::uword n_k = x.n_rows;
+  const arma::uword n_l = y.n_elem;
+  arma::vec Dhat(n_k);
+  arma::mat Nhat(n_k, n_l);
+  arma::mat mhat(n_k, n_l);
+
+  arma::vec xrow_k(n_p);
+  arma::vec Xrow_i(n_p);
+  arma::vec Dik_h(n_p);
+  double Kik_h = 1.0;
+
+  for (size_t k = 0; k < n_k; ++k) {
+
+    xrow_k = x.row(k).t();
+
+    for (size_t i = 0; i < n_n; ++i) {
+
+      Xrow_i = X.row(i).t();
+      Dik_h = (Xrow_i - xrow_k) / h;
+      Kik_h = 1.0;
+
+      for (size_t l = 0; l < n_p; ++l) {
+
+        Kik_h *= K4_Bw_rcpp(Dik_h(l)) / h(l);
+      }
+
+      Dhat(k) += Kik_h;
+
+      for (size_t l = 0; l < n_l; ++l) {
+
+        Nhat(k, l) += Kik_h * (Y(i) <= y(l));
+      }
+    }
+  }
+
+  for (size_t k = 0; k < n_k; ++k) {
+
+    if (Dhat(k) != 0) {
+
+      for (size_t l = 0; l < n_l; ++l) {
+
+        mhat(k, l) = Nhat(k, l) / Dhat(k);
+      }
+    }
+  }
+
+  mhat.elem(arma::find(mhat < 0)).fill(0);
+  mhat.elem(arma::find(mhat > 1)).fill(1);
+
+  return mhat;
+}
+
+// [[Rcpp::export]]
+arma::mat KNWcdf_K4Bw_w_rcpp(const arma::vec & Y,
+                             const arma::vec & y,
+                             const arma::mat & X,
+                             const arma::mat & x,
+                             const arma::vec & h,
+                             const arma::vec & w) {
+
+  const arma::uword n_n = X.n_rows;
+  const arma::uword n_p = X.n_cols;
+  const arma::uword n_k = x.n_rows;
+  const arma::uword n_l = y.n_elem;
+  arma::vec Dhat(n_k);
+  arma::mat Nhat(n_k, n_l);
+  arma::mat mhat(n_k, n_l);
+
+  arma::vec xrow_k(n_p);
+  arma::vec Xrow_i(n_p);
+  arma::vec Dik_h(n_p);
+  double Kik_h = 1.0;
+
+  for (size_t k = 0; k < n_k; ++k) {
+
+    xrow_k = x.row(k).t();
+
+    for (size_t i = 0; i < n_n; ++i) {
+
+      Xrow_i = X.row(i).t();
+      Dik_h = (Xrow_i - xrow_k) / h;
+      Kik_h = 1.0;
+
+      for (size_t l = 0; l < n_p; ++l) {
+
+        Kik_h *= K4_Bw_rcpp(Dik_h(l)) / h(l);
+      }
+
+      Dhat(k) += Kik_h * w(i);
+
+      for (size_t l = 0; l < n_l; ++l) {
+
+        Nhat(k, l) += Kik_h * (Y(i) <= y(l)) * w(i);
+      }
+    }
+  }
+
+  for (size_t k = 0; k < n_k; ++k) {
+
+    if (Dhat(k) != 0) {
+
+      for (size_t l = 0; l < n_l; ++l) {
+
+        mhat(k, l) = Nhat(k, l) / Dhat(k);
+      }
+    }
+  }
+
+  mhat.elem(arma::find(mhat < 0)).fill(0);
+  mhat.elem(arma::find(mhat > 1)).fill(1);
+
+  return mhat;
+}
+
+// [[Rcpp::export]]
 double CVKNW_K2Ep_rcpp(const arma::vec & Y,
                        const arma::mat & X,
                        const arma::vec & h) {
