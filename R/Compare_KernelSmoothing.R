@@ -133,6 +133,24 @@ CVKNW_R <- function(Y, X, K, h){
   return(cv_value)
 }
 
+CVKNW_w_R <- function(Y, X, K, h, w){
+
+  number_n <- dim(X)[1]
+  number_p <- dim(X)[2]
+
+  Xij <- X[rep(1:number_n, times = number_n), ] -
+    X[rep(1:number_n, each = number_n), ]
+  dim(Xij) <- c(number_n, number_n, number_p)
+  Kij <- apply(K(aperm(Xij, c(3, 1, 2)) / h) / h, c(2, 3), prod)
+  diag(Kij) <- 0
+  Dhat <- colSums(Kij * w)
+  Nhat <- colSums(Kij * Y * w)
+  mhat <- Nhat * (Dhat != 0) / (Dhat + (Dhat == 0))
+  cv_value <- sum(((Y - mhat) ^ 2) * w) / sum(w)
+
+  return(cv_value)
+}
+
 CVKNWcdf_R <- function(Y, X, K, h){
 
   number_n <- dim(X)[1]
@@ -153,7 +171,96 @@ CVKNWcdf_R <- function(Y, X, K, h){
   return(cv_value)
 }
 
+CVKNWcdf_w_R <- function(Y, X, K, h, w){
 
+  number_n <- dim(X)[1]
+  number_p <- dim(X)[2]
 
+  Yik <- outer_leq_rcpp(Y, Y)
+  Xij <- X[rep(1:number_n, times = number_n), ] -
+    X[rep(1:number_n, each = number_n), ]
+  dim(Xij) <- c(number_n, number_n, number_p)
+  Kij <- apply(K(aperm(Xij, c(3, 1, 2)) / h) / h, c(2, 3), prod)
+  diag(Kij) <- 0
+  Dhat <- colSums(Kij * w)
+  Nhat <- Kij %*% (Yik * w)
+  mhat <- Nhat * (Dhat != 0) / (Dhat + (Dhat == 0))
+  mhat <- mhat * (mhat > 0) * (mhat < 1) + (mhat >= 1)
+  cv_value <- sum(colSums(((Yik - mhat) ^ 2) * w) * w) / (sum(w) ^ 2)
+
+  return(cv_value)
+}
+
+LSKNW_R <- function(Y, X, K, h){
+
+  number_n <- dim(X)[1]
+  number_p <- dim(X)[2]
+
+  Xij <- X[rep(1:number_n, times = number_n), ] -
+    X[rep(1:number_n, each = number_n), ]
+  dim(Xij) <- c(number_n, number_n, number_p)
+  Kij <- apply(K(aperm(Xij, c(3, 1, 2)) / h) / h, c(2, 3), prod)
+  Dhat <- colSums(Kij)
+  Nhat <- colSums(Kij * Y)
+  mhat <- Nhat * (Dhat != 0) / (Dhat + (Dhat == 0))
+  ls_value <- sum((Y - mhat) ^ 2) / number_n
+
+  return(ls_value)
+}
+
+LSKNW_w_R <- function(Y, X, K, h, w){
+
+  number_n <- dim(X)[1]
+  number_p <- dim(X)[2]
+
+  Xij <- X[rep(1:number_n, times = number_n), ] -
+    X[rep(1:number_n, each = number_n), ]
+  dim(Xij) <- c(number_n, number_n, number_p)
+  Kij <- apply(K(aperm(Xij, c(3, 1, 2)) / h) / h, c(2, 3), prod)
+  Dhat <- colSums(Kij * w)
+  Nhat <- colSums(Kij * Y * w)
+  mhat <- Nhat * (Dhat != 0) / (Dhat + (Dhat == 0))
+  ls_value <- sum(((Y - mhat) ^ 2) * w) / sum(w)
+
+  return(ls_value)
+}
+
+LSKNWcdf_R <- function(Y, X, K, h){
+
+  number_n <- dim(X)[1]
+  number_p <- dim(X)[2]
+
+  Yik <- outer_leq_rcpp(Y, Y)
+  Xij <- X[rep(1:number_n, times = number_n), ] -
+    X[rep(1:number_n, each = number_n), ]
+  dim(Xij) <- c(number_n, number_n, number_p)
+  Kij <- apply(K(aperm(Xij, c(3, 1, 2)) / h) / h, c(2, 3), prod)
+  Dhat <- colSums(Kij)
+  Nhat <- Kij %*% Yik
+  mhat <- Nhat * (Dhat != 0) / (Dhat + (Dhat == 0))
+  mhat <- mhat * (mhat > 0) * (mhat < 1) + (mhat >= 1)
+  ls_value <- sum((Yik - mhat) ^ 2) / (number_n ^ 2)
+
+  return(ls_value)
+}
+
+LSKNWcdf_w_R <- function(Y, X, K, h, w){
+
+  number_n <- dim(X)[1]
+  number_p <- dim(X)[2]
+
+  Yik <- outer_leq_rcpp(Y, Y)
+  Xij <- X[rep(1:number_n, times = number_n), ] -
+    X[rep(1:number_n, each = number_n), ]
+  dim(Xij) <- c(number_n, number_n, number_p)
+  Kij <- apply(K(aperm(Xij, c(3, 1, 2)) / h) / h, c(2, 3), prod)
+  Dhat <- colSums(Kij * w)
+  Nhat <- Kij %*% (Yik * w)
+  mhat <- Nhat * (Dhat != 0) / (Dhat + (Dhat == 0))
+  mhat <- mhat * (mhat > 0) * (mhat < 1) + (mhat >= 1)
+  ls_value <- sum(colSums(((Yik - mhat) ^ 2) * w) * w) / (sum(w) ^ 2)
+
+  return(ls_value)
+}
 
 

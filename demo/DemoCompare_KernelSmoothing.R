@@ -185,6 +185,16 @@ ggplot2::autoplot(
   )
 )
 
+test1 <- CVKNW_K2Ep_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w)
+test2 <- CVKNW_w_R(Y = Y, X = X, K = K2_Ep, h = rep(0.5, p), w = w)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = CVKNW_K2Ep_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w),
+    R = CVKNW_w_R(Y = Y, X = X, K = K2_Ep, h = rep(0.5, p), w = w)
+  )
+)
+
 test1 <- CVKNW_K2Bw_rcpp(Y = Y, X = X, h = rep(0.5, p))
 test2 <- CVKNW_R(Y = Y, X = X, K = K2_Bw, h = rep(0.5, p))
 sum(abs(test1 - test2))
@@ -192,6 +202,16 @@ ggplot2::autoplot(
   microbenchmark::microbenchmark(
     Rcpp = CVKNW_K2Bw_rcpp(Y = Y, X = X, h = rep(0.5, p)),
     R = CVKNW_R(Y = Y, X = X, K = K2_Bw, h = rep(0.5, p))
+  )
+)
+
+test1 <- CVKNW_K2Bw_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w)
+test2 <- CVKNW_w_R(Y = Y, X = X, K = K2_Bw, h = rep(0.5, p), w = w)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = CVKNW_K2Bw_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w),
+    R = CVKNW_w_R(Y = Y, X = X, K = K2_Bw, h = rep(0.5, p), w = w)
   )
 )
 
@@ -205,6 +225,16 @@ ggplot2::autoplot(
   )
 )
 
+test1 <- CVKNW_K4Bw_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w)
+test2 <- CVKNW_w_R(Y = Y, X = X, K = K4_Bw, h = rep(0.5, p), w = w)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = CVKNW_K4Bw_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w),
+    R = CVKNW_w_R(Y = Y, X = X, K = K4_Bw, h = rep(0.5, p), w = w)
+  )
+)
+
 test1 <- CVKNWcdf_K2Ep_rcpp(Y = Y, X = X, h = rep(0.5, p))
 test2 <- CVKNWcdf_R(Y = Y, X = X, K = K2_Ep, h = rep(0.5, p))
 sum(abs(test1 - test2))
@@ -212,6 +242,16 @@ ggplot2::autoplot(
   microbenchmark::microbenchmark(
     Rcpp = CVKNWcdf_K2Ep_rcpp(Y = Y, X = X, h = rep(0.5, p)),
     R = CVKNWcdf_R(Y = Y, X = X, K = K2_Ep, h = rep(0.5, p))
+  )
+)
+
+test1 <- CVKNWcdf_K2Ep_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w)
+test2 <- CVKNWcdf_w_R(Y = Y, X = X, K = K2_Ep, h = rep(0.5, p), w = w)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = CVKNWcdf_K2Ep_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w),
+    R = CVKNWcdf_w_R(Y = Y, X = X, K = K2_Ep, h = rep(0.5, p), w = w)
   )
 )
 
@@ -225,6 +265,16 @@ ggplot2::autoplot(
   )
 )
 
+test1 <- CVKNWcdf_K2Bw_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w)
+test2 <- CVKNWcdf_w_R(Y = Y, X = X, K = K2_Bw, h = rep(0.5, p), w = w)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = CVKNWcdf_K2Bw_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w),
+    R = CVKNWcdf_w_R(Y = Y, X = X, K = K2_Bw, h = rep(0.5, p), w = w)
+  )
+)
+
 test1 <- CVKNWcdf_K4Bw_rcpp(Y = Y, X = X, h = rep(0.5, p))
 test2 <- CVKNWcdf_R(Y = Y, X = X, K = K4_Bw, h = rep(0.5, p))
 sum(abs(test1 - test2))
@@ -235,7 +285,133 @@ ggplot2::autoplot(
   )
 )
 
+test1 <- CVKNWcdf_K4Bw_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w)
+test2 <- CVKNWcdf_w_R(Y = Y, X = X, K = K4_Bw, h = rep(0.5, p), w = w)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = CVKNWcdf_K4Bw_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w),
+    R = CVKNWcdf_w_R(Y = Y, X = X, K = K4_Bw, h = rep(0.5, p), w = w)
+  )
+)
 
+test1 <- LSKNW_K2Ep_rcpp(Y = Y, X = X, h = rep(0.5, p))
+test2 <- LSKNW_R(Y = Y, X = X, K = K2_Ep, h = rep(0.5, p))
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = LSKNW_K2Ep_rcpp(Y = Y, X = X, h = rep(0.5, p)),
+    R = LSKNW_R(Y = Y, X = X, K = K2_Ep, h = rep(0.5, p))
+  )
+)
 
+test1 <- LSKNW_K2Ep_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w)
+test2 <- LSKNW_w_R(Y = Y, X = X, K = K2_Ep, h = rep(0.5, p), w = w)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = LSKNW_K2Ep_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w),
+    R = LSKNW_w_R(Y = Y, X = X, K = K2_Ep, h = rep(0.5, p), w = w)
+  )
+)
 
+test1 <- LSKNW_K2Bw_rcpp(Y = Y, X = X, h = rep(0.5, p))
+test2 <- LSKNW_R(Y = Y, X = X, K = K2_Bw, h = rep(0.5, p))
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = LSKNW_K2Bw_rcpp(Y = Y, X = X, h = rep(0.5, p)),
+    R = LSKNW_R(Y = Y, X = X, K = K2_Bw, h = rep(0.5, p))
+  )
+)
+
+test1 <- LSKNW_K2Bw_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w)
+test2 <- LSKNW_w_R(Y = Y, X = X, K = K2_Bw, h = rep(0.5, p), w = w)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = LSKNW_K2Bw_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w),
+    R = LSKNW_w_R(Y = Y, X = X, K = K2_Bw, h = rep(0.5, p), w = w)
+  )
+)
+
+test1 <- LSKNW_K4Bw_rcpp(Y = Y, X = X, h = rep(0.5, p))
+test2 <- LSKNW_R(Y = Y, X = X, K = K4_Bw, h = rep(0.5, p))
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = LSKNW_K4Bw_rcpp(Y = Y, X = X, h = rep(0.5, p)),
+    R = LSKNW_R(Y = Y, X = X, K = K4_Bw, h = rep(0.5, p))
+  )
+)
+
+test1 <- LSKNW_K4Bw_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w)
+test2 <- LSKNW_w_R(Y = Y, X = X, K = K4_Bw, h = rep(0.5, p), w = w)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = LSKNW_K4Bw_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w),
+    R = LSKNW_w_R(Y = Y, X = X, K = K4_Bw, h = rep(0.5, p), w = w)
+  )
+)
+
+test1 <- LSKNWcdf_K2Ep_rcpp(Y = Y, X = X, h = rep(0.5, p))
+test2 <- LSKNWcdf_R(Y = Y, X = X, K = K2_Ep, h = rep(0.5, p))
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = LSKNWcdf_K2Ep_rcpp(Y = Y, X = X, h = rep(0.5, p)),
+    R = LSKNWcdf_R(Y = Y, X = X, K = K2_Ep, h = rep(0.5, p))
+  )
+)
+
+test1 <- LSKNWcdf_K2Ep_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w)
+test2 <- LSKNWcdf_w_R(Y = Y, X = X, K = K2_Ep, h = rep(0.5, p), w = w)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = LSKNWcdf_K2Ep_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w),
+    R = LSKNWcdf_w_R(Y = Y, X = X, K = K2_Ep, h = rep(0.5, p), w = w)
+  )
+)
+
+test1 <- LSKNWcdf_K2Bw_rcpp(Y = Y, X = X, h = rep(0.5, p))
+test2 <- LSKNWcdf_R(Y = Y, X = X, K = K2_Bw, h = rep(0.5, p))
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = LSKNWcdf_K2Bw_rcpp(Y = Y, X = X, h = rep(0.5, p)),
+    R = LSKNWcdf_R(Y = Y, X = X, K = K2_Bw, h = rep(0.5, p))
+  )
+)
+
+test1 <- LSKNWcdf_K2Bw_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w)
+test2 <- LSKNWcdf_w_R(Y = Y, X = X, K = K2_Bw, h = rep(0.5, p), w = w)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = LSKNWcdf_K2Bw_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w),
+    R = LSKNWcdf_w_R(Y = Y, X = X, K = K2_Bw, h = rep(0.5, p), w = w)
+  )
+)
+
+test1 <- LSKNWcdf_K4Bw_rcpp(Y = Y, X = X, h = rep(0.5, p))
+test2 <- LSKNWcdf_R(Y = Y, X = X, K = K4_Bw, h = rep(0.5, p))
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = LSKNWcdf_K4Bw_rcpp(Y = Y, X = X, h = rep(0.5, p)),
+    R = LSKNWcdf_R(Y = Y, X = X, K = K4_Bw, h = rep(0.5, p))
+  )
+)
+
+test1 <- LSKNWcdf_K4Bw_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w)
+test2 <- LSKNWcdf_w_R(Y = Y, X = X, K = K4_Bw, h = rep(0.5, p), w = w)
+sum(abs(test1 - test2))
+ggplot2::autoplot(
+  microbenchmark::microbenchmark(
+    Rcpp = LSKNWcdf_K4Bw_w_rcpp(Y = Y, X = X, h = rep(0.5, p), w = w),
+    R = LSKNWcdf_w_R(Y = Y, X = X, K = K4_Bw, h = rep(0.5, p), w = w)
+  )
+)
 

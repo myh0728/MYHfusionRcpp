@@ -33,3 +33,30 @@ test <- KernelSmooth(X = X, Y = Y, x = x, y = y,
 test <- KernelSmooth(X = X, Y = Y, x = x, y = y,
                      type = "distribution", kernel = "K4.Biweight")
 
+test <- SemiSI(X = X, Y = Y, type = "mean", kernel = "K2.Epanechnikov")
+
+test <- SemiSI(X = X, Y = Y, type = "mean", kernel = "K2.Epanechnikov", wi.boot = w)
+
+test <- SemiSI(X = X, Y = Y, type = "distribution", kernel = "K2.Epanechnikov")
+
+test <- SemiSI(X = X, Y = Y, type = "distribution", kernel = "K2.Epanechnikov", wi.boot = w)
+
+test <- SemiSI(X = X, Y = Y, type = "mean", kernel = "K2.Biweight")
+
+test <- SemiSI(X = X, Y = Y, type = "mean", kernel = "K2.Biweight", wi.boot = w)
+
+test <- SemiSI(X = X, Y = Y, type = "distribution", kernel = "K2.Biweight")
+
+test <- SemiSI(X = X, Y = Y, type = "distribution", kernel = "K2.Biweight", wi.boot = w)
+
+test <- SemiSI(X = X, Y = Y, type = "mean", kernel = "K4.Biweight")
+
+test <- SemiSI(X = X, Y = Y, type = "mean", kernel = "K4.Biweight", wi.boot = w)
+
+test <- SemiSI(X = X, Y = Y, type = "distribution", kernel = "K4.Biweight")
+
+test <- SemiSI(X = X, Y = Y, type = "distribution", kernel = "K4.Biweight", wi.boot = w)
+
+
+
+
