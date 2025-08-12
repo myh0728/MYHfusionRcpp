@@ -976,6 +976,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cumuSIR_rcpp
+List cumuSIR_rcpp(const arma::mat& X, const arma::vec& Y, const double& eps_inv);
+RcppExport SEXP _MYHfusionRcpp_cumuSIR_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP eps_invSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const double& >::type eps_inv(eps_invSEXP);
+    rcpp_result_gen = Rcpp::wrap(cumuSIR_rcpp(X, Y, eps_inv));
+    return rcpp_result_gen;
+END_RCPP
+}
 // AD_EY_normal_Lagrange_rcpp
 List AD_EY_normal_Lagrange_rcpp(const arma::mat& X, const double& alpha, const arma::vec& beta, const double& sigma, const double& phi, const double& eta);
 RcppExport SEXP _MYHfusionRcpp_AD_EY_normal_Lagrange_rcpp(SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP sigmaSEXP, SEXP phiSEXP, SEXP etaSEXP) {
@@ -3059,6 +3072,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_MYHfusionRcpp_lL_normal_rcpp_fun", (DL_FUNC) &_MYHfusionRcpp_lL_normal_rcpp_fun, 5},
     {"_MYHfusionRcpp_lL_normal_w_rcpp_fun", (DL_FUNC) &_MYHfusionRcpp_lL_normal_w_rcpp_fun, 6},
     {"_MYHfusionRcpp_diff_lL_normal_rcpp_v1", (DL_FUNC) &_MYHfusionRcpp_diff_lL_normal_rcpp_v1, 5},
+    {"_MYHfusionRcpp_cumuSIR_rcpp", (DL_FUNC) &_MYHfusionRcpp_cumuSIR_rcpp, 3},
     {"_MYHfusionRcpp_AD_EY_normal_Lagrange_rcpp", (DL_FUNC) &_MYHfusionRcpp_AD_EY_normal_Lagrange_rcpp, 6},
     {"_MYHfusionRcpp_AD_EY_normal_SolveLagrange_rcpp", (DL_FUNC) &_MYHfusionRcpp_AD_EY_normal_SolveLagrange_rcpp, 11},
     {"_MYHfusionRcpp_AD_EY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_AD_EY_normal_rcpp, 5},

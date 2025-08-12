@@ -281,6 +281,10 @@ diff_lL_normal_rcpp_v1 <- function(X, Y, alpha, beta, sigma) {
     .Call(`_MYHfusionRcpp_diff_lL_normal_rcpp_v1`, X, Y, alpha, beta, sigma)
 }
 
+cumuSIR_rcpp <- function(X, Y, eps_inv) {
+    .Call(`_MYHfusionRcpp_cumuSIR_rcpp`, X, Y, eps_inv)
+}
+
 AD_EY_normal_Lagrange_rcpp <- function(X, alpha, beta, sigma, phi, eta) {
     .Call(`_MYHfusionRcpp_AD_EY_normal_Lagrange_rcpp`, X, alpha, beta, sigma, phi, eta)
 }

@@ -3,7 +3,7 @@ cumuSIR_R <- function(X, Y, eps.inv)
   number_n <- dim(X)[1]
   number_p <- dim(X)[2]
 
-  Y.CP <- outer_leq_rcpp(as.vector(Y), as.vector(Y))
+  Y.CP <- ctingP_uni_rcpp(as.vector(Y), as.vector(Y))
   varX.eigen <- eigen_rcpp(var(X))
   varX.eigen.value <- as.vector(varX.eigen$value)
   varX.eigen.value[varX.eigen.value < eps.inv] <- eps.inv
@@ -28,7 +28,7 @@ cumuSAVE_R <- function(X, Y, eps.inv)
   number_n <- dim(X)[1]
   number_p <- dim(X)[2]
 
-  Y.CP <- outer_leq_rcpp(as.vector(Y), as.vector(Y))
+  Y.CP <- ctingP_uni_rcpp(as.vector(Y), as.vector(Y))
   varX.eigen <- eigen_rcpp(var(X))
   varX.eigen.value <- as.vector(varX.eigen$value)
   varX.eigen.value[varX.eigen.value < eps.inv] <- eps.inv
