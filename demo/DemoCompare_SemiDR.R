@@ -14,6 +14,4 @@ ggplot2::autoplot(
   )
 )
 
-test2 <- cumuSAVE_R(X = X, Y = Y, eps.inv = 1e-7)
-
 
