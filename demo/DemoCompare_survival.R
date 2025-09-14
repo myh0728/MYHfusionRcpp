@@ -18,17 +18,31 @@ w <- w / sum(w)
 ###
 
 test1 <- KME_R_outer(time.last = test.data.1$time.last,
-                     is.event = test.data.1$is.event)
+                     is.event = test.data.1$is.event,
+                     time.event = sort(unique(
+                       test.data.1$time.last[test.data.1$is.event == 1])))
 test2 <- KME_rcpp(time_last = test.data.1$time.last,
                   is_event = test.data.1$is.event,
                   time_event = sort(unique(
                     test.data.1$time.last[test.data.1$is.event == 1])))
 sum(abs(test1$hazard - test2))
 
+time.jumps <- sort(unique(c(seq(0, 3, 0.1), test.data.1$time.last[test.data.1$is.event == 1])))
+
+test1 <- KME_R_outer(time.last = test.data.1$time.last,
+                     is.event = test.data.1$is.event,
+                     time.event = time.jumps)
+test2 <- KME_rcpp(time_last = test.data.1$time.last,
+                  is_event = test.data.1$is.event,
+                  time_event = time.jumps)
+sum(abs(test1$hazard - test2))
+
 ggplot2::autoplot(
   microbenchmark::microbenchmark(
     "R" = KME_R_outer(time.last = test.data.1$time.last,
-                      is.event = test.data.1$is.event),
+                      is.event = test.data.1$is.event,
+                      time.event = sort(unique(
+                        test.data.1$time.last[test.data.1$is.event == 1]))),
     "Rcpp" = KME_rcpp(time_last = test.data.1$time.last,
                       is_event = test.data.1$is.event,
                       time_event = sort(unique(
@@ -40,6 +54,8 @@ ggplot2::autoplot(
 
 test1 <- SKME_R_outer(time.last = test.data.1$time.last,
                       is.event = test.data.1$is.event,
+                      time.event = sort(unique(
+                        test.data.1$time.last[test.data.1$is.event == 1])),
                       X = Xi, x = Xi, K = K2_Bw, h = 1.5)
 
 

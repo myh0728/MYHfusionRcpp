@@ -1,9 +1,9 @@
-KME_R_outer <- function(time.last, is.event)
+KME_R_outer <- function(time.last, is.event, time.event)
 {
   time.last <- as.vector(time.last)
   is.event <- as.vector(is.event)
+  time.event <- as.vector(time.event)
 
-  time.event <- sort(unique(time.last[is.event == 1]))
   dNit <- outer(time.last, time.event, FUN = "==") * is.event
   Yit <- outer(time.last, time.event, FUN = ">=")
   Nhat <- colSums(dNit)
@@ -20,17 +20,17 @@ KME_R_outer <- function(time.last, is.event)
   return(results)
 }
 
-SKME_R_outer <- function(time.last, is.event,
+SKME_R_outer <- function(time.last, is.event, time.event,
                        X, x, K, h)
 {
   time.last <- as.vector(time.last)
   is.event <- as.vector(is.event)
+  time.event <- as.vector(time.event)
 
   number_n <- length(time.last)
   number_p <- dim(X)[2]
   number_k <- dim(x)[1]
 
-  time.event <- sort(unique(time.last[is.event == 1]))
   dNit <- outer(time.last, time.event, FUN = "==") * is.event
   Yit <- outer(time.last, time.event, FUN = ">=")
 
