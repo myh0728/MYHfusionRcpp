@@ -777,3 +777,15 @@ KME_rcpp <- function(time_last, is_event, time_event) {
     .Call(`_MYHfusionRcpp_KME_rcpp`, time_last, is_event, time_event)
 }
 
+SKME_K2Ep_rcpp <- function(time_last, is_event, time_event, X, x, h) {
+    .Call(`_MYHfusionRcpp_SKME_K2Ep_rcpp`, time_last, is_event, time_event, X, x, h)
+}
+
+SKME_K2Bw_rcpp <- function(time_last, is_event, time_event, X, x, h) {
+    .Call(`_MYHfusionRcpp_SKME_K2Bw_rcpp`, time_last, is_event, time_event, X, x, h)
+}
+
+SKME_K4Bw_rcpp <- function(time_last, is_event, time_event, X, x, h) {
+    .Call(`_MYHfusionRcpp_SKME_K4Bw_rcpp`, time_last, is_event, time_event, X, x, h)
+}
+

@@ -3000,6 +3000,54 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// SKME_K2Ep_rcpp
+arma::mat SKME_K2Ep_rcpp(const arma::vec& time_last, const arma::uvec& is_event, const arma::vec& time_event, const arma::mat& X, const arma::mat& x, const arma::vec& h);
+RcppExport SEXP _MYHfusionRcpp_SKME_K2Ep_rcpp(SEXP time_lastSEXP, SEXP is_eventSEXP, SEXP time_eventSEXP, SEXP XSEXP, SEXP xSEXP, SEXP hSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type time_last(time_lastSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type is_event(is_eventSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type time_event(time_eventSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type h(hSEXP);
+    rcpp_result_gen = Rcpp::wrap(SKME_K2Ep_rcpp(time_last, is_event, time_event, X, x, h));
+    return rcpp_result_gen;
+END_RCPP
+}
+// SKME_K2Bw_rcpp
+arma::mat SKME_K2Bw_rcpp(const arma::vec& time_last, const arma::uvec& is_event, const arma::vec& time_event, const arma::mat& X, const arma::mat& x, const arma::vec& h);
+RcppExport SEXP _MYHfusionRcpp_SKME_K2Bw_rcpp(SEXP time_lastSEXP, SEXP is_eventSEXP, SEXP time_eventSEXP, SEXP XSEXP, SEXP xSEXP, SEXP hSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type time_last(time_lastSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type is_event(is_eventSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type time_event(time_eventSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type h(hSEXP);
+    rcpp_result_gen = Rcpp::wrap(SKME_K2Bw_rcpp(time_last, is_event, time_event, X, x, h));
+    return rcpp_result_gen;
+END_RCPP
+}
+// SKME_K4Bw_rcpp
+arma::mat SKME_K4Bw_rcpp(const arma::vec& time_last, const arma::uvec& is_event, const arma::vec& time_event, const arma::mat& X, const arma::mat& x, const arma::vec& h);
+RcppExport SEXP _MYHfusionRcpp_SKME_K4Bw_rcpp(SEXP time_lastSEXP, SEXP is_eventSEXP, SEXP time_eventSEXP, SEXP XSEXP, SEXP xSEXP, SEXP hSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type time_last(time_lastSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type is_event(is_eventSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type time_event(time_eventSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type h(hSEXP);
+    rcpp_result_gen = Rcpp::wrap(SKME_K4Bw_rcpp(time_last, is_event, time_event, X, x, h));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_MYHfusionRcpp_K2_Ep_rcpp", (DL_FUNC) &_MYHfusionRcpp_K2_Ep_rcpp, 1},
@@ -3196,6 +3244,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_MYHfusionRcpp_rcpparma_bothproducts", (DL_FUNC) &_MYHfusionRcpp_rcpparma_bothproducts, 1},
     {"_MYHfusionRcpp_testfunction_rcpp", (DL_FUNC) &_MYHfusionRcpp_testfunction_rcpp, 2},
     {"_MYHfusionRcpp_KME_rcpp", (DL_FUNC) &_MYHfusionRcpp_KME_rcpp, 3},
+    {"_MYHfusionRcpp_SKME_K2Ep_rcpp", (DL_FUNC) &_MYHfusionRcpp_SKME_K2Ep_rcpp, 6},
+    {"_MYHfusionRcpp_SKME_K2Bw_rcpp", (DL_FUNC) &_MYHfusionRcpp_SKME_K2Bw_rcpp, 6},
+    {"_MYHfusionRcpp_SKME_K4Bw_rcpp", (DL_FUNC) &_MYHfusionRcpp_SKME_K4Bw_rcpp, 6},
     {NULL, NULL, 0}
 };
 
