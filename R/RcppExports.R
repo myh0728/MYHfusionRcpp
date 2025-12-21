@@ -37,6 +37,90 @@ K4_Bw_diff2_rcpp <- function(u) {
     .Call(`_MYHfusionRcpp_K4_Bw_diff2_rcpp`, u)
 }
 
+K2_G_rcpp <- function(u) {
+    .Call(`_MYHfusionRcpp_K2_G_rcpp`, u)
+}
+
+K2_G_diff1_rcpp <- function(u) {
+    .Call(`_MYHfusionRcpp_K2_G_diff1_rcpp`, u)
+}
+
+K2_G_diff2_rcpp <- function(u) {
+    .Call(`_MYHfusionRcpp_K2_G_diff2_rcpp`, u)
+}
+
+KDE_rcpp <- function(X, x, h, kernel = "Epanechnikov", w = NULL) {
+    .Call(`_MYHfusionRcpp_KDE_rcpp`, X, x, h, kernel, w)
+}
+
+KNW_rcpp <- function(Y, X, x, h, kernel = "Epanechnikov", w = NULL) {
+    .Call(`_MYHfusionRcpp_KNW_rcpp`, Y, X, x, h, kernel, w)
+}
+
+KNWcdf_rcpp <- function(Y, y, X, x, h, kernel = "Epanechnikov", w = NULL) {
+    .Call(`_MYHfusionRcpp_KNWcdf_rcpp`, Y, y, X, x, h, kernel, w)
+}
+
+CVKNW_rcpp <- function(Y, X, h, kernel = "Epanechnikov", w = NULL) {
+    .Call(`_MYHfusionRcpp_CVKNW_rcpp`, Y, X, h, kernel, w)
+}
+
+CVKNWcdf_rcpp <- function(Y, X, h, kernel = "Epanechnikov", w = NULL) {
+    .Call(`_MYHfusionRcpp_CVKNWcdf_rcpp`, Y, X, h, kernel, w)
+}
+
+LSKNW_K2Ep_rcpp <- function(Y, X, h) {
+    .Call(`_MYHfusionRcpp_LSKNW_K2Ep_rcpp`, Y, X, h)
+}
+
+LSKNW_K2Ep_w_rcpp <- function(Y, X, h, w) {
+    .Call(`_MYHfusionRcpp_LSKNW_K2Ep_w_rcpp`, Y, X, h, w)
+}
+
+LSKNW_K2Bw_rcpp <- function(Y, X, h) {
+    .Call(`_MYHfusionRcpp_LSKNW_K2Bw_rcpp`, Y, X, h)
+}
+
+LSKNW_K2Bw_w_rcpp <- function(Y, X, h, w) {
+    .Call(`_MYHfusionRcpp_LSKNW_K2Bw_w_rcpp`, Y, X, h, w)
+}
+
+LSKNW_K4Bw_rcpp <- function(Y, X, h) {
+    .Call(`_MYHfusionRcpp_LSKNW_K4Bw_rcpp`, Y, X, h)
+}
+
+LSKNW_K4Bw_w_rcpp <- function(Y, X, h, w) {
+    .Call(`_MYHfusionRcpp_LSKNW_K4Bw_w_rcpp`, Y, X, h, w)
+}
+
+LSKNWcdf_K2Ep_rcpp <- function(Y, X, h) {
+    .Call(`_MYHfusionRcpp_LSKNWcdf_K2Ep_rcpp`, Y, X, h)
+}
+
+LSKNWcdf_K2Ep_w_rcpp <- function(Y, X, h, w) {
+    .Call(`_MYHfusionRcpp_LSKNWcdf_K2Ep_w_rcpp`, Y, X, h, w)
+}
+
+LSKNWcdf_K2Bw_rcpp <- function(Y, X, h) {
+    .Call(`_MYHfusionRcpp_LSKNWcdf_K2Bw_rcpp`, Y, X, h)
+}
+
+LSKNWcdf_K2Bw_w_rcpp <- function(Y, X, h, w) {
+    .Call(`_MYHfusionRcpp_LSKNWcdf_K2Bw_w_rcpp`, Y, X, h, w)
+}
+
+LSKNWcdf_K4Bw_rcpp <- function(Y, X, h) {
+    .Call(`_MYHfusionRcpp_LSKNWcdf_K4Bw_rcpp`, Y, X, h)
+}
+
+LSKNWcdf_K4Bw_w_rcpp <- function(Y, X, h, w) {
+    .Call(`_MYHfusionRcpp_LSKNWcdf_K4Bw_w_rcpp`, Y, X, h, w)
+}
+
+K2_Ep_rcpp_v1 <- function(u) {
+    .Call(`_MYHfusionRcpp_K2_Ep_rcpp_v1`, u)
+}
+
 KDE_K2Ep_rcpp <- function(X, x, h) {
     .Call(`_MYHfusionRcpp_KDE_K2Ep_rcpp`, X, x, h)
 }
@@ -155,58 +239,6 @@ CVKNWcdf_K4Bw_rcpp <- function(Y, X, h) {
 
 CVKNWcdf_K4Bw_w_rcpp <- function(Y, X, h, w) {
     .Call(`_MYHfusionRcpp_CVKNWcdf_K4Bw_w_rcpp`, Y, X, h, w)
-}
-
-LSKNW_K2Ep_rcpp <- function(Y, X, h) {
-    .Call(`_MYHfusionRcpp_LSKNW_K2Ep_rcpp`, Y, X, h)
-}
-
-LSKNW_K2Ep_w_rcpp <- function(Y, X, h, w) {
-    .Call(`_MYHfusionRcpp_LSKNW_K2Ep_w_rcpp`, Y, X, h, w)
-}
-
-LSKNW_K2Bw_rcpp <- function(Y, X, h) {
-    .Call(`_MYHfusionRcpp_LSKNW_K2Bw_rcpp`, Y, X, h)
-}
-
-LSKNW_K2Bw_w_rcpp <- function(Y, X, h, w) {
-    .Call(`_MYHfusionRcpp_LSKNW_K2Bw_w_rcpp`, Y, X, h, w)
-}
-
-LSKNW_K4Bw_rcpp <- function(Y, X, h) {
-    .Call(`_MYHfusionRcpp_LSKNW_K4Bw_rcpp`, Y, X, h)
-}
-
-LSKNW_K4Bw_w_rcpp <- function(Y, X, h, w) {
-    .Call(`_MYHfusionRcpp_LSKNW_K4Bw_w_rcpp`, Y, X, h, w)
-}
-
-LSKNWcdf_K2Ep_rcpp <- function(Y, X, h) {
-    .Call(`_MYHfusionRcpp_LSKNWcdf_K2Ep_rcpp`, Y, X, h)
-}
-
-LSKNWcdf_K2Ep_w_rcpp <- function(Y, X, h, w) {
-    .Call(`_MYHfusionRcpp_LSKNWcdf_K2Ep_w_rcpp`, Y, X, h, w)
-}
-
-LSKNWcdf_K2Bw_rcpp <- function(Y, X, h) {
-    .Call(`_MYHfusionRcpp_LSKNWcdf_K2Bw_rcpp`, Y, X, h)
-}
-
-LSKNWcdf_K2Bw_w_rcpp <- function(Y, X, h, w) {
-    .Call(`_MYHfusionRcpp_LSKNWcdf_K2Bw_w_rcpp`, Y, X, h, w)
-}
-
-LSKNWcdf_K4Bw_rcpp <- function(Y, X, h) {
-    .Call(`_MYHfusionRcpp_LSKNWcdf_K4Bw_rcpp`, Y, X, h)
-}
-
-LSKNWcdf_K4Bw_w_rcpp <- function(Y, X, h, w) {
-    .Call(`_MYHfusionRcpp_LSKNWcdf_K4Bw_w_rcpp`, Y, X, h, w)
-}
-
-K2_Ep_rcpp_v1 <- function(u) {
-    .Call(`_MYHfusionRcpp_K2_Ep_rcpp_v1`, u)
 }
 
 lL_normal_rcpp <- function(X, Y, alpha, beta, sigma) {

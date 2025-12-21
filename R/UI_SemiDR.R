@@ -527,6 +527,118 @@ SemiSI <- function(data = NULL, X.name = NULL, Y.name = NULL,
   return(results)
 }
 
+SemiSI.adtLASSO.ADMM <- function(data = NULL, X.name = NULL, Y.name = NULL,
+                                 X = NULL, Y = NULL,
+                                 type = "mean", kernel = "K2.Biweight",
+                                 beta.initial, bandwidth,
+                                 weight.beta, lambda.L1.penalty,
+                                 rho.augLagrange.penalty = 1,
+                                 iter.max = 50, tol = 1e-7)
+{
+  if (!is.null(data))
+  {
+    X <- as.matrix(data[, X.name])
+    Y <- as.matrix(data[, Y.name])
+  }else
+  {
+    X <- as.matrix(X)
+    Y <- as.matrix(Y)
+  }
+
+  number_n <- dim(Y)[1]
+  number_p <- dim(X)[2]
+
+  if (number_p < 2)
+  {
+    warnings("There should be at least two covariates.")
+  }
+
+  beta.free.initial <- beta.initial[-1] / beta.initial[1]
+  weight.free.beta <- lambda.L1.penalty / (weight.beta[-1] / weight.beta[1])
+
+  if (type == "mean")
+  {
+    if (kernel == "K2.Epanechnikov")
+    {
+      beta_free_iter <- beta.free.initial
+      gamma_free_iter <- beta.free.initial
+      u_free_iter <- rep(0, length(beta.free.initial))
+
+      for (iter in 1:iter.max)
+      {
+        SemiLS.penalized <- function(theta)
+        {
+          beta <- c(1, theta)
+          ls_value <- LSKNW_K2Ep_rcpp(Y = Y, X = X %*% beta, h = bandwidth) * number_n +
+            (rho.augLagrange.penalty / 2) *
+            sum((theta - gamma_free_iter + u_free_iter) ^ 2)
+
+          return(ls_value)
+        }
+
+        SemiLS.penalized.esti <- nlminb(start = beta_free_iter,
+                                        objective = SemiLS.penalized)
+
+        beta_free_iter_new <- SemiLS.penalized.esti$par
+
+        gamma_free_iter_new <- sign(beta_free_iter + u_free_iter) * pmax(
+          abs(beta_free_iter + u_free_iter) - weight.free.beta / rho.augLagrange.penalty,
+          0)
+        u_free_iter_new <- u_free_iter + beta_free_iter_new - gamma_free_iter_new
+
+        res_primal <- sqrt(sum((beta_free_iter_new - gamma_free_iter_new) ^ 2))
+        res_dual <- rho.augLagrange.penalty *
+          sqrt(sum((gamma_free_iter_new - gamma_free_iter) ^ 2))
+
+        if ((res_primal > tol) | (res_dual > tol))
+        {
+          beta_free_iter <- beta_free_iter_new
+          gamma_free_iter <- gamma_free_iter_new
+          u_free_iter <- u_free_iter_new
+
+          print(c(paste("Iteration", iter, " par = ", sep = ""), beta_free_iter))
+        }else
+        {
+          break
+        }
+      }
+
+      results <- list(coef = c(1, beta_free_iter),
+                      iteration = iter)
+    }
+
+    if (kernel == "K2.Biweight")
+    {
+
+    }
+
+    if (kernel == "K4.Biweight")
+    {
+
+    }
+  }
+
+  if (type == "distribution")
+  {
+    if (kernel == "K2.Epanechnikov")
+    {
+
+    }
+
+    if (kernel == "K2.Biweight")
+    {
+
+    }
+
+    if (kernel == "K4.Biweight")
+    {
+
+    }
+  }
+
+
+}
+
 SemiMI <- function(data = NULL, X.name = NULL, Y.name = NULL,
                    X = NULL, Y = NULL,
                    type = "mean", dimension = 2, kernel = "K2.Biweight",
