@@ -252,8 +252,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // lL_normal_rcpp
-double lL_normal_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const double& sigma);
-RcppExport SEXP _MYHfusionRcpp_lL_normal_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP sigmaSEXP) {
+double lL_normal_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const double& sigma, Rcpp::Nullable<Rcpp::NumericVector> w);
+RcppExport SEXP _MYHfusionRcpp_lL_normal_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP sigmaSEXP, SEXP wSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -262,29 +262,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< const double& >::type sigma(sigmaSEXP);
-    rcpp_result_gen = Rcpp::wrap(lL_normal_rcpp(X, Y, alpha, beta, sigma));
-    return rcpp_result_gen;
-END_RCPP
-}
-// lL_normal_w_rcpp
-double lL_normal_w_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const double& sigma, const arma::vec& w);
-RcppExport SEXP _MYHfusionRcpp_lL_normal_w_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP sigmaSEXP, SEXP wSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< const double& >::type sigma(sigmaSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
-    rcpp_result_gen = Rcpp::wrap(lL_normal_w_rcpp(X, Y, alpha, beta, sigma, w));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(lL_normal_rcpp(X, Y, alpha, beta, sigma, w));
     return rcpp_result_gen;
 END_RCPP
 }
 // diff_lL_normal_rcpp
-List diff_lL_normal_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const double& sigma);
-RcppExport SEXP _MYHfusionRcpp_diff_lL_normal_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP sigmaSEXP) {
+List diff_lL_normal_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const double& sigma, Rcpp::Nullable<Rcpp::NumericVector> w);
+RcppExport SEXP _MYHfusionRcpp_diff_lL_normal_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP sigmaSEXP, SEXP wSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -293,13 +278,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< const double& >::type sigma(sigmaSEXP);
-    rcpp_result_gen = Rcpp::wrap(diff_lL_normal_rcpp(X, Y, alpha, beta, sigma));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(diff_lL_normal_rcpp(X, Y, alpha, beta, sigma, w));
     return rcpp_result_gen;
 END_RCPP
 }
 // lL_logistic_rcpp
-double lL_logistic_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta);
-RcppExport SEXP _MYHfusionRcpp_lL_logistic_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP) {
+double lL_logistic_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, Rcpp::Nullable<Rcpp::NumericVector> w);
+RcppExport SEXP _MYHfusionRcpp_lL_logistic_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP wSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -307,28 +293,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
     Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
-    rcpp_result_gen = Rcpp::wrap(lL_logistic_rcpp(X, Y, alpha, beta));
-    return rcpp_result_gen;
-END_RCPP
-}
-// lL_logistic_w_rcpp
-double lL_logistic_w_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const arma::vec& w);
-RcppExport SEXP _MYHfusionRcpp_lL_logistic_w_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP wSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
-    rcpp_result_gen = Rcpp::wrap(lL_logistic_w_rcpp(X, Y, alpha, beta, w));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(lL_logistic_rcpp(X, Y, alpha, beta, w));
     return rcpp_result_gen;
 END_RCPP
 }
 // diff_lL_logistic_rcpp
-List diff_lL_logistic_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta);
-RcppExport SEXP _MYHfusionRcpp_diff_lL_logistic_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP) {
+List diff_lL_logistic_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, Rcpp::Nullable<Rcpp::NumericVector> w);
+RcppExport SEXP _MYHfusionRcpp_diff_lL_logistic_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP wSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -336,13 +308,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
     Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
-    rcpp_result_gen = Rcpp::wrap(diff_lL_logistic_rcpp(X, Y, alpha, beta));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(diff_lL_logistic_rcpp(X, Y, alpha, beta, w));
     return rcpp_result_gen;
 END_RCPP
 }
 // lL_Gamma_rcpp
-double lL_Gamma_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const double& nu);
-RcppExport SEXP _MYHfusionRcpp_lL_Gamma_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP nuSEXP) {
+double lL_Gamma_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const double& nu, Rcpp::Nullable<Rcpp::NumericVector> w);
+RcppExport SEXP _MYHfusionRcpp_lL_Gamma_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP nuSEXP, SEXP wSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -351,29 +324,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< const double& >::type nu(nuSEXP);
-    rcpp_result_gen = Rcpp::wrap(lL_Gamma_rcpp(X, Y, alpha, beta, nu));
-    return rcpp_result_gen;
-END_RCPP
-}
-// lL_Gamma_w_rcpp
-double lL_Gamma_w_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const double& nu, const arma::vec& w);
-RcppExport SEXP _MYHfusionRcpp_lL_Gamma_w_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP nuSEXP, SEXP wSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< const double& >::type nu(nuSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
-    rcpp_result_gen = Rcpp::wrap(lL_Gamma_w_rcpp(X, Y, alpha, beta, nu, w));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(lL_Gamma_rcpp(X, Y, alpha, beta, nu, w));
     return rcpp_result_gen;
 END_RCPP
 }
 // diff_lL_Gamma_rcpp
-List diff_lL_Gamma_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const double& nu);
-RcppExport SEXP _MYHfusionRcpp_diff_lL_Gamma_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP nuSEXP) {
+List diff_lL_Gamma_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const double& nu, Rcpp::Nullable<Rcpp::NumericVector> w);
+RcppExport SEXP _MYHfusionRcpp_diff_lL_Gamma_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP nuSEXP, SEXP wSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -382,13 +340,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< const double& >::type nu(nuSEXP);
-    rcpp_result_gen = Rcpp::wrap(diff_lL_Gamma_rcpp(X, Y, alpha, beta, nu));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(diff_lL_Gamma_rcpp(X, Y, alpha, beta, nu, w));
     return rcpp_result_gen;
 END_RCPP
 }
 // lL_binomial_rcpp
-double lL_binomial_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const size_t& N);
-RcppExport SEXP _MYHfusionRcpp_lL_binomial_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP NSEXP) {
+double lL_binomial_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const double& N, Rcpp::Nullable<Rcpp::NumericVector> w);
+RcppExport SEXP _MYHfusionRcpp_lL_binomial_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP NSEXP, SEXP wSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -396,30 +355,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
     Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< const size_t& >::type N(NSEXP);
-    rcpp_result_gen = Rcpp::wrap(lL_binomial_rcpp(X, Y, alpha, beta, N));
-    return rcpp_result_gen;
-END_RCPP
-}
-// lL_binomial_w_rcpp
-double lL_binomial_w_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const size_t& N, const arma::vec& w);
-RcppExport SEXP _MYHfusionRcpp_lL_binomial_w_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP NSEXP, SEXP wSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< const size_t& >::type N(NSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
-    rcpp_result_gen = Rcpp::wrap(lL_binomial_w_rcpp(X, Y, alpha, beta, N, w));
+    Rcpp::traits::input_parameter< const double& >::type N(NSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(lL_binomial_rcpp(X, Y, alpha, beta, N, w));
     return rcpp_result_gen;
 END_RCPP
 }
 // diff_lL_binomial_rcpp
-List diff_lL_binomial_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const size_t& N);
-RcppExport SEXP _MYHfusionRcpp_diff_lL_binomial_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP NSEXP) {
+List diff_lL_binomial_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const double& N, Rcpp::Nullable<Rcpp::NumericVector> w);
+RcppExport SEXP _MYHfusionRcpp_diff_lL_binomial_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP NSEXP, SEXP wSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -427,14 +371,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
     Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< const size_t& >::type N(NSEXP);
-    rcpp_result_gen = Rcpp::wrap(diff_lL_binomial_rcpp(X, Y, alpha, beta, N));
+    Rcpp::traits::input_parameter< const double& >::type N(NSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(diff_lL_binomial_rcpp(X, Y, alpha, beta, N, w));
     return rcpp_result_gen;
 END_RCPP
 }
 // lL_Poisson_rcpp
-double lL_Poisson_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta);
-RcppExport SEXP _MYHfusionRcpp_lL_Poisson_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP) {
+double lL_Poisson_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, Rcpp::Nullable<Rcpp::NumericVector> w);
+RcppExport SEXP _MYHfusionRcpp_lL_Poisson_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP wSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -442,28 +387,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
     Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
-    rcpp_result_gen = Rcpp::wrap(lL_Poisson_rcpp(X, Y, alpha, beta));
-    return rcpp_result_gen;
-END_RCPP
-}
-// lL_Poisson_w_rcpp
-double lL_Poisson_w_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const arma::vec& w);
-RcppExport SEXP _MYHfusionRcpp_lL_Poisson_w_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP wSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
-    rcpp_result_gen = Rcpp::wrap(lL_Poisson_w_rcpp(X, Y, alpha, beta, w));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(lL_Poisson_rcpp(X, Y, alpha, beta, w));
     return rcpp_result_gen;
 END_RCPP
 }
 // diff_lL_Poisson_rcpp
-List diff_lL_Poisson_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta);
-RcppExport SEXP _MYHfusionRcpp_diff_lL_Poisson_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP) {
+List diff_lL_Poisson_rcpp(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, Rcpp::Nullable<Rcpp::NumericVector> w);
+RcppExport SEXP _MYHfusionRcpp_diff_lL_Poisson_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP wSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -471,13 +402,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
     Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
-    rcpp_result_gen = Rcpp::wrap(diff_lL_Poisson_rcpp(X, Y, alpha, beta));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(diff_lL_Poisson_rcpp(X, Y, alpha, beta, w));
     return rcpp_result_gen;
 END_RCPP
 }
-// lL_normal_rcpp_fun
-double lL_normal_rcpp_fun(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const double& sigma);
-RcppExport SEXP _MYHfusionRcpp_lL_normal_rcpp_fun(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP sigmaSEXP) {
+// lL_Poisson_rcpp_v1
+double lL_Poisson_rcpp_v1(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta);
+RcppExport SEXP _MYHfusionRcpp_lL_Poisson_rcpp_v1(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -485,14 +417,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
     Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< const double& >::type sigma(sigmaSEXP);
-    rcpp_result_gen = Rcpp::wrap(lL_normal_rcpp_fun(X, Y, alpha, beta, sigma));
+    rcpp_result_gen = Rcpp::wrap(lL_Poisson_rcpp_v1(X, Y, alpha, beta));
     return rcpp_result_gen;
 END_RCPP
 }
-// lL_normal_w_rcpp_fun
-double lL_normal_w_rcpp_fun(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const double& sigma, const arma::vec& w);
-RcppExport SEXP _MYHfusionRcpp_lL_normal_w_rcpp_fun(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP sigmaSEXP, SEXP wSEXP) {
+// lL_Poisson_w_rcpp_v1
+double lL_Poisson_w_rcpp_v1(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const arma::vec& w);
+RcppExport SEXP _MYHfusionRcpp_lL_Poisson_w_rcpp_v1(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP wSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -500,15 +431,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
     Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< const double& >::type sigma(sigmaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
-    rcpp_result_gen = Rcpp::wrap(lL_normal_w_rcpp_fun(X, Y, alpha, beta, sigma, w));
+    rcpp_result_gen = Rcpp::wrap(lL_Poisson_w_rcpp_v1(X, Y, alpha, beta, w));
     return rcpp_result_gen;
 END_RCPP
 }
-// diff_lL_normal_rcpp_v1
-List diff_lL_normal_rcpp_v1(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta, const double& sigma);
-RcppExport SEXP _MYHfusionRcpp_diff_lL_normal_rcpp_v1(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP sigmaSEXP) {
+// diff_lL_Poisson_rcpp_v1
+List diff_lL_Poisson_rcpp_v1(const arma::mat& X, const arma::vec& Y, const double& alpha, const arma::vec& beta);
+RcppExport SEXP _MYHfusionRcpp_diff_lL_Poisson_rcpp_v1(SEXP XSEXP, SEXP YSEXP, SEXP alphaSEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -516,8 +446,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
     Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< const double& >::type sigma(sigmaSEXP);
-    rcpp_result_gen = Rcpp::wrap(diff_lL_normal_rcpp_v1(X, Y, alpha, beta, sigma));
+    rcpp_result_gen = Rcpp::wrap(diff_lL_Poisson_rcpp_v1(X, Y, alpha, beta));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -2614,24 +2543,19 @@ static const R_CallMethodDef CallEntries[] = {
     {"_MYHfusionRcpp_CVKNWcdf_rcpp", (DL_FUNC) &_MYHfusionRcpp_CVKNWcdf_rcpp, 5},
     {"_MYHfusionRcpp_LSKNW_rcpp", (DL_FUNC) &_MYHfusionRcpp_LSKNW_rcpp, 5},
     {"_MYHfusionRcpp_LSKNWcdf_rcpp", (DL_FUNC) &_MYHfusionRcpp_LSKNWcdf_rcpp, 5},
-    {"_MYHfusionRcpp_lL_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_normal_rcpp, 5},
-    {"_MYHfusionRcpp_lL_normal_w_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_normal_w_rcpp, 6},
-    {"_MYHfusionRcpp_diff_lL_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_diff_lL_normal_rcpp, 5},
-    {"_MYHfusionRcpp_lL_logistic_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_logistic_rcpp, 4},
-    {"_MYHfusionRcpp_lL_logistic_w_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_logistic_w_rcpp, 5},
-    {"_MYHfusionRcpp_diff_lL_logistic_rcpp", (DL_FUNC) &_MYHfusionRcpp_diff_lL_logistic_rcpp, 4},
-    {"_MYHfusionRcpp_lL_Gamma_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_Gamma_rcpp, 5},
-    {"_MYHfusionRcpp_lL_Gamma_w_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_Gamma_w_rcpp, 6},
-    {"_MYHfusionRcpp_diff_lL_Gamma_rcpp", (DL_FUNC) &_MYHfusionRcpp_diff_lL_Gamma_rcpp, 5},
-    {"_MYHfusionRcpp_lL_binomial_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_binomial_rcpp, 5},
-    {"_MYHfusionRcpp_lL_binomial_w_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_binomial_w_rcpp, 6},
-    {"_MYHfusionRcpp_diff_lL_binomial_rcpp", (DL_FUNC) &_MYHfusionRcpp_diff_lL_binomial_rcpp, 5},
-    {"_MYHfusionRcpp_lL_Poisson_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_Poisson_rcpp, 4},
-    {"_MYHfusionRcpp_lL_Poisson_w_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_Poisson_w_rcpp, 5},
-    {"_MYHfusionRcpp_diff_lL_Poisson_rcpp", (DL_FUNC) &_MYHfusionRcpp_diff_lL_Poisson_rcpp, 4},
-    {"_MYHfusionRcpp_lL_normal_rcpp_fun", (DL_FUNC) &_MYHfusionRcpp_lL_normal_rcpp_fun, 5},
-    {"_MYHfusionRcpp_lL_normal_w_rcpp_fun", (DL_FUNC) &_MYHfusionRcpp_lL_normal_w_rcpp_fun, 6},
-    {"_MYHfusionRcpp_diff_lL_normal_rcpp_v1", (DL_FUNC) &_MYHfusionRcpp_diff_lL_normal_rcpp_v1, 5},
+    {"_MYHfusionRcpp_lL_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_normal_rcpp, 6},
+    {"_MYHfusionRcpp_diff_lL_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_diff_lL_normal_rcpp, 6},
+    {"_MYHfusionRcpp_lL_logistic_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_logistic_rcpp, 5},
+    {"_MYHfusionRcpp_diff_lL_logistic_rcpp", (DL_FUNC) &_MYHfusionRcpp_diff_lL_logistic_rcpp, 5},
+    {"_MYHfusionRcpp_lL_Gamma_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_Gamma_rcpp, 6},
+    {"_MYHfusionRcpp_diff_lL_Gamma_rcpp", (DL_FUNC) &_MYHfusionRcpp_diff_lL_Gamma_rcpp, 6},
+    {"_MYHfusionRcpp_lL_binomial_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_binomial_rcpp, 6},
+    {"_MYHfusionRcpp_diff_lL_binomial_rcpp", (DL_FUNC) &_MYHfusionRcpp_diff_lL_binomial_rcpp, 6},
+    {"_MYHfusionRcpp_lL_Poisson_rcpp", (DL_FUNC) &_MYHfusionRcpp_lL_Poisson_rcpp, 5},
+    {"_MYHfusionRcpp_diff_lL_Poisson_rcpp", (DL_FUNC) &_MYHfusionRcpp_diff_lL_Poisson_rcpp, 5},
+    {"_MYHfusionRcpp_lL_Poisson_rcpp_v1", (DL_FUNC) &_MYHfusionRcpp_lL_Poisson_rcpp_v1, 4},
+    {"_MYHfusionRcpp_lL_Poisson_w_rcpp_v1", (DL_FUNC) &_MYHfusionRcpp_lL_Poisson_w_rcpp_v1, 5},
+    {"_MYHfusionRcpp_diff_lL_Poisson_rcpp_v1", (DL_FUNC) &_MYHfusionRcpp_diff_lL_Poisson_rcpp_v1, 4},
     {"_MYHfusionRcpp_cumuSIR_rcpp", (DL_FUNC) &_MYHfusionRcpp_cumuSIR_rcpp, 3},
     {"_MYHfusionRcpp_AD_EY_normal_Lagrange_rcpp", (DL_FUNC) &_MYHfusionRcpp_AD_EY_normal_Lagrange_rcpp, 6},
     {"_MYHfusionRcpp_AD_EY_normal_SolveLagrange_rcpp", (DL_FUNC) &_MYHfusionRcpp_AD_EY_normal_SolveLagrange_rcpp, 11},

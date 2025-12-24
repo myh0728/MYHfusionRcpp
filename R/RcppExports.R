@@ -77,76 +77,56 @@ LSKNWcdf_rcpp <- function(Y, X, h, kernel = "K2_Ep", w = NULL) {
     .Call(`_MYHfusionRcpp_LSKNWcdf_rcpp`, Y, X, h, kernel, w)
 }
 
-lL_normal_rcpp <- function(X, Y, alpha, beta, sigma) {
-    .Call(`_MYHfusionRcpp_lL_normal_rcpp`, X, Y, alpha, beta, sigma)
+lL_normal_rcpp <- function(X, Y, alpha, beta, sigma, w = NULL) {
+    .Call(`_MYHfusionRcpp_lL_normal_rcpp`, X, Y, alpha, beta, sigma, w)
 }
 
-lL_normal_w_rcpp <- function(X, Y, alpha, beta, sigma, w) {
-    .Call(`_MYHfusionRcpp_lL_normal_w_rcpp`, X, Y, alpha, beta, sigma, w)
+diff_lL_normal_rcpp <- function(X, Y, alpha, beta, sigma, w = NULL) {
+    .Call(`_MYHfusionRcpp_diff_lL_normal_rcpp`, X, Y, alpha, beta, sigma, w)
 }
 
-diff_lL_normal_rcpp <- function(X, Y, alpha, beta, sigma) {
-    .Call(`_MYHfusionRcpp_diff_lL_normal_rcpp`, X, Y, alpha, beta, sigma)
+lL_logistic_rcpp <- function(X, Y, alpha, beta, w = NULL) {
+    .Call(`_MYHfusionRcpp_lL_logistic_rcpp`, X, Y, alpha, beta, w)
 }
 
-lL_logistic_rcpp <- function(X, Y, alpha, beta) {
-    .Call(`_MYHfusionRcpp_lL_logistic_rcpp`, X, Y, alpha, beta)
+diff_lL_logistic_rcpp <- function(X, Y, alpha, beta, w = NULL) {
+    .Call(`_MYHfusionRcpp_diff_lL_logistic_rcpp`, X, Y, alpha, beta, w)
 }
 
-lL_logistic_w_rcpp <- function(X, Y, alpha, beta, w) {
-    .Call(`_MYHfusionRcpp_lL_logistic_w_rcpp`, X, Y, alpha, beta, w)
+lL_Gamma_rcpp <- function(X, Y, alpha, beta, nu, w = NULL) {
+    .Call(`_MYHfusionRcpp_lL_Gamma_rcpp`, X, Y, alpha, beta, nu, w)
 }
 
-diff_lL_logistic_rcpp <- function(X, Y, alpha, beta) {
-    .Call(`_MYHfusionRcpp_diff_lL_logistic_rcpp`, X, Y, alpha, beta)
+diff_lL_Gamma_rcpp <- function(X, Y, alpha, beta, nu, w = NULL) {
+    .Call(`_MYHfusionRcpp_diff_lL_Gamma_rcpp`, X, Y, alpha, beta, nu, w)
 }
 
-lL_Gamma_rcpp <- function(X, Y, alpha, beta, nu) {
-    .Call(`_MYHfusionRcpp_lL_Gamma_rcpp`, X, Y, alpha, beta, nu)
+lL_binomial_rcpp <- function(X, Y, alpha, beta, N, w = NULL) {
+    .Call(`_MYHfusionRcpp_lL_binomial_rcpp`, X, Y, alpha, beta, N, w)
 }
 
-lL_Gamma_w_rcpp <- function(X, Y, alpha, beta, nu, w) {
-    .Call(`_MYHfusionRcpp_lL_Gamma_w_rcpp`, X, Y, alpha, beta, nu, w)
+diff_lL_binomial_rcpp <- function(X, Y, alpha, beta, N, w = NULL) {
+    .Call(`_MYHfusionRcpp_diff_lL_binomial_rcpp`, X, Y, alpha, beta, N, w)
 }
 
-diff_lL_Gamma_rcpp <- function(X, Y, alpha, beta, nu) {
-    .Call(`_MYHfusionRcpp_diff_lL_Gamma_rcpp`, X, Y, alpha, beta, nu)
+lL_Poisson_rcpp <- function(X, Y, alpha, beta, w = NULL) {
+    .Call(`_MYHfusionRcpp_lL_Poisson_rcpp`, X, Y, alpha, beta, w)
 }
 
-lL_binomial_rcpp <- function(X, Y, alpha, beta, N) {
-    .Call(`_MYHfusionRcpp_lL_binomial_rcpp`, X, Y, alpha, beta, N)
+diff_lL_Poisson_rcpp <- function(X, Y, alpha, beta, w = NULL) {
+    .Call(`_MYHfusionRcpp_diff_lL_Poisson_rcpp`, X, Y, alpha, beta, w)
 }
 
-lL_binomial_w_rcpp <- function(X, Y, alpha, beta, N, w) {
-    .Call(`_MYHfusionRcpp_lL_binomial_w_rcpp`, X, Y, alpha, beta, N, w)
+lL_Poisson_rcpp_v1 <- function(X, Y, alpha, beta) {
+    .Call(`_MYHfusionRcpp_lL_Poisson_rcpp_v1`, X, Y, alpha, beta)
 }
 
-diff_lL_binomial_rcpp <- function(X, Y, alpha, beta, N) {
-    .Call(`_MYHfusionRcpp_diff_lL_binomial_rcpp`, X, Y, alpha, beta, N)
+lL_Poisson_w_rcpp_v1 <- function(X, Y, alpha, beta, w) {
+    .Call(`_MYHfusionRcpp_lL_Poisson_w_rcpp_v1`, X, Y, alpha, beta, w)
 }
 
-lL_Poisson_rcpp <- function(X, Y, alpha, beta) {
-    .Call(`_MYHfusionRcpp_lL_Poisson_rcpp`, X, Y, alpha, beta)
-}
-
-lL_Poisson_w_rcpp <- function(X, Y, alpha, beta, w) {
-    .Call(`_MYHfusionRcpp_lL_Poisson_w_rcpp`, X, Y, alpha, beta, w)
-}
-
-diff_lL_Poisson_rcpp <- function(X, Y, alpha, beta) {
-    .Call(`_MYHfusionRcpp_diff_lL_Poisson_rcpp`, X, Y, alpha, beta)
-}
-
-lL_normal_rcpp_fun <- function(X, Y, alpha, beta, sigma) {
-    .Call(`_MYHfusionRcpp_lL_normal_rcpp_fun`, X, Y, alpha, beta, sigma)
-}
-
-lL_normal_w_rcpp_fun <- function(X, Y, alpha, beta, sigma, w) {
-    .Call(`_MYHfusionRcpp_lL_normal_w_rcpp_fun`, X, Y, alpha, beta, sigma, w)
-}
-
-diff_lL_normal_rcpp_v1 <- function(X, Y, alpha, beta, sigma) {
-    .Call(`_MYHfusionRcpp_diff_lL_normal_rcpp_v1`, X, Y, alpha, beta, sigma)
+diff_lL_Poisson_rcpp_v1 <- function(X, Y, alpha, beta) {
+    .Call(`_MYHfusionRcpp_diff_lL_Poisson_rcpp_v1`, X, Y, alpha, beta)
 }
 
 cumuSIR_rcpp <- function(X, Y, eps_inv) {
