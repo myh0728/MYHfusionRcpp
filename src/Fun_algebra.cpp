@@ -2,6 +2,9 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 using namespace Rcpp;
 
+//============================================================================
+// Armadillo functions transformer (to R functions)
+
 // [[Rcpp::export]]
 arma::mat pinv_rcpp(const arma::mat & M_A) {
 
@@ -58,6 +61,9 @@ double rcond_rcpp(const arma::mat & A) {
 
   return value;
 }
+
+//============================================================================
+// My own functions
 
 // [[Rcpp::export]]
 arma::mat GroupSum_rcpp(const arma::mat & MM,
@@ -399,54 +405,5 @@ arma::mat outer_geq_rcpp(const arma::vec & a,
   return outer;
 }
 
-
-
-// For comparison
-
-// [[Rcpp::export]]
-arma::mat pinv_rcpp_v1(const arma::mat & M_A) {
-
-  const arma::mat M_X = arma::pinv(M_A);
-
-  return M_X;
-}
-
-// [[Rcpp::export]]
-arma::mat pinv_rcpp_v2(arma::mat M_A) {
-
-  const arma::mat M_X = arma::pinv(M_A);
-
-  return M_X;
-}
-
-// [[Rcpp::export]]
-arma::mat pinv_rcpp_v3(arma::mat M_A) {
-
-  arma::mat M_X = arma::pinv(M_A);
-
-  return M_X;
-}
-
-// [[Rcpp::export]]
-arma::mat pinv_rcpp_v4(const arma::mat & M_A) {
-
-  return arma::pinv(M_A);
-}
-
-// [[Rcpp::export]]
-List eigen_rcpp_v1(const arma::mat & M_S) {
-
-  List result;
-  arma::vec eigval;
-  arma::mat eigvec;
-
-  eig_sym(eigval, eigvec, M_S);
-  eigval = arma::reverse(eigval);
-  eigvec = arma::reverse(eigvec, 1);
-
-  result["value"] = eigval;
-  result["vector"] = eigvec;
-  return result;
-}
 
 

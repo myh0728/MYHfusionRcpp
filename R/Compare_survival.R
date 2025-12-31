@@ -1,4 +1,4 @@
-KME_R_outer <- function(time.last, is.event, time.event)
+KME_R <- function(time.last, is.event, time.event)
 {
   time.last <- as.vector(time.last)
   is.event <- as.vector(is.event)
@@ -20,7 +20,7 @@ KME_R_outer <- function(time.last, is.event, time.event)
   return(results)
 }
 
-SKME_R_outer <- function(time.last, is.event, time.event,
+SKME_R <- function(time.last, is.event, time.event,
                          X, x, K, h)
 {
   time.last <- as.vector(time.last)

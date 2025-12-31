@@ -83,11 +83,8 @@ double K2_G_diff2_rcpp(const double & u) {
 }
 
 // =========================================================
-//  定義函數指標與選擇器
+//  製作 kernel 選擇器
 // =========================================================
-
-// 定義一個「函數指標型別」，它指向一個「輸入 double&，回傳 double」的函數
-typedef double (*KernelFunc)(const double &);
 
 // 輔助函數：根據字串名稱回傳對應的函數指標
 KernelFunc get_kernel_func(std::string kernel_name) {

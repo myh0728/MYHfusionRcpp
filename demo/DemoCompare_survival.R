@@ -1,4 +1,4 @@
-n <- 100
+n <- 200
 p <- 5
 
 Xi <- matrix(rnorm(n * p), n, p)
@@ -17,121 +17,69 @@ w <- w / sum(w)
 
 ###
 
-test1 <- KME_R_outer(time.last = test.data.1$time.last,
-                     is.event = test.data.1$is.event,
-                     time.event = sort(unique(
-                       test.data.1$time.last[test.data.1$is.event == 1])))
-test2 <- KME_rcpp(time_last = test.data.1$time.last,
-                  is_event = test.data.1$is.event,
-                  time_event = sort(unique(
-                    test.data.1$time.last[test.data.1$is.event == 1])))
-sum(abs(test1$hazard - test2))
+ord <- order(test.data.1$time.last)
+time_last <- test.data.1$time.last[ord]
+is_event <- test.data.1$is.event[ord]
+time_event <- sort(unique(
+  test.data.1$time.last[test.data.1$is.event == 1]))
 
-time.jumps <- sort(unique(c(seq(0, 3, 0.1), test.data.1$time.last[test.data.1$is.event == 1])))
+test1 <- KME_R(time.last = time_last,
+               is.event = is_event,
+               time.event = time_event)
+test2 <- KME_exact_rcpp(time_last = time_last,
+                        is_event = is_event,
+                        time_event = time_event)
 
-test1 <- KME_R_outer(time.last = test.data.1$time.last,
-                     is.event = test.data.1$is.event,
-                     time.event = time.jumps)
-test2 <- KME_rcpp(time_last = test.data.1$time.last,
-                  is_event = test.data.1$is.event,
-                  time_event = time.jumps)
-sum(abs(test1$hazard - test2))
+all.equal(as.vector(test1$survival), as.vector(test2$survival))
 
 ggplot2::autoplot(
   microbenchmark::microbenchmark(
-    "R" = KME_R_outer(time.last = test.data.1$time.last,
-                      is.event = test.data.1$is.event,
-                      time.event = sort(unique(
-                        test.data.1$time.last[test.data.1$is.event == 1]))),
-    "Rcpp" = KME_rcpp(time_last = test.data.1$time.last,
-                      is_event = test.data.1$is.event,
-                      time_event = sort(unique(
-                        test.data.1$time.last[test.data.1$is.event == 1])))
+    "R" = KME_R(time.last = time_last,
+                is.event = is_event,
+                time.event = time_event),
+    "Rcpp" = KME_exact_rcpp(time_last = time_last,
+                            is_event = is_event,
+                            time_event = time_event)
   )
 )
 
-###
+test <- KME_at_times_rcpp(time_event = time_event,
+                          S_event = test2$survival,
+                          H_event = test2$cum_hazard,
+                          time_points = seq(0, 5, 0.1))
 
-test1 <- SKME_R_outer(time.last = test.data.1$time.last,
-                      is.event = test.data.1$is.event,
-                      time.event = sort(unique(
-                        test.data.1$time.last[test.data.1$is.event == 1])),
-                      X = Xi, x = Xi, K = K2_Ep, h = 1.5)
-test2 <- SKME_K2Ep_rcpp(time_last = test.data.1$time.last,
-                        is_event = test.data.1$is.event,
-                        time_event = sort(unique(
-                          test.data.1$time.last[test.data.1$is.event == 1])),
-                        X = Xi, x = Xi, h = rep(1.5, length = p))
-sum(abs(test1$hazard - test2))
+test3 <- SKME_R(time.last = time_last,
+                is.event = is_event,
+                time.event = time_event,
+                X = Xi, x = Xi, K = K2_Ep_R, h = 1.5)
+
+test4 <- SKME_exact_rcpp(time_last = time_last,
+                         is_event = is_event,
+                         time_event = time_event,
+                         X = Xi, x = Xi, h = rep(1.5, length = p))
+
+all.equal(as.vector(test3$survival), as.vector(test4$survival))
 
 ggplot2::autoplot(
   microbenchmark::microbenchmark(
-    "R" = SKME_R_outer(time.last = test.data.1$time.last,
-                       is.event = test.data.1$is.event,
-                       time.event = sort(unique(
-                         test.data.1$time.last[test.data.1$is.event == 1])),
-                       X = Xi, x = Xi, K = K2_Ep, h = 1.5),
-    "Rcpp" = SKME_K2Ep_rcpp(time_last = test.data.1$time.last,
-                            is_event = test.data.1$is.event,
-                            time_event = sort(unique(
-                              test.data.1$time.last[test.data.1$is.event == 1])),
-                            X = Xi, x = Xi, h = rep(1.5, length = p))
+    "R" = SKME_R(time.last = time_last,
+                 is.event = is_event,
+                 time.event = time_event,
+                 X = Xi, x = Xi, K = K2_Ep_R, h = 1.5),
+    "Rcpp" = SKME_exact_rcpp(time_last = time_last,
+                             is_event = is_event,
+                             time_event = time_event,
+                             X = Xi, x = Xi, h = rep(1.5, length = p))
   )
 )
 
-test1 <- SKME_R_outer(time.last = test.data.1$time.last,
-                      is.event = test.data.1$is.event,
-                      time.event = sort(unique(
-                        test.data.1$time.last[test.data.1$is.event == 1])),
-                      X = Xi, x = Xi, K = K2_Bw, h = 1.5)
-test2 <- SKME_K2Bw_rcpp(time_last = test.data.1$time.last,
-                        is_event = test.data.1$is.event,
-                        time_event = sort(unique(
-                          test.data.1$time.last[test.data.1$is.event == 1])),
-                        X = Xi, x = Xi, h = rep(1.5, length = p))
-sum(abs(test1$hazard - test2))
 
-ggplot2::autoplot(
-  microbenchmark::microbenchmark(
-    "R" = SKME_R_outer(time.last = test.data.1$time.last,
-                       is.event = test.data.1$is.event,
-                       time.event = sort(unique(
-                         test.data.1$time.last[test.data.1$is.event == 1])),
-                       X = Xi, x = Xi, K = K2_Bw, h = 1.5),
-    "Rcpp" = SKME_K2Bw_rcpp(time_last = test.data.1$time.last,
-                            is_event = test.data.1$is.event,
-                            time_event = sort(unique(
-                              test.data.1$time.last[test.data.1$is.event == 1])),
-                            X = Xi, x = Xi, h = rep(1.5, length = p))
-  )
-)
 
-test1 <- SKME_R_outer(time.last = test.data.1$time.last,
-                      is.event = test.data.1$is.event,
-                      time.event = sort(unique(
-                        test.data.1$time.last[test.data.1$is.event == 1])),
-                      X = Xi, x = Xi, K = K4_Bw, h = 1.5)
-test2 <- SKME_K4Bw_rcpp(time_last = test.data.1$time.last,
-                        is_event = test.data.1$is.event,
-                        time_event = sort(unique(
-                          test.data.1$time.last[test.data.1$is.event == 1])),
-                        X = Xi, x = Xi, h = rep(1.5, length = p))
-sum(abs(test1$hazard - test2))
 
-ggplot2::autoplot(
-  microbenchmark::microbenchmark(
-    "R" = SKME_R_outer(time.last = test.data.1$time.last,
-                       is.event = test.data.1$is.event,
-                       time.event = sort(unique(
-                         test.data.1$time.last[test.data.1$is.event == 1])),
-                       X = Xi, x = Xi, K = K4_Bw, h = 1.5),
-    "Rcpp" = SKME_K4Bw_rcpp(time_last = test.data.1$time.last,
-                            is_event = test.data.1$is.event,
-                            time_event = sort(unique(
-                              test.data.1$time.last[test.data.1$is.event == 1])),
-                            X = Xi, x = Xi, h = rep(1.5, length = p))
-  )
-)
+
+
+
+
 
 
 

@@ -146,4 +146,14 @@ inline double K2_G_diff2_inline(const double & u) {
   return (u2 - 1.0) * phi;
 }
 
+// =========================================================
+//  共用的型別定義與函數宣告
+// =========================================================
+
+// 1. 定義函數指標型別
+typedef double (*KernelFunc)(const double &);
+
+// 2. 宣告 get_kernel_func (告訴編譯器這個函數存在於某個 .cpp 中)
+KernelFunc get_kernel_func(std::string kernel_name);
+
 #endif
