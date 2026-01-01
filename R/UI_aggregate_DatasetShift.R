@@ -359,7 +359,7 @@ GLMcombineAD.DatasetShift <- function(data = NULL,
             par.hat[number_p + 2] <- exp(par.hat[number_p + 2])
             names(par.hat) <- par.names
 
-            results$EY <- list(
+            results$EXsubY <- list(
               alpha = par.hat["alpha"],
               beta  = par.hat[paste0("beta", 1:number_p)],
               sigma = par.hat["sigma"],
@@ -954,11 +954,266 @@ GLMcombineAD.DatasetShift <- function(data = NULL,
         eta.names <- paste0("eta", 1:number_m)
         phi.names <- paste0("phi", 1:number_m)
 
-        if (method == "fast") {}
+        if (method == "fast") {
 
-        if (method == "EL") {}
+          SS <- function(b) {
 
-        if (do.SE) {}
+            meanPsi <- mean_psi_ADCS_EXsubY_normal_rcpp(
+              X = X,
+              alpha = alpha.initial,
+              beta = beta.initial,
+              sigma = sigma.initial,
+              phi = info.EXsubY$phi,
+              CS_beta = b,
+              y_pts = info.EXsubY$y.pts)
+            sum(meanPsi ^ 2)
+          }
+          initial.DRM <- nlminb(start = initial.DRM, objective = SS)$par
+
+          MLE.score <- diff_lL_normal_rcpp(
+            X = X, Y = Y,
+            alpha = alpha.initial, beta = beta.initial, sigma = sigma.initial
+          )
+
+          if (rcond_rcpp(MLE.score$hessian) > eps.inv) {
+            MLE.score.H.inv <- -inv_sympd_rcpp(-MLE.score$hessian)
+          } else {
+            MLE.score.H.inv <- ginv.sym.eigen(MLE.score$hessian, eps.inv)
+          }
+
+          AD.relevant <- grad_psi_ADCS_EXsubY_normal_rcpp(
+            X = X,
+            alpha = alpha.initial, beta = beta.initial, sigma = sigma.initial,
+            phi = info.EXsubY$phi, CS_beta = initial.DRM, y_pts = info.EXsubY$y.pts,
+            eta = rep(0, number_m),
+            diff_size = diff.size
+          )
+
+          AD.diff <- AD.relevant$mean_psi_gradient
+          colnames(AD.diff) <- c(par.names, phi.names, CS.names)
+
+          ADvar <- GLMcombineADavar(
+            name.par = par.names,
+            MLE.hessian = MLE.score$hessian,
+            Psi.square = AD.relevant$mean_psi_outer,
+            Psi.diff.beta = AD.diff[, par.names, drop = FALSE], # 取出對參數的微分部分
+            Psi.diff.phi = AD.diff[, phi.names, drop = FALSE],
+            Psi.diff.theta = AD.diff[, CS.names, drop = FALSE],
+            kappa = if(!is.null(info.EXsubY$ext.size)) info.EXsubY$ext.size / number_n else NULL,
+            avar.phi = if (!is.null(info.EXsubY$ext.var)) info.EXsubY$ext.var else AD.relevant$ADvar,
+            eps.inv = eps.inv
+          )
+
+          J.V <- ADvar$J.V
+          J.V.inv <- ADvar$J.V.inv
+
+          update_term <- MLE.score.H.inv %*%
+            J.V[par.names, eta.names, drop = FALSE] %*%
+            J.V.inv[eta.names, eta.names, drop = FALSE] %*%
+            (-AD.relevant$mean_psi)
+
+          par.hat <- as.vector(c(alpha.initial, beta.initial, sigma.initial) + update_term)
+          names(par.hat) <- par.names
+
+          results$EXsubY <- list(
+            alpha = par.hat["alpha"],
+            beta  = par.hat[paste0("beta", 1:number_p)],
+            sigma = par.hat["sigma"],
+            parameter = par.hat
+          )
+        }
+
+        if (method == "EL") {
+
+          if (is.null(info.EXsubY$ext.size)) {
+
+            nll <- function(par) {
+
+              alpha <- par[1]
+              beta <- par[2:(number_p + 1)]
+              sigma <- exp(par[number_p + 2])
+              CS_beta <- par[(number_p + 3):(number_p * 2 + 2)]
+
+              ll <- lL_normal_rcpp(X = X, Y = Y,
+                                   alpha = alpha, beta = beta, sigma = sigma) -
+                SolveLagrange_ADCS_EXsubY_normal_rcpp(
+                  X = X, alpha = alpha, beta = beta, sigma = sigma,
+                  phi = info.EXsubY$phi, CS_beta = CS_beta, y_pts = info.EXsubY$y.pts,
+                  eta_initial = rep(0, number_m),
+                  iter_max = iter.max, step_rate = step.rate,
+                  step_max = step.max, tol = tol, eps_inv = eps.inv)$value
+
+              return(-ll)
+            }
+
+            estimation <- nlminb(start = c(alpha.initial, beta.initial, log(sigma.initial), initial.DRM),
+                                 objective = nll)
+            par.hat <- estimation$par
+            par.hat[number_p + 2] <- exp(par.hat[number_p + 2])
+            names(par.hat) <- c(par.names, CS.names)
+
+            results$EXsubY <- list(
+              alpha = par.hat["alpha"],
+              beta  = par.hat[paste0("beta", 1:number_p)],
+              sigma = par.hat["sigma"],
+              parameter = par.hat
+            )
+          } else {
+
+            if (!is.null(info.EXsubY$ext.var)) {
+
+              ext.var.inv <- inv_sympd_rcpp(info.EXsubY$ext.var)
+
+            } else {
+
+              nll <- function(par) {
+
+                alpha <- par[1]
+                beta <- par[2:(number_p + 1)]
+                sigma <- exp(par[number_p + 2])
+                phi.par <- t(matrix(par[(number_p + 3):(number_p + 2 + number_m)],
+                                    nrow = number_p,
+                                    ncol = number_k))
+                CS_beta <- par[(number_p + 3 + number_m):(number_p * 2 + 2 + number_m)]
+                phi.diff <- as.vector(t(info.EXsubY$phi - phi.par))
+
+                ll <- lL_normal_rcpp(X = X, Y = Y,
+                                     alpha = alpha, beta = beta, sigma = sigma) -
+                  SolveLagrange_ADCS_EXsubY_normal_rcpp(
+                    X = X, alpha = alpha, beta = beta, sigma = sigma,
+                    phi = phi.par, CS_beta = CS_beta, y_pts = info.EXsubY$y.pts,
+                    eta_initial = rep(0, number_m),
+                    iter_max = iter.max, step_rate = step.rate,
+                    step_max = step.max, tol = tol, eps_inv = eps.inv)$value -
+                  info.EXsubY$ext.size * sum(phi.diff ^ 2) / 2
+
+                return(-ll)
+              }
+
+              estimation <- nlminb(start = c(alpha.initial, beta.initial, log(sigma.initial),
+                                             as.vector(t(info.EXsubY$phi)), initial.DRM),
+                                   objective = nll)
+              par.hat <- estimation$par
+              par.hat[number_p + 2] <- exp(par.hat[number_p + 2])
+              names(par.hat) <- c(par.names, phi.names, CS.names)
+              alpha.initial <- par.hat["alpha"]
+              beta.initial <- par.hat[paste0("beta", 1:number_p)]
+              sigma.initial <- par.hat["sigma"]
+              phi.initial <- par.hat[phi.names]
+              initial.DRM <- par.hat[CS.names]
+
+              ext.var  <- grad_psi_ADCS_EXsubY_normal_rcpp(
+                X = X,
+                alpha = alpha.initial, beta = beta.initial, sigma = sigma.initial,
+                phi = t(matrix(phi.initial, nrow = number_p, ncol = number_k)),
+                CS_beta = initial.DRM,
+                y_pts = info.EXsubY$y.pts,
+                eta = rep(0, number_m),
+                diff_size = diff.size
+              )$ADvar
+
+              ext.var.inv <- inv_sympd_rcpp(ext.var)
+            }
+
+            nll <- function(par) {
+
+              alpha <- par[1]
+              beta <- par[2:(number_p + 1)]
+              sigma <- exp(par[number_p + 2])
+              phi.par <- t(matrix(par[(number_p + 3):(number_p + 2 + number_m)],
+                                  nrow = number_p,
+                                  ncol = number_k))
+              CS_beta <- par[(number_p + 3 + number_m):(number_p * 2 + 2 + number_m)]
+              phi.diff <- as.vector(t(info.EXsubY$phi - phi.par))
+
+              ll <- lL_normal_rcpp(X = X, Y = Y,
+                                   alpha = alpha, beta = beta, sigma = sigma) -
+                SolveLagrange_ADCS_EXsubY_normal_rcpp(
+                  X = X, alpha = alpha, beta = beta, sigma = sigma,
+                  phi = phi.par, CS_beta = CS_beta, y_pts = info.EXsubY$y.pts,
+                  eta_initial = rep(0, number_m),
+                  iter_max = iter.max, step_rate = step.rate,
+                  step_max = step.max, tol = tol, eps_inv = eps.inv)$value -
+                info.EXsubY$ext.size * sum(t(ext.var.inv * phi.diff) * phi.diff) / 2
+
+              return(-ll)
+            }
+
+            estimation <- nlminb(start = c(alpha.initial, beta.initial, log(sigma.initial),
+                                           as.vector(t(info.EXsubY$phi)), initial.DRM),
+                                 objective = nll)
+            par.hat <- estimation$par
+            par.hat[number_p + 2] <- exp(par.hat[number_p + 2])
+            names(par.hat) <- c(par.names, phi.names, CS.names)
+
+            results$EXsubY <- list(
+              alpha = par.hat["alpha"],
+              beta  = par.hat[paste0("beta", 1:number_p)],
+              sigma = par.hat["sigma"],
+              parameter = par.hat
+            )
+          }
+        }
+
+        if (do.SE) {
+
+          if (method == "fast") {
+
+            par.hat <- c(par.hat, info.EXsubY$phi, initial.DRM)
+            names(par.hat) <- c(par.names, phi.names, CS.names)
+          } else if (is.null(info.EXsubY$ext.size)) {
+
+            par.hat <- c(par.hat[par.names], info.EXsubY$phi, par.hat[CS.names])
+            names(par.hat) <- c(par.names, phi.names, CS.names)
+          }
+
+          MLE.score <- diff_lL_normal_rcpp(
+            X = X, Y = Y,
+            alpha = par.hat["alpha"],
+            beta = par.hat[paste0("beta", 1:number_p)],
+            sigma = par.hat["sigma"]
+          )
+
+          eta.hat <- SolveLagrange_ADCS_EXsubY_normal_rcpp(
+            X = X,
+            alpha = par.hat["alpha"],
+            beta = par.hat[paste0("beta", 1:number_p)],
+            sigma = par.hat["sigma"],
+            phi = t(matrix(par.hat[phi.names], nrow = number_p, ncol = number_k)),
+            CS_beta = par.hat[CS.names],
+            y_pts = info.EXsubY$y.pts,
+            eta_initial = rep(0, number_m),
+            iter_max = iter.max, step_rate = step.rate,
+            step_max = step.max, tol = tol, eps_inv = eps.inv)$eta
+
+          AD.relevant <- grad_psi_ADCS_EXsubY_normal_rcpp(
+            X = X,
+            alpha = par.hat["alpha"],
+            beta = par.hat[paste0("beta", 1:number_p)],
+            sigma = par.hat["sigma"],
+            phi = t(matrix(par.hat[phi.names], nrow = number_p, ncol = number_k)),
+            CS_beta = par.hat[CS.names],
+            y_pts = info.EXsubY$y.pts,
+            eta = eta.hat,
+            diff_size = diff.size
+          )
+
+          AD.diff <- AD.relevant$mean_psi_gradient
+          colnames(AD.diff) <- c(par.names, phi.names, CS.names)
+
+          asy.Cov.par <- GLMcombineADavar(
+            name.par = par.names,
+            MLE.hessian = MLE.score$hessian,
+            Psi.square = AD.relevant$mean_psi_outer,
+            Psi.diff.beta = AD.diff[, par.names, drop = FALSE],
+            Psi.diff.phi = AD.diff[, phi.names, drop = FALSE],
+            Psi.diff.theta = AD.diff[, CS.names, drop = FALSE],
+            kappa = if(!is.null(info.EXsubY$ext.size)) info.EXsubY$ext.size / number_n else NULL,
+            avar.phi = if (!is.null(info.EXsubY$ext.var)) info.EXsubY$ext.var else AD.relevant$ADvar,
+            eps.inv = eps.inv)$asy.Cov.par
+
+          results$EXsubY$Cov.coef <- asy.Cov.par / number_n
+        }
       }
 
       # Case: EYsubX

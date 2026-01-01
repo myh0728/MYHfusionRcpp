@@ -53,7 +53,7 @@ inclusion <- cbind(X[, 1] > 0, X[, 2] > 0)
 GLMcombineAD.DatasetShift(
   X = test.data[, paste("covariate.X", 1:p, sep = "")],
   Y = test.data$response,
-  shift = "NS", distribution = "normal",
+  shift = "CS", distribution = "normal",
   method = "EL", do.SE = TRUE,
   info.EY = list(phi = phi.EY,
                  ext.size = N,
