@@ -2831,6 +2831,34 @@ arma::vec get_psi_ADCS_EY_logistic_rcpp(const arma::vec & Xrow_i,
 }
 
 // [[Rcpp::export]]
+arma::vec mean_psi_ADCS_EY_logistic_rcpp(const arma::mat & X,
+                                         const double & alpha,
+                                         const arma::vec & beta,
+                                         const double & phi,
+                                         const arma::vec & CS_beta) {
+
+  const arma::uword n = X.n_rows;
+  const arma::uword n_m = 1; // Psi 維度 (EY logistic 為 1)
+
+  arma::vec mean_psi = arma::zeros(n_m);
+
+  for (arma::uword i = 0; i < n; ++i) {
+
+    arma::vec psi_vec = get_psi_ADCS_EY_logistic_rcpp(X.row(i).t(),
+                                                      alpha,
+                                                      beta,
+                                                      phi,
+                                                      CS_beta);
+
+    mean_psi += psi_vec;
+  }
+
+  mean_psi /= n;
+
+  return mean_psi;
+}
+
+// [[Rcpp::export]]
 List SolveLagrange_ADCS_EY_logistic_rcpp(const arma::mat & X,
                                          const double & alpha,
                                          const arma::vec & beta,
@@ -3014,6 +3042,39 @@ arma::vec get_psi_ADCS_EXsubY_logistic_rcpp(const arma::vec & Xrow_i,
 
   // 4. 組合 (長度 2p)
   return arma::join_cols(psi_1, psi_0);
+}
+
+// [[Rcpp::export]]
+arma::vec mean_psi_ADCS_EXsubY_logistic_rcpp(const arma::mat & X,
+                                             const double & alpha,
+                                             const arma::vec & beta,
+                                             const arma::mat & phi,
+                                             const arma::vec & CS_beta) {
+
+  const arma::uword n = X.n_rows;
+
+  // 計算 Psi 的維度
+  // EXsubY Logistic 通常 phi 為 (2, p) 矩陣，Psi 為長度 2p 的向量
+  const arma::uword n_p = X.n_cols;
+  const arma::uword n_k = phi.n_rows;
+  const arma::uword n_m = n_p * n_k;
+
+  arma::vec mean_psi = arma::zeros(n_m);
+
+  for (arma::uword i = 0; i < n; ++i) {
+
+    arma::vec psi_vec = get_psi_ADCS_EXsubY_logistic_rcpp(X.row(i).t(),
+                                                          alpha,
+                                                          beta,
+                                                          phi,
+                                                          CS_beta);
+
+    mean_psi += psi_vec;
+  }
+
+  mean_psi /= n;
+
+  return mean_psi;
 }
 
 // [[Rcpp::export]]
@@ -3216,6 +3277,37 @@ arma::vec get_psi_ADCS_EYsubX_logistic_rcpp(const arma::vec & Xrow_i,
 }
 
 // [[Rcpp::export]]
+arma::vec mean_psi_ADCS_EYsubX_logistic_rcpp(const arma::mat & X,
+                                             const double & alpha,
+                                             const arma::vec & beta,
+                                             const arma::vec & phi,
+                                             const arma::vec & CS_beta,
+                                             const arma::umat & inclusion) {
+
+  const arma::uword n = X.n_rows;
+  const arma::uword n_m = phi.n_elem; // Psi 的維度取決於 phi (通常等於 group 數量)
+
+  arma::vec mean_psi = arma::zeros(n_m);
+
+  for (arma::uword i = 0; i < n; ++i) {
+
+    arma::vec inc_vec = arma::conv_to<arma::vec>::from(inclusion.row(i).t());
+    arma::vec psi_vec = get_psi_ADCS_EYsubX_logistic_rcpp(X.row(i).t(),
+                                                          alpha,
+                                                          beta,
+                                                          phi,
+                                                          CS_beta,
+                                                          inc_vec);
+
+    mean_psi += psi_vec;
+  }
+
+  mean_psi /= n;
+
+  return mean_psi;
+}
+
+// [[Rcpp::export]]
 List SolveLagrange_ADCS_EYsubX_logistic_rcpp(const arma::mat & X,
                                              const double & alpha,
                                              const arma::vec & beta,
@@ -3414,6 +3506,34 @@ arma::vec get_psi_ADPPS_EX_logistic_rcpp(const arma::vec & Xrow_i,
 }
 
 // [[Rcpp::export]]
+arma::vec mean_psi_ADPPS_EX_logistic_rcpp(const arma::mat & X,
+                                          const double & alpha,
+                                          const arma::vec & beta,
+                                          const arma::vec & phi,
+                                          const double & PPS_beta) {
+
+  const arma::uword n = X.n_rows;
+  const arma::uword n_m = phi.n_elem; // Psi 的維度與 phi 相同 (即 p 維)
+
+  arma::vec mean_psi = arma::zeros(n_m);
+
+  for (arma::uword i = 0; i < n; ++i) {
+
+    arma::vec psi_vec = get_psi_ADPPS_EX_logistic_rcpp(X.row(i).t(),
+                                                       alpha,
+                                                       beta,
+                                                       phi,
+                                                       PPS_beta);
+
+    mean_psi += psi_vec;
+  }
+
+  mean_psi /= n;
+
+  return mean_psi;
+}
+
+// [[Rcpp::export]]
 List SolveLagrange_ADPPS_EX_logistic_rcpp(const arma::mat & X,
                                           const double & alpha,
                                           const arma::vec & beta,
@@ -3588,6 +3708,34 @@ arma::vec get_psi_ADPPS_EY_logistic_rcpp(const arma::vec & Xrow_i,
 }
 
 // [[Rcpp::export]]
+arma::vec mean_psi_ADPPS_EY_logistic_rcpp(const arma::mat & X,
+                                          const double & alpha,
+                                          const arma::vec & beta,
+                                          const double & phi,
+                                          const double & PPS_beta) {
+
+  const arma::uword n = X.n_rows;
+  const arma::uword n_m = 1; // Psi 維度 (EY logistic 為 1)
+
+  arma::vec mean_psi = arma::zeros(n_m);
+
+  for (arma::uword i = 0; i < n; ++i) {
+
+    arma::vec psi_vec = get_psi_ADPPS_EY_logistic_rcpp(X.row(i).t(),
+                                                       alpha,
+                                                       beta,
+                                                       phi,
+                                                       PPS_beta);
+
+    mean_psi += psi_vec;
+  }
+
+  mean_psi /= n;
+
+  return mean_psi;
+}
+
+// [[Rcpp::export]]
 List SolveLagrange_ADPPS_EY_logistic_rcpp(const arma::mat & X,
                                           const double & alpha,
                                           const arma::vec & beta,
@@ -3758,6 +3906,37 @@ arma::vec get_psi_ADPPS_EYsubX_logistic_rcpp(const arma::vec & Xrow_i,
 
   // 4. 應用遮罩
   return psi_raw % inclusion;
+}
+
+// [[Rcpp::export]]
+arma::vec mean_psi_ADPPS_EYsubX_logistic_rcpp(const arma::mat & X,
+                                              const double & alpha,
+                                              const arma::vec & beta,
+                                              const arma::vec & phi,
+                                              const double & PPS_beta,
+                                              const arma::umat & inclusion) {
+
+  const arma::uword n = X.n_rows;
+  const arma::uword n_m = phi.n_elem; // Psi 的維度取決於 phi (通常等於 group 數量)
+
+  arma::vec mean_psi = arma::zeros(n_m);
+
+  for (arma::uword i = 0; i < n; ++i) {
+
+    arma::vec inc_vec = arma::conv_to<arma::vec>::from(inclusion.row(i).t());
+    arma::vec psi_vec = get_psi_ADPPS_EYsubX_logistic_rcpp(X.row(i).t(),
+                                                           alpha,
+                                                           beta,
+                                                           phi,
+                                                           PPS_beta,
+                                                           inc_vec);
+
+    mean_psi += psi_vec;
+  }
+
+  mean_psi /= n;
+
+  return mean_psi;
 }
 
 // [[Rcpp::export]]

@@ -265,12 +265,20 @@ grad_psi_AD_EYsubX_logistic_rcpp <- function(X, alpha, beta, phi, inclusion, eta
     .Call(`_MYHfusionRcpp_grad_psi_AD_EYsubX_logistic_rcpp`, X, alpha, beta, phi, inclusion, eta, diff_size)
 }
 
+mean_psi_ADCS_EY_logistic_rcpp <- function(X, alpha, beta, phi, CS_beta) {
+    .Call(`_MYHfusionRcpp_mean_psi_ADCS_EY_logistic_rcpp`, X, alpha, beta, phi, CS_beta)
+}
+
 SolveLagrange_ADCS_EY_logistic_rcpp <- function(X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol, eps_inv) {
     .Call(`_MYHfusionRcpp_SolveLagrange_ADCS_EY_logistic_rcpp`, X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol, eps_inv)
 }
 
 grad_psi_ADCS_EY_logistic_rcpp <- function(X, alpha, beta, phi, CS_beta, eta, diff_size) {
     .Call(`_MYHfusionRcpp_grad_psi_ADCS_EY_logistic_rcpp`, X, alpha, beta, phi, CS_beta, eta, diff_size)
+}
+
+mean_psi_ADCS_EXsubY_logistic_rcpp <- function(X, alpha, beta, phi, CS_beta) {
+    .Call(`_MYHfusionRcpp_mean_psi_ADCS_EXsubY_logistic_rcpp`, X, alpha, beta, phi, CS_beta)
 }
 
 SolveLagrange_ADCS_EXsubY_logistic_rcpp <- function(X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol, eps_inv) {
@@ -281,12 +289,20 @@ grad_psi_ADCS_EXsubY_logistic_rcpp <- function(X, alpha, beta, phi, CS_beta, eta
     .Call(`_MYHfusionRcpp_grad_psi_ADCS_EXsubY_logistic_rcpp`, X, alpha, beta, phi, CS_beta, eta, diff_size)
 }
 
+mean_psi_ADCS_EYsubX_logistic_rcpp <- function(X, alpha, beta, phi, CS_beta, inclusion) {
+    .Call(`_MYHfusionRcpp_mean_psi_ADCS_EYsubX_logistic_rcpp`, X, alpha, beta, phi, CS_beta, inclusion)
+}
+
 SolveLagrange_ADCS_EYsubX_logistic_rcpp <- function(X, alpha, beta, phi, CS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol, eps_inv) {
     .Call(`_MYHfusionRcpp_SolveLagrange_ADCS_EYsubX_logistic_rcpp`, X, alpha, beta, phi, CS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol, eps_inv)
 }
 
 grad_psi_ADCS_EYsubX_logistic_rcpp <- function(X, alpha, beta, phi, CS_beta, inclusion, eta, diff_size) {
     .Call(`_MYHfusionRcpp_grad_psi_ADCS_EYsubX_logistic_rcpp`, X, alpha, beta, phi, CS_beta, inclusion, eta, diff_size)
+}
+
+mean_psi_ADPPS_EX_logistic_rcpp <- function(X, alpha, beta, phi, PPS_beta) {
+    .Call(`_MYHfusionRcpp_mean_psi_ADPPS_EX_logistic_rcpp`, X, alpha, beta, phi, PPS_beta)
 }
 
 SolveLagrange_ADPPS_EX_logistic_rcpp <- function(X, alpha, beta, phi, PPS_beta, eta_initial, iter_max, step_rate, step_max, tol, eps_inv) {
@@ -297,12 +313,20 @@ grad_psi_ADPPS_EX_logistic_rcpp <- function(X, alpha, beta, phi, PPS_beta, eta, 
     .Call(`_MYHfusionRcpp_grad_psi_ADPPS_EX_logistic_rcpp`, X, alpha, beta, phi, PPS_beta, eta, diff_size)
 }
 
+mean_psi_ADPPS_EY_logistic_rcpp <- function(X, alpha, beta, phi, PPS_beta) {
+    .Call(`_MYHfusionRcpp_mean_psi_ADPPS_EY_logistic_rcpp`, X, alpha, beta, phi, PPS_beta)
+}
+
 SolveLagrange_ADPPS_EY_logistic_rcpp <- function(X, alpha, beta, phi, PPS_beta, eta_initial, iter_max, step_rate, step_max, tol, eps_inv) {
     .Call(`_MYHfusionRcpp_SolveLagrange_ADPPS_EY_logistic_rcpp`, X, alpha, beta, phi, PPS_beta, eta_initial, iter_max, step_rate, step_max, tol, eps_inv)
 }
 
 grad_psi_ADPPS_EY_logistic_rcpp <- function(X, alpha, beta, phi, PPS_beta, eta, diff_size) {
     .Call(`_MYHfusionRcpp_grad_psi_ADPPS_EY_logistic_rcpp`, X, alpha, beta, phi, PPS_beta, eta, diff_size)
+}
+
+mean_psi_ADPPS_EYsubX_logistic_rcpp <- function(X, alpha, beta, phi, PPS_beta, inclusion) {
+    .Call(`_MYHfusionRcpp_mean_psi_ADPPS_EYsubX_logistic_rcpp`, X, alpha, beta, phi, PPS_beta, inclusion)
 }
 
 SolveLagrange_ADPPS_EYsubX_logistic_rcpp <- function(X, alpha, beta, phi, PPS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol, eps_inv) {
