@@ -579,6 +579,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// mean_psi_ADCS_EY_normal_rcpp
+arma::vec mean_psi_ADCS_EY_normal_rcpp(const arma::mat& X, const double& alpha, const arma::vec& beta, const double& phi, const arma::vec& CS_beta);
+RcppExport SEXP _MYHfusionRcpp_mean_psi_ADCS_EY_normal_rcpp(SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP phiSEXP, SEXP CS_betaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type phi(phiSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type CS_beta(CS_betaSEXP);
+    rcpp_result_gen = Rcpp::wrap(mean_psi_ADCS_EY_normal_rcpp(X, alpha, beta, phi, CS_beta));
+    return rcpp_result_gen;
+END_RCPP
+}
 // SolveLagrange_ADCS_EY_normal_rcpp
 List SolveLagrange_ADCS_EY_normal_rcpp(const arma::mat& X, const double& alpha, const arma::vec& beta, const double& phi, const arma::vec& CS_beta, const double& eta_initial, const size_t& iter_max, const double& step_rate, const size_t& step_max, const double& tol, const double& eps_inv);
 RcppExport SEXP _MYHfusionRcpp_SolveLagrange_ADCS_EY_normal_rcpp(SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP phiSEXP, SEXP CS_betaSEXP, SEXP eta_initialSEXP, SEXP iter_maxSEXP, SEXP step_rateSEXP, SEXP step_maxSEXP, SEXP tolSEXP, SEXP eps_invSEXP) {
@@ -615,6 +630,23 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double& >::type eta(etaSEXP);
     Rcpp::traits::input_parameter< const double& >::type diff_size(diff_sizeSEXP);
     rcpp_result_gen = Rcpp::wrap(grad_psi_ADCS_EY_normal_rcpp(X, alpha, beta, sigma, phi, CS_beta, eta, diff_size));
+    return rcpp_result_gen;
+END_RCPP
+}
+// mean_psi_ADCS_EXsubY_normal_rcpp
+arma::vec mean_psi_ADCS_EXsubY_normal_rcpp(const arma::mat& X, const double& alpha, const arma::vec& beta, const double& sigma, const arma::mat& phi, const arma::vec& CS_beta, const arma::mat& y_pts);
+RcppExport SEXP _MYHfusionRcpp_mean_psi_ADCS_EXsubY_normal_rcpp(SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP sigmaSEXP, SEXP phiSEXP, SEXP CS_betaSEXP, SEXP y_ptsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type phi(phiSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type CS_beta(CS_betaSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type y_pts(y_ptsSEXP);
+    rcpp_result_gen = Rcpp::wrap(mean_psi_ADCS_EXsubY_normal_rcpp(X, alpha, beta, sigma, phi, CS_beta, y_pts));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -660,6 +692,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// mean_psi_ADCS_EYsubX_normal_rcpp
+arma::vec mean_psi_ADCS_EYsubX_normal_rcpp(const arma::mat& X, const double& alpha, const arma::vec& beta, const arma::vec& phi, const arma::vec& CS_beta, const arma::umat& inclusion);
+RcppExport SEXP _MYHfusionRcpp_mean_psi_ADCS_EYsubX_normal_rcpp(SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP phiSEXP, SEXP CS_betaSEXP, SEXP inclusionSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type phi(phiSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type CS_beta(CS_betaSEXP);
+    Rcpp::traits::input_parameter< const arma::umat& >::type inclusion(inclusionSEXP);
+    rcpp_result_gen = Rcpp::wrap(mean_psi_ADCS_EYsubX_normal_rcpp(X, alpha, beta, phi, CS_beta, inclusion));
+    return rcpp_result_gen;
+END_RCPP
+}
 // SolveLagrange_ADCS_EYsubX_normal_rcpp
 List SolveLagrange_ADCS_EYsubX_normal_rcpp(const arma::mat& X, const double& alpha, const arma::vec& beta, const arma::vec& phi, const arma::vec& CS_beta, const arma::umat& inclusion, const arma::vec& eta_initial, const size_t& iter_max, const double& step_rate, const size_t& step_max, const double& tol, const double& eps_inv);
 RcppExport SEXP _MYHfusionRcpp_SolveLagrange_ADCS_EYsubX_normal_rcpp(SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP phiSEXP, SEXP CS_betaSEXP, SEXP inclusionSEXP, SEXP eta_initialSEXP, SEXP iter_maxSEXP, SEXP step_rateSEXP, SEXP step_maxSEXP, SEXP tolSEXP, SEXP eps_invSEXP) {
@@ -698,6 +746,22 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type eta(etaSEXP);
     Rcpp::traits::input_parameter< const double& >::type diff_size(diff_sizeSEXP);
     rcpp_result_gen = Rcpp::wrap(grad_psi_ADCS_EYsubX_normal_rcpp(X, alpha, beta, sigma, phi, CS_beta, inclusion, eta, diff_size));
+    return rcpp_result_gen;
+END_RCPP
+}
+// mean_psi_ADPPS_EX_normal_rcpp
+arma::vec mean_psi_ADPPS_EX_normal_rcpp(const arma::mat& X, const double& alpha, const arma::vec& beta, const double& sigma, const arma::vec& phi, const double& PPS_beta);
+RcppExport SEXP _MYHfusionRcpp_mean_psi_ADPPS_EX_normal_rcpp(SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP sigmaSEXP, SEXP phiSEXP, SEXP PPS_betaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type phi(phiSEXP);
+    Rcpp::traits::input_parameter< const double& >::type PPS_beta(PPS_betaSEXP);
+    rcpp_result_gen = Rcpp::wrap(mean_psi_ADPPS_EX_normal_rcpp(X, alpha, beta, sigma, phi, PPS_beta));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -741,6 +805,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// mean_psi_ADPPS_EY_normal_rcpp
+arma::vec mean_psi_ADPPS_EY_normal_rcpp(const arma::mat& X, const double& alpha, const arma::vec& beta, const double& sigma, const double& phi, const double& PPS_beta);
+RcppExport SEXP _MYHfusionRcpp_mean_psi_ADPPS_EY_normal_rcpp(SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP sigmaSEXP, SEXP phiSEXP, SEXP PPS_betaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type phi(phiSEXP);
+    Rcpp::traits::input_parameter< const double& >::type PPS_beta(PPS_betaSEXP);
+    rcpp_result_gen = Rcpp::wrap(mean_psi_ADPPS_EY_normal_rcpp(X, alpha, beta, sigma, phi, PPS_beta));
+    return rcpp_result_gen;
+END_RCPP
+}
 // SolveLagrange_ADPPS_EY_normal_rcpp
 List SolveLagrange_ADPPS_EY_normal_rcpp(const arma::mat& X, const double& alpha, const arma::vec& beta, const double& sigma, const double& phi, const double& PPS_beta, const double& eta_initial, const size_t& iter_max, const double& step_rate, const size_t& step_max, const double& tol, const double& eps_inv);
 RcppExport SEXP _MYHfusionRcpp_SolveLagrange_ADPPS_EY_normal_rcpp(SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP sigmaSEXP, SEXP phiSEXP, SEXP PPS_betaSEXP, SEXP eta_initialSEXP, SEXP iter_maxSEXP, SEXP step_rateSEXP, SEXP step_maxSEXP, SEXP tolSEXP, SEXP eps_invSEXP) {
@@ -778,6 +858,23 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double& >::type eta(etaSEXP);
     Rcpp::traits::input_parameter< const double& >::type diff_size(diff_sizeSEXP);
     rcpp_result_gen = Rcpp::wrap(grad_psi_ADPPS_EY_normal_rcpp(X, alpha, beta, sigma, phi, PPS_beta, eta, diff_size));
+    return rcpp_result_gen;
+END_RCPP
+}
+// mean_psi_ADPPS_EXsubY_normal_rcpp
+arma::vec mean_psi_ADPPS_EXsubY_normal_rcpp(const arma::mat& X, const double& alpha, const arma::vec& beta, const double& sigma, const arma::mat& phi, const double& PPS_beta, const arma::mat& y_pts);
+RcppExport SEXP _MYHfusionRcpp_mean_psi_ADPPS_EXsubY_normal_rcpp(SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP sigmaSEXP, SEXP phiSEXP, SEXP PPS_betaSEXP, SEXP y_ptsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type phi(phiSEXP);
+    Rcpp::traits::input_parameter< const double& >::type PPS_beta(PPS_betaSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type y_pts(y_ptsSEXP);
+    rcpp_result_gen = Rcpp::wrap(mean_psi_ADPPS_EXsubY_normal_rcpp(X, alpha, beta, sigma, phi, PPS_beta, y_pts));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -820,6 +917,23 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type eta(etaSEXP);
     Rcpp::traits::input_parameter< const double& >::type diff_size(diff_sizeSEXP);
     rcpp_result_gen = Rcpp::wrap(grad_psi_ADPPS_EXsubY_normal_rcpp(X, alpha, beta, sigma, phi, PPS_beta, y_pts, eta, diff_size));
+    return rcpp_result_gen;
+END_RCPP
+}
+// mean_psi_ADPPS_EYsubX_normal_rcpp
+arma::vec mean_psi_ADPPS_EYsubX_normal_rcpp(const arma::mat& X, const double& alpha, const arma::vec& beta, const double& sigma, const arma::vec& phi, const double& PPS_beta, const arma::umat& inclusion);
+RcppExport SEXP _MYHfusionRcpp_mean_psi_ADPPS_EYsubX_normal_rcpp(SEXP XSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP sigmaSEXP, SEXP phiSEXP, SEXP PPS_betaSEXP, SEXP inclusionSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type phi(phiSEXP);
+    Rcpp::traits::input_parameter< const double& >::type PPS_beta(PPS_betaSEXP);
+    Rcpp::traits::input_parameter< const arma::umat& >::type inclusion(inclusionSEXP);
+    rcpp_result_gen = Rcpp::wrap(mean_psi_ADPPS_EYsubX_normal_rcpp(X, alpha, beta, sigma, phi, PPS_beta, inclusion));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -2009,18 +2123,25 @@ static const R_CallMethodDef CallEntries[] = {
     {"_MYHfusionRcpp_grad_psi_AD_EXsubY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_grad_psi_AD_EXsubY_normal_rcpp, 8},
     {"_MYHfusionRcpp_SolveLagrange_AD_EYsubX_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_SolveLagrange_AD_EYsubX_normal_rcpp, 11},
     {"_MYHfusionRcpp_grad_psi_AD_EYsubX_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_grad_psi_AD_EYsubX_normal_rcpp, 8},
+    {"_MYHfusionRcpp_mean_psi_ADCS_EY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_mean_psi_ADCS_EY_normal_rcpp, 5},
     {"_MYHfusionRcpp_SolveLagrange_ADCS_EY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_SolveLagrange_ADCS_EY_normal_rcpp, 11},
     {"_MYHfusionRcpp_grad_psi_ADCS_EY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_grad_psi_ADCS_EY_normal_rcpp, 8},
+    {"_MYHfusionRcpp_mean_psi_ADCS_EXsubY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_mean_psi_ADCS_EXsubY_normal_rcpp, 7},
     {"_MYHfusionRcpp_SolveLagrange_ADCS_EXsubY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_SolveLagrange_ADCS_EXsubY_normal_rcpp, 13},
     {"_MYHfusionRcpp_grad_psi_ADCS_EXsubY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_grad_psi_ADCS_EXsubY_normal_rcpp, 9},
+    {"_MYHfusionRcpp_mean_psi_ADCS_EYsubX_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_mean_psi_ADCS_EYsubX_normal_rcpp, 6},
     {"_MYHfusionRcpp_SolveLagrange_ADCS_EYsubX_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_SolveLagrange_ADCS_EYsubX_normal_rcpp, 12},
     {"_MYHfusionRcpp_grad_psi_ADCS_EYsubX_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_grad_psi_ADCS_EYsubX_normal_rcpp, 9},
+    {"_MYHfusionRcpp_mean_psi_ADPPS_EX_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_mean_psi_ADPPS_EX_normal_rcpp, 6},
     {"_MYHfusionRcpp_SolveLagrange_ADPPS_EX_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_SolveLagrange_ADPPS_EX_normal_rcpp, 12},
     {"_MYHfusionRcpp_grad_psi_ADPPS_EX_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_grad_psi_ADPPS_EX_normal_rcpp, 8},
+    {"_MYHfusionRcpp_mean_psi_ADPPS_EY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_mean_psi_ADPPS_EY_normal_rcpp, 6},
     {"_MYHfusionRcpp_SolveLagrange_ADPPS_EY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_SolveLagrange_ADPPS_EY_normal_rcpp, 12},
     {"_MYHfusionRcpp_grad_psi_ADPPS_EY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_grad_psi_ADPPS_EY_normal_rcpp, 8},
+    {"_MYHfusionRcpp_mean_psi_ADPPS_EXsubY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_mean_psi_ADPPS_EXsubY_normal_rcpp, 7},
     {"_MYHfusionRcpp_SolveLagrange_ADPPS_EXsubY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_SolveLagrange_ADPPS_EXsubY_normal_rcpp, 13},
     {"_MYHfusionRcpp_grad_psi_ADPPS_EXsubY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_grad_psi_ADPPS_EXsubY_normal_rcpp, 9},
+    {"_MYHfusionRcpp_mean_psi_ADPPS_EYsubX_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_mean_psi_ADPPS_EYsubX_normal_rcpp, 7},
     {"_MYHfusionRcpp_SolveLagrange_ADPPS_EYsubX_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_SolveLagrange_ADPPS_EYsubX_normal_rcpp, 13},
     {"_MYHfusionRcpp_grad_psi_ADPPS_EYsubX_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_grad_psi_ADPPS_EYsubX_normal_rcpp, 9},
     {"_MYHfusionRcpp_SolveLagrange_AD_EY_logistic_rcpp", (DL_FUNC) &_MYHfusionRcpp_SolveLagrange_AD_EY_logistic_rcpp, 10},

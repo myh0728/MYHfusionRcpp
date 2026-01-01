@@ -61,7 +61,11 @@ GLMcombineAD.DatasetShift(
   info.EXsubY = list(phi = phi.EXsubY,
                      y.pts = y.pts,
                      ext.size = N,
-                     ext.var = 10 * diag(4)))
+                     ext.var = 10 * diag(4)),
+  info.EYsubX = list(phi = phi.EYsubX,
+                     inclusion = inclusion,
+                     ext.size = N,
+                     ext.var = 10 * diag(2)))
 
 
 

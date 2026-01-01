@@ -157,12 +157,20 @@ grad_psi_AD_EYsubX_normal_rcpp <- function(X, alpha, beta, sigma, phi, inclusion
     .Call(`_MYHfusionRcpp_grad_psi_AD_EYsubX_normal_rcpp`, X, alpha, beta, sigma, phi, inclusion, eta, diff_size)
 }
 
+mean_psi_ADCS_EY_normal_rcpp <- function(X, alpha, beta, phi, CS_beta) {
+    .Call(`_MYHfusionRcpp_mean_psi_ADCS_EY_normal_rcpp`, X, alpha, beta, phi, CS_beta)
+}
+
 SolveLagrange_ADCS_EY_normal_rcpp <- function(X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol, eps_inv) {
     .Call(`_MYHfusionRcpp_SolveLagrange_ADCS_EY_normal_rcpp`, X, alpha, beta, phi, CS_beta, eta_initial, iter_max, step_rate, step_max, tol, eps_inv)
 }
 
 grad_psi_ADCS_EY_normal_rcpp <- function(X, alpha, beta, sigma, phi, CS_beta, eta, diff_size) {
     .Call(`_MYHfusionRcpp_grad_psi_ADCS_EY_normal_rcpp`, X, alpha, beta, sigma, phi, CS_beta, eta, diff_size)
+}
+
+mean_psi_ADCS_EXsubY_normal_rcpp <- function(X, alpha, beta, sigma, phi, CS_beta, y_pts) {
+    .Call(`_MYHfusionRcpp_mean_psi_ADCS_EXsubY_normal_rcpp`, X, alpha, beta, sigma, phi, CS_beta, y_pts)
 }
 
 SolveLagrange_ADCS_EXsubY_normal_rcpp <- function(X, alpha, beta, sigma, phi, CS_beta, y_pts, eta_initial, iter_max, step_rate, step_max, tol, eps_inv) {
@@ -173,12 +181,20 @@ grad_psi_ADCS_EXsubY_normal_rcpp <- function(X, alpha, beta, sigma, phi, CS_beta
     .Call(`_MYHfusionRcpp_grad_psi_ADCS_EXsubY_normal_rcpp`, X, alpha, beta, sigma, phi, CS_beta, y_pts, eta, diff_size)
 }
 
+mean_psi_ADCS_EYsubX_normal_rcpp <- function(X, alpha, beta, phi, CS_beta, inclusion) {
+    .Call(`_MYHfusionRcpp_mean_psi_ADCS_EYsubX_normal_rcpp`, X, alpha, beta, phi, CS_beta, inclusion)
+}
+
 SolveLagrange_ADCS_EYsubX_normal_rcpp <- function(X, alpha, beta, phi, CS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol, eps_inv) {
     .Call(`_MYHfusionRcpp_SolveLagrange_ADCS_EYsubX_normal_rcpp`, X, alpha, beta, phi, CS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol, eps_inv)
 }
 
 grad_psi_ADCS_EYsubX_normal_rcpp <- function(X, alpha, beta, sigma, phi, CS_beta, inclusion, eta, diff_size) {
     .Call(`_MYHfusionRcpp_grad_psi_ADCS_EYsubX_normal_rcpp`, X, alpha, beta, sigma, phi, CS_beta, inclusion, eta, diff_size)
+}
+
+mean_psi_ADPPS_EX_normal_rcpp <- function(X, alpha, beta, sigma, phi, PPS_beta) {
+    .Call(`_MYHfusionRcpp_mean_psi_ADPPS_EX_normal_rcpp`, X, alpha, beta, sigma, phi, PPS_beta)
 }
 
 SolveLagrange_ADPPS_EX_normal_rcpp <- function(X, alpha, beta, sigma, phi, PPS_beta, eta_initial, iter_max, step_rate, step_max, tol, eps_inv) {
@@ -189,6 +205,10 @@ grad_psi_ADPPS_EX_normal_rcpp <- function(X, alpha, beta, sigma, phi, PPS_beta, 
     .Call(`_MYHfusionRcpp_grad_psi_ADPPS_EX_normal_rcpp`, X, alpha, beta, sigma, phi, PPS_beta, eta, diff_size)
 }
 
+mean_psi_ADPPS_EY_normal_rcpp <- function(X, alpha, beta, sigma, phi, PPS_beta) {
+    .Call(`_MYHfusionRcpp_mean_psi_ADPPS_EY_normal_rcpp`, X, alpha, beta, sigma, phi, PPS_beta)
+}
+
 SolveLagrange_ADPPS_EY_normal_rcpp <- function(X, alpha, beta, sigma, phi, PPS_beta, eta_initial, iter_max, step_rate, step_max, tol, eps_inv) {
     .Call(`_MYHfusionRcpp_SolveLagrange_ADPPS_EY_normal_rcpp`, X, alpha, beta, sigma, phi, PPS_beta, eta_initial, iter_max, step_rate, step_max, tol, eps_inv)
 }
@@ -197,12 +217,20 @@ grad_psi_ADPPS_EY_normal_rcpp <- function(X, alpha, beta, sigma, phi, PPS_beta, 
     .Call(`_MYHfusionRcpp_grad_psi_ADPPS_EY_normal_rcpp`, X, alpha, beta, sigma, phi, PPS_beta, eta, diff_size)
 }
 
+mean_psi_ADPPS_EXsubY_normal_rcpp <- function(X, alpha, beta, sigma, phi, PPS_beta, y_pts) {
+    .Call(`_MYHfusionRcpp_mean_psi_ADPPS_EXsubY_normal_rcpp`, X, alpha, beta, sigma, phi, PPS_beta, y_pts)
+}
+
 SolveLagrange_ADPPS_EXsubY_normal_rcpp <- function(X, alpha, beta, sigma, phi, PPS_beta, y_pts, eta_initial, iter_max, step_rate, step_max, tol, eps_inv) {
     .Call(`_MYHfusionRcpp_SolveLagrange_ADPPS_EXsubY_normal_rcpp`, X, alpha, beta, sigma, phi, PPS_beta, y_pts, eta_initial, iter_max, step_rate, step_max, tol, eps_inv)
 }
 
 grad_psi_ADPPS_EXsubY_normal_rcpp <- function(X, alpha, beta, sigma, phi, PPS_beta, y_pts, eta, diff_size) {
     .Call(`_MYHfusionRcpp_grad_psi_ADPPS_EXsubY_normal_rcpp`, X, alpha, beta, sigma, phi, PPS_beta, y_pts, eta, diff_size)
+}
+
+mean_psi_ADPPS_EYsubX_normal_rcpp <- function(X, alpha, beta, sigma, phi, PPS_beta, inclusion) {
+    .Call(`_MYHfusionRcpp_mean_psi_ADPPS_EYsubX_normal_rcpp`, X, alpha, beta, sigma, phi, PPS_beta, inclusion)
 }
 
 SolveLagrange_ADPPS_EYsubX_normal_rcpp <- function(X, alpha, beta, sigma, phi, PPS_beta, inclusion, eta_initial, iter_max, step_rate, step_max, tol, eps_inv) {

@@ -692,6 +692,34 @@ arma::vec get_psi_ADCS_EY_normal_rcpp(const arma::vec & Xrow_i,
 }
 
 // [[Rcpp::export]]
+arma::vec mean_psi_ADCS_EY_normal_rcpp(const arma::mat & X,
+                                       const double & alpha,
+                                       const arma::vec & beta,
+                                       const double & phi,
+                                       const arma::vec & CS_beta) {
+
+  const arma::uword n = X.n_rows;
+  const arma::uword n_m = 1;
+
+  arma::vec mean_psi = arma::zeros(n_m);
+
+  for (arma::uword i = 0; i < n; ++i) {
+
+    arma::vec psi_vec = get_psi_ADCS_EY_normal_rcpp(X.row(i).t(),
+                                                    alpha,
+                                                    beta,
+                                                    phi,
+                                                    CS_beta);
+
+    mean_psi += psi_vec;
+  }
+
+  mean_psi /= n;
+
+  return mean_psi;
+}
+
+// [[Rcpp::export]]
 List SolveLagrange_ADCS_EY_normal_rcpp(const arma::mat & X,
                                        const double & alpha,
                                        const arma::vec & beta,
@@ -870,6 +898,40 @@ arma::vec get_psi_ADCS_EXsubY_normal_rcpp(const arma::vec & Xrow_i,
   // 5. 計算 Psi
   // 公式: (X - phi) * cdf_dist * w(X)
   return arma::vectorise((x_phi_dist.each_col() % cdf_dist).t()) * eSI_CS_i;
+}
+
+// [[Rcpp::export]]
+arma::vec mean_psi_ADCS_EXsubY_normal_rcpp(const arma::mat & X,
+                                           const double & alpha,
+                                           const arma::vec & beta,
+                                           const double & sigma,
+                                           const arma::mat & phi,
+                                           const arma::vec & CS_beta,
+                                           const arma::mat & y_pts) {
+
+  const arma::uword n = X.n_rows;
+  const arma::uword n_k = phi.n_rows;
+  const arma::uword n_p = X.n_cols;
+  const arma::uword n_m = n_p * n_k;
+
+  arma::vec mean_psi = arma::zeros(n_m);
+
+  for (arma::uword i = 0; i < n; ++i) {
+
+    arma::vec psi_vec = get_psi_ADCS_EXsubY_normal_rcpp(X.row(i).t(),
+                                                        alpha,
+                                                        beta,
+                                                        sigma,
+                                                        phi,
+                                                        CS_beta,
+                                                        y_pts);
+
+    mean_psi += psi_vec;
+  }
+
+  mean_psi /= n;
+
+  return mean_psi;
 }
 
 // [[Rcpp::export]]
@@ -1082,6 +1144,37 @@ arma::vec get_psi_ADCS_EYsubX_normal_rcpp(const arma::vec & Xrow_i,
 }
 
 // [[Rcpp::export]]
+arma::vec mean_psi_ADCS_EYsubX_normal_rcpp(const arma::mat & X,
+                                           const double & alpha,
+                                           const arma::vec & beta,
+                                           const arma::vec & phi,
+                                           const arma::vec & CS_beta,
+                                           const arma::umat & inclusion) {
+
+  const arma::uword n = X.n_rows;
+  const arma::uword n_m = phi.n_elem; // Psi 的維度取決於 phi
+
+  arma::vec mean_psi = arma::zeros(n_m);
+
+  for (arma::uword i = 0; i < n; ++i) {
+
+    arma::vec inc_vec = arma::conv_to<arma::vec>::from(inclusion.row(i).t());
+    arma::vec psi_vec = get_psi_ADCS_EYsubX_normal_rcpp(X.row(i).t(),
+                                                        alpha,
+                                                        beta,
+                                                        phi,
+                                                        CS_beta,
+                                                        inc_vec);
+
+    mean_psi += psi_vec;
+  }
+
+  mean_psi /= n;
+
+  return mean_psi;
+}
+
+// [[Rcpp::export]]
 List SolveLagrange_ADCS_EYsubX_normal_rcpp(const arma::mat & X,
                                            const double & alpha,
                                            const arma::vec & beta,
@@ -1289,6 +1382,36 @@ arma::vec get_psi_ADPPS_EX_normal_rcpp(const arma::vec & Xrow_i,
 }
 
 // [[Rcpp::export]]
+arma::vec mean_psi_ADPPS_EX_normal_rcpp(const arma::mat & X,
+                                        const double & alpha,
+                                        const arma::vec & beta,
+                                        const double & sigma,
+                                        const arma::vec & phi,
+                                        const double & PPS_beta) {
+
+  const arma::uword n = X.n_rows;
+  const arma::uword n_m = phi.n_elem;
+
+  arma::vec mean_psi = arma::zeros(n_m);
+
+  for (arma::uword i = 0; i < n; ++i) {
+
+    arma::vec psi_vec = get_psi_ADPPS_EX_normal_rcpp(X.row(i).t(),
+                                                     alpha,
+                                                     beta,
+                                                     sigma,
+                                                     phi,
+                                                     PPS_beta);
+
+    mean_psi += psi_vec;
+  }
+
+  mean_psi /= n;
+
+  return mean_psi;
+}
+
+// [[Rcpp::export]]
 List SolveLagrange_ADPPS_EX_normal_rcpp(const arma::mat & X,
                                         const double & alpha,
                                         const arma::vec & beta,
@@ -1457,6 +1580,36 @@ arma::vec get_psi_ADPPS_EY_normal_rcpp(const arma::vec & Xrow_i,
 
   // 4. 計算 Psi = c_f * w
   return arma::vec({c_f * e_f});
+}
+
+// [[Rcpp::export]]
+arma::vec mean_psi_ADPPS_EY_normal_rcpp(const arma::mat & X,
+                                        const double & alpha,
+                                        const arma::vec & beta,
+                                        const double & sigma,
+                                        const double & phi,
+                                        const double & PPS_beta) {
+
+  const arma::uword n = X.n_rows;
+  const arma::uword n_m = 1; // Psi 維度 (EY normal 為 1)
+
+  arma::vec mean_psi = arma::zeros(n_m);
+
+  for (arma::uword i = 0; i < n; ++i) {
+
+    arma::vec psi_vec = get_psi_ADPPS_EY_normal_rcpp(X.row(i).t(),
+                                                     alpha,
+                                                     beta,
+                                                     sigma,
+                                                     phi,
+                                                     PPS_beta);
+
+    mean_psi += psi_vec;
+  }
+
+  mean_psi /= n;
+
+  return mean_psi;
 }
 
 // [[Rcpp::export]]
@@ -1657,6 +1810,42 @@ arma::vec get_psi_ADPPS_EXsubY_normal_rcpp(const arma::vec & Xrow_i,
   // 5. 計算 Psi
   // 公式: (X - phi) * cdf_dist * w(X)
   return arma::vectorise((x_phi_dist.each_col() % cdf_dist).t()) * e_f;
+}
+
+// [[Rcpp::export]]
+arma::vec mean_psi_ADPPS_EXsubY_normal_rcpp(const arma::mat & X,
+                                            const double & alpha,
+                                            const arma::vec & beta,
+                                            const double & sigma,
+                                            const arma::mat & phi,
+                                            const double & PPS_beta,
+                                            const arma::mat & y_pts) {
+
+  const arma::uword n = X.n_rows;
+
+  // 計算 Psi 的維度
+  const arma::uword n_k = phi.n_rows;
+  const arma::uword n_p = X.n_cols;
+  const arma::uword n_m = n_p * n_k;
+
+  arma::vec mean_psi = arma::zeros(n_m);
+
+  for (arma::uword i = 0; i < n; ++i) {
+
+    arma::vec psi_vec = get_psi_ADPPS_EXsubY_normal_rcpp(X.row(i).t(),
+                                                         alpha,
+                                                         beta,
+                                                         sigma,
+                                                         phi,
+                                                         PPS_beta,
+                                                         y_pts);
+
+    mean_psi += psi_vec;
+  }
+
+  mean_psi /= n;
+
+  return mean_psi;
 }
 
 // [[Rcpp::export]]
@@ -1868,6 +2057,39 @@ arma::vec get_psi_ADPPS_EYsubX_normal_rcpp(const arma::vec & Xrow_i,
   // 4. 組合並回傳 Psi
   // (Shifted Mean - Phi) * I(Inclusion) * Weight
   return (c_f % inclusion) * e_f;
+}
+
+// [[Rcpp::export]]
+arma::vec mean_psi_ADPPS_EYsubX_normal_rcpp(const arma::mat & X,
+                                            const double & alpha,
+                                            const arma::vec & beta,
+                                            const double & sigma,
+                                            const arma::vec & phi,
+                                            const double & PPS_beta,
+                                            const arma::umat & inclusion) {
+
+  const arma::uword n = X.n_rows;
+  const arma::uword n_m = phi.n_elem; // Psi 的維度取決於 phi
+
+  arma::vec mean_psi = arma::zeros(n_m);
+
+  for (arma::uword i = 0; i < n; ++i) {
+
+    arma::vec inc_vec = arma::conv_to<arma::vec>::from(inclusion.row(i).t());
+    arma::vec psi_vec = get_psi_ADPPS_EYsubX_normal_rcpp(X.row(i).t(),
+                                                         alpha,
+                                                         beta,
+                                                         sigma,
+                                                         phi,
+                                                         PPS_beta,
+                                                         inc_vec);
+
+    mean_psi += psi_vec;
+  }
+
+  mean_psi /= n;
+
+  return mean_psi;
 }
 
 // [[Rcpp::export]]
