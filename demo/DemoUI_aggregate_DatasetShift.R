@@ -54,10 +54,14 @@ GLMcombineAD.DatasetShift(
   X = test.data[, paste("covariate.X", 1:p, sep = "")],
   Y = test.data$response,
   shift = "NS", distribution = "normal",
-  method = "fast", do.SE = TRUE,
+  method = "EL", do.SE = TRUE,
   info.EY = list(phi = phi.EY,
                  ext.size = N,
-                 ext.var = 10))
+                 ext.var = 10),
+  info.EXsubY = list(phi = phi.EXsubY,
+                     y.pts = y.pts,
+                     ext.size = N,
+                     ext.var = 10 * diag(4)))
 
 
 

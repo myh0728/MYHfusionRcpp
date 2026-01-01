@@ -295,7 +295,6 @@ arma::vec get_psi_AD_EXsubY_normal_rcpp(const arma::vec & Xrow_i,
                                         const arma::mat & y_pts) { // y_pts: (n_k, 2)
 
   const arma::uword n_k = phi.n_rows;
-  const arma::uword n_p = Xrow_i.n_elem;
 
   // 1. 計算線性預測與標準化座標
   double SI_i = alpha + arma::dot(Xrow_i, beta);
@@ -3628,7 +3627,6 @@ List grad_psi_ADPPS_EYsubX_logistic_rcpp(const arma::mat & X,
   arma::mat mean_psi_outer = arma::zeros(n_m, n_m);
   arma::vec var_A_accum = arma::zeros(n_m);
   arma::mat var_B_accum = arma::zeros(n_m, n_m);
-  double var_AB_Dtor = 0.0;
 
   // 預計算 PPS 參數
   double ePPS_beta = std::exp(PPS_beta);
