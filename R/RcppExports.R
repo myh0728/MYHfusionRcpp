@@ -129,6 +129,14 @@ diff_lL_Poisson_rcpp_v1 <- function(X, Y, alpha, beta) {
     .Call(`_MYHfusionRcpp_diff_lL_Poisson_rcpp_v1`, X, Y, alpha, beta)
 }
 
+criterion_panel_CV_rcpp <- function(X, Y, h, kernel = "K2_Ep") {
+    .Call(`_MYHfusionRcpp_criterion_panel_CV_rcpp`, X, Y, h, kernel)
+}
+
+criterion_panel_SS_rcpp <- function(X, Y, h, kernel = "K2_Ep") {
+    .Call(`_MYHfusionRcpp_criterion_panel_SS_rcpp`, X, Y, h, kernel)
+}
+
 cumuSIR_rcpp <- function(X, Y, eps_inv) {
     .Call(`_MYHfusionRcpp_cumuSIR_rcpp`, X, Y, eps_inv)
 }
