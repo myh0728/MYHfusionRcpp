@@ -137,6 +137,10 @@ criterion_panel_SS_rcpp <- function(X, Y, h, kernel = "K2_Ep") {
     .Call(`_MYHfusionRcpp_criterion_panel_SS_rcpp`, X, Y, h, kernel)
 }
 
+criterion_panel_SSeff_rcpp <- function(X, Y, V_inv, h, kernel = "K2_Ep") {
+    .Call(`_MYHfusionRcpp_criterion_panel_SSeff_rcpp`, X, Y, V_inv, h, kernel)
+}
+
 cumuSIR_rcpp <- function(X, Y, eps_inv) {
     .Call(`_MYHfusionRcpp_cumuSIR_rcpp`, X, Y, eps_inv)
 }

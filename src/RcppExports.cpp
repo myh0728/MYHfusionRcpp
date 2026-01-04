@@ -478,6 +478,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// criterion_panel_SSeff_rcpp
+double criterion_panel_SSeff_rcpp(const arma::mat& X, const arma::mat& Y, const arma::cube& V_inv, const double& h, std::string kernel);
+RcppExport SEXP _MYHfusionRcpp_criterion_panel_SSeff_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP V_invSEXP, SEXP hSEXP, SEXP kernelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type V_inv(V_invSEXP);
+    Rcpp::traits::input_parameter< const double& >::type h(hSEXP);
+    Rcpp::traits::input_parameter< std::string >::type kernel(kernelSEXP);
+    rcpp_result_gen = Rcpp::wrap(criterion_panel_SSeff_rcpp(X, Y, V_inv, h, kernel));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cumuSIR_rcpp
 List cumuSIR_rcpp(const arma::mat& X, const arma::vec& Y, const double& eps_inv);
 RcppExport SEXP _MYHfusionRcpp_cumuSIR_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP eps_invSEXP) {
@@ -2238,6 +2253,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_MYHfusionRcpp_diff_lL_Poisson_rcpp_v1", (DL_FUNC) &_MYHfusionRcpp_diff_lL_Poisson_rcpp_v1, 4},
     {"_MYHfusionRcpp_criterion_panel_CV_rcpp", (DL_FUNC) &_MYHfusionRcpp_criterion_panel_CV_rcpp, 4},
     {"_MYHfusionRcpp_criterion_panel_SS_rcpp", (DL_FUNC) &_MYHfusionRcpp_criterion_panel_SS_rcpp, 4},
+    {"_MYHfusionRcpp_criterion_panel_SSeff_rcpp", (DL_FUNC) &_MYHfusionRcpp_criterion_panel_SSeff_rcpp, 5},
     {"_MYHfusionRcpp_cumuSIR_rcpp", (DL_FUNC) &_MYHfusionRcpp_cumuSIR_rcpp, 3},
     {"_MYHfusionRcpp_SolveLagrange_AD_EY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_SolveLagrange_AD_EY_normal_rcpp, 10},
     {"_MYHfusionRcpp_grad_psi_AD_EY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_grad_psi_AD_EY_normal_rcpp, 7},
