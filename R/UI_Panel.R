@@ -26,6 +26,8 @@ Panel.SemiSI <- function(X, Y, kernel = "K2.Biweight", bandwidth = NULL,
 
   results <- list()
 
+  # === Step 1 ===
+
   if (is.null(bandwidth))
   {
     CVcriterion <- function(par.free)
@@ -48,6 +50,8 @@ Panel.SemiSI <- function(X, Y, kernel = "K2.Biweight", bandwidth = NULL,
     results$details.CV <- estimation.CV
   }
 
+  # === Step 2 ===
+
   SScriterion <- function(par.free)
   {
     beta <- c(1, par.free)
@@ -60,8 +64,56 @@ Panel.SemiSI <- function(X, Y, kernel = "K2.Biweight", bandwidth = NULL,
   estimation <- nlminb(start = beta.free.initial,
                        objective = SScriterion)
 
-  results$coef <- c(1, estimation$par)
-  results$details <- estimation
+  results$coef.SS <- c(1, estimation$par)
+  results$details.SS <- estimation
+
+  # === Step 3.1 ===
+
+  effV.inv.CVbeta <- get_effVinv_panel_rcpp(
+    X = apply(aperm(X, c(3, 1, 2)) * results$coef.CV, c(2, 3), sum), Y = Y,
+    h = results$bandwidth, kernel = cpp_kernel
+  )
+
+  SScriterion <- function(par.free)
+  {
+    beta <- c(1, par.free)
+    SI <- apply(aperm(X, c(3, 1, 2)) * beta, c(2, 3), sum)
+    value <- criterion_panel_SSeff_rcpp(X = SI, Y = Y, V_inv = effV.inv.CVbeta,
+                                        h = results$bandwidth, kernel = cpp_kernel)
+
+    return(value)
+  }
+
+  estimation <- nlminb(start = beta.free.initial,
+                       objective = SScriterion)
+
+  results$coef.SSeff.CV <- c(1, estimation$par)
+  results$details.SSeff.CV <- estimation
+
+  # === Step 3.2 ===
+
+  effV.inv.SSbeta <- get_effVinv_panel_rcpp(
+    X = apply(aperm(X, c(3, 1, 2)) * results$coef.SS, c(2, 3), sum), Y = Y,
+    h = results$bandwidth, kernel = cpp_kernel
+  )
+
+  SScriterion <- function(par.free)
+  {
+    beta <- c(1, par.free)
+    SI <- apply(aperm(X, c(3, 1, 2)) * beta, c(2, 3), sum)
+    value <- criterion_panel_SSeff_rcpp(X = SI, Y = Y, V_inv = effV.inv.SSbeta,
+                                        h = results$bandwidth, kernel = cpp_kernel)
+
+    return(value)
+  }
+
+  estimation <- nlminb(start = beta.free.initial,
+                       objective = SScriterion)
+
+  results$coef.SSeff.SS <- c(1, estimation$par)
+  results$details.SSeff.SS <- estimation
+
+  # =============
 
   return(results)
 }

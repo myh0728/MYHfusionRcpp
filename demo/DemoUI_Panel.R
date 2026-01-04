@@ -6,9 +6,9 @@ L <- 12
 beta0 <- c(1, -1)
 
 SN <- 100
-results.simulation <- matrix(0, nrow = SN, ncol = 3)
+results.simulation <- matrix(0, nrow = SN, ncol = 5)
 dimnames(results.simulation) <- list(paste0("sim", 1:SN),
-                                     c("CV", "SS", "bandwidth"))
+                                     c("CV", "SS", "SSeff.CV", "SSeff.SS", "bandwidth"))
 
 for (sn in 1:SN) {
 
@@ -37,13 +37,15 @@ for (sn in 1:SN) {
                        beta.initial = beta0)
 
   results.simulation[sn, "CV"] <- esti$coef.CV[2]
-  results.simulation[sn, "SS"] <- esti$coef[2]
+  results.simulation[sn, "SS"] <- esti$coef.SS[2]
+  results.simulation[sn, "SSeff.CV"] <- esti$coef.SSeff.CV[2]
+  results.simulation[sn, "SSeff.SS"] <- esti$coef.SSeff.SS[2]
   results.simulation[sn, "bandwidth"] <- esti$bandwidth
 
   print(sn)
 }
 
 summary(results.simulation)
-
+apply(results.simulation, 2, sd)
 
 
