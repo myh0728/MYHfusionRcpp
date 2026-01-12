@@ -53,12 +53,24 @@ KDE_rcpp <- function(X, x, h, kernel = "K2_Ep", w = NULL) {
     .Call(`_MYHfusionRcpp_KDE_rcpp`, X, x, h, kernel, w)
 }
 
+KDE_rcpp0 <- function(X, x, h, kernel = "K2_Ep", w = NULL) {
+    .Call(`_MYHfusionRcpp_KDE_rcpp0`, X, x, h, kernel, w)
+}
+
 KNW_rcpp <- function(Y, X, x, h, kernel = "K2_Ep", w = NULL) {
     .Call(`_MYHfusionRcpp_KNW_rcpp`, Y, X, x, h, kernel, w)
 }
 
+KNW_rcpp0 <- function(Y, X, x, h, kernel = "K2_Ep", w = NULL) {
+    .Call(`_MYHfusionRcpp_KNW_rcpp0`, Y, X, x, h, kernel, w)
+}
+
 KNWcdf_rcpp <- function(Y, y, X, x, h, kernel = "K2_Ep", w = NULL) {
     .Call(`_MYHfusionRcpp_KNWcdf_rcpp`, Y, y, X, x, h, kernel, w)
+}
+
+KNWcdf_rcpp0 <- function(Y, y, X, x, h, kernel = "K2_Ep", w = NULL) {
+    .Call(`_MYHfusionRcpp_KNWcdf_rcpp0`, Y, y, X, x, h, kernel, w)
 }
 
 CVKNW_rcpp <- function(Y, X, h, kernel = "K2_Ep", w = NULL) {
@@ -73,8 +85,16 @@ LSKNW_rcpp <- function(Y, X, h, kernel = "K2_Ep", w = NULL) {
     .Call(`_MYHfusionRcpp_LSKNW_rcpp`, Y, X, h, kernel, w)
 }
 
+LSKNW_rcpp0 <- function(Y, X, h, kernel = "K2_Ep", w = NULL) {
+    .Call(`_MYHfusionRcpp_LSKNW_rcpp0`, Y, X, h, kernel, w)
+}
+
 LSKNWcdf_rcpp <- function(Y, X, h, kernel = "K2_Ep", w = NULL) {
     .Call(`_MYHfusionRcpp_LSKNWcdf_rcpp`, Y, X, h, kernel, w)
+}
+
+LSKNWcdf_rcpp0 <- function(Y, X, h, kernel = "K2_Ep", w = NULL) {
+    .Call(`_MYHfusionRcpp_LSKNWcdf_rcpp0`, Y, X, h, kernel, w)
 }
 
 lL_normal_rcpp <- function(X, Y, alpha, beta, sigma, w = NULL) {
@@ -141,8 +161,16 @@ criterion_panel_SSeff_rcpp <- function(X, Y, V_inv, h, kernel = "K2_Ep") {
     .Call(`_MYHfusionRcpp_criterion_panel_SSeff_rcpp`, X, Y, V_inv, h, kernel)
 }
 
+criterion_panel_SSw_rcpp <- function(X, Y, W_inv, h, kernel = "K2_Ep") {
+    .Call(`_MYHfusionRcpp_criterion_panel_SSw_rcpp`, X, Y, W_inv, h, kernel)
+}
+
 get_effVinv_panel_rcpp <- function(X, Y, h, kernel = "K2_Ep") {
     .Call(`_MYHfusionRcpp_get_effVinv_panel_rcpp`, X, Y, h, kernel)
+}
+
+get_linkF_panel_rcpp <- function(X, Y, u_points, h, kernel = "K2_Ep") {
+    .Call(`_MYHfusionRcpp_get_linkF_panel_rcpp`, X, Y, u_points, h, kernel)
 }
 
 cumuSIR_rcpp <- function(X, Y, eps_inv) {

@@ -5,7 +5,7 @@ L <- 12
 
 beta0 <- c(1, -1)
 
-SN <- 100
+SN <- 10
 results.simulation <- matrix(0, nrow = SN, ncol = 5)
 dimnames(results.simulation) <- list(paste0("sim", 1:SN),
                                      c("CV", "SS", "SSeff.CV", "SSeff.SS", "bandwidth"))
