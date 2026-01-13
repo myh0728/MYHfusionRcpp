@@ -1,6 +1,6 @@
-Panel.SemiSI <- function(X, Y, kernel = "K2.Biweight", bandwidth = NULL,
-                         bandwidth.initial = 1, beta.initial = NULL,
-                         link.eval = NULL)
+Panel.SemiSI.Frailty <- function(X, Y, kernel = "K2.Biweight", bandwidth = NULL,
+                                 bandwidth.initial = 1, beta.initial = NULL,
+                                 link.eval = NULL)
 {
   number_n <- dim(Y)[1]
   number_t <- dim(Y)[2]

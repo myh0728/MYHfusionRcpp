@@ -39,9 +39,9 @@ for (sn in 1:SN) {
 
   X <- abind(X1, X2, along = 3)
 
-  esti <- Panel.SemiSI(X = X, Y = Y, kernel = "K2.Biweight",
-                       beta.initial = beta0,
-                       link.eval = link.evaluation)
+  esti <- Panel.SemiSI.Frailty(X = X, Y = Y, kernel = "K2.Biweight",
+                               beta.initial = beta0,
+                               link.eval = link.evaluation)
 
   results.simulation[sn, "CV"] <- esti$coef.CV[2]
   results.simulation[sn, "SS"] <- esti$coef.SS[2]
