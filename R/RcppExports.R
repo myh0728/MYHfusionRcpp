@@ -161,12 +161,8 @@ criterion_panel_SSeff_rcpp <- function(X, Y, V_inv, h, kernel = "K2_Ep") {
     .Call(`_MYHfusionRcpp_criterion_panel_SSeff_rcpp`, X, Y, V_inv, h, kernel)
 }
 
-criterion_panel_SSw_rcpp <- function(X, Y, W_inv, h, kernel = "K2_Ep") {
-    .Call(`_MYHfusionRcpp_criterion_panel_SSw_rcpp`, X, Y, W_inv, h, kernel)
-}
-
-get_effVinv_panel_rcpp <- function(X, Y, h, kernel = "K2_Ep") {
-    .Call(`_MYHfusionRcpp_get_effVinv_panel_rcpp`, X, Y, h, kernel)
+get_Vinv_panel_frailty_rcpp <- function(X, Y, h, kernel = "K2_Ep") {
+    .Call(`_MYHfusionRcpp_get_Vinv_panel_frailty_rcpp`, X, Y, h, kernel)
 }
 
 get_linkF_panel_rcpp <- function(X, Y, u_points, h, kernel = "K2_Ep") {

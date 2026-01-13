@@ -232,87 +232,10 @@ double criterion_panel_SSeff_rcpp(const arma::mat & X,
 }
 
 // [[Rcpp::export]]
-double criterion_panel_SSw_rcpp(const arma::mat & X,
-                                const arma::mat & Y,
-                                const arma::mat & W_inv, // 共同變異數矩陣的反矩陣 (n_t, n_t)
-                                const double & h,
-                                std::string kernel = "K2_Ep") {
-
-  const arma::uword n_n = Y.n_rows; // 個體數 (N)
-  const arma::uword n_t = Y.n_cols; // 時間點數 (T)
-
-  // 取得 Kernel 函數
-  KernelFunc k_func = get_kernel_func(kernel);
-
-  // 預先計算 h 的倒數
-  const double inv_h = 1.0 / h;
-
-  double ss_val = 0.0;
-
-  // Loop 1: Target Individual i (平行化)
-  // 使用 reduction 處理 ss_val 的累加
-  // 使用 static 排程，因為每個 i 的負載是均衡的
-#pragma omp parallel for schedule(static) reduction(+:ss_val)
-  for (arma::uword i = 0; i < n_n; ++i) {
-
-    // [重要修正]：必須在平行迴圈內宣告，確保每個執行緒有獨立的殘差向量
-    arma::vec resid_i(n_t);
-
-    // Loop 2: Target Time j
-    for (arma::uword j = 0; j < n_t; ++j) {
-
-      double target_x = X(i, j);
-      double p_ij_sum = 0.0;
-      double valid_t_count = 0.0;
-
-      // Loop 3: Feature Time j_F
-      for (arma::uword j_F = 0; j_F < n_t; ++j_F) {
-
-        double sum_num = 0.0;
-        double sum_den = 0.0;
-
-        // Loop 4: Training Individuals
-        // 內層維持單執行緒掃描，因為 X 是 Column-Major，這樣讀取記憶體效率高
-        for (arma::uword i_F = 0; i_F < n_n; ++i_F) {
-
-          double u = (X(i_F, j_F) - target_x) * inv_h;
-          double k_val = k_func(u);
-
-          sum_den += k_val;
-          sum_num += Y(i_F, j_F) * k_val;
-        }
-
-        if (std::abs(sum_den) > 1e-10) {
-          p_ij_sum += sum_num / sum_den;
-          valid_t_count += 1.0;
-        }
-      }
-
-      // 計算平均預測值
-      double p_ij = 0.0;
-      if (valid_t_count > 0) {
-        p_ij = p_ij_sum / valid_t_count;
-      }
-
-      // 儲存殘差 (寫入各執行緒私有的 resid_i)
-      resid_i(j) = Y(i, j) - p_ij;
-    }
-
-    // 計算加權誤差平方和: (Y_i - p_i)' * W_inv * (Y_i - p_i)
-    // W_inv 是 const reference，多執行緒同時讀取是安全的
-    double term_i = arma::as_scalar(resid_i.t() * W_inv * resid_i);
-
-    ss_val += term_i;
-  }
-
-  return ss_val;
-}
-
-// [[Rcpp::export]]
-arma::cube get_effVinv_panel_rcpp(const arma::mat & X,
-                                  const arma::mat & Y,
-                                  const double & h,
-                                  std::string kernel = "K2_Ep") {
+arma::cube get_Vinv_panel_frailty_rcpp(const arma::mat & X,
+                                       const arma::mat & Y,
+                                       const double & h,
+                                       std::string kernel = "K2_Ep") {
 
   const arma::uword n_n = Y.n_rows; // N
   const arma::uword n_t = Y.n_cols; // T

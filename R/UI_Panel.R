@@ -70,7 +70,7 @@ Panel.SemiSI <- function(X, Y, kernel = "K2.Biweight", bandwidth = NULL,
 
   # === Step 3.1 ===
 
-  effV.inv.CVbeta <- get_effVinv_panel_rcpp(
+  effV.inv.CVbeta <- get_Vinv_panel_frailty_rcpp(
     X = apply(aperm(X, c(3, 1, 2)) * results$coef.CV, c(2, 3), sum), Y = Y,
     h = results$bandwidth, kernel = cpp_kernel
   )
@@ -93,7 +93,7 @@ Panel.SemiSI <- function(X, Y, kernel = "K2.Biweight", bandwidth = NULL,
 
   # === Step 3.2 ===
 
-  effV.inv.SSbeta <- get_effVinv_panel_rcpp(
+  effV.inv.SSbeta <- get_Vinv_panel_frailty_rcpp(
     X = apply(aperm(X, c(3, 1, 2)) * results$coef.SS, c(2, 3), sum), Y = Y,
     h = results$bandwidth, kernel = cpp_kernel
   )

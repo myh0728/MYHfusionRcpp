@@ -571,24 +571,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// criterion_panel_SSw_rcpp
-double criterion_panel_SSw_rcpp(const arma::mat& X, const arma::mat& Y, const arma::mat& W_inv, const double& h, std::string kernel);
-RcppExport SEXP _MYHfusionRcpp_criterion_panel_SSw_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP W_invSEXP, SEXP hSEXP, SEXP kernelSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type W_inv(W_invSEXP);
-    Rcpp::traits::input_parameter< const double& >::type h(hSEXP);
-    Rcpp::traits::input_parameter< std::string >::type kernel(kernelSEXP);
-    rcpp_result_gen = Rcpp::wrap(criterion_panel_SSw_rcpp(X, Y, W_inv, h, kernel));
-    return rcpp_result_gen;
-END_RCPP
-}
-// get_effVinv_panel_rcpp
-arma::cube get_effVinv_panel_rcpp(const arma::mat& X, const arma::mat& Y, const double& h, std::string kernel);
-RcppExport SEXP _MYHfusionRcpp_get_effVinv_panel_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP hSEXP, SEXP kernelSEXP) {
+// get_Vinv_panel_frailty_rcpp
+arma::cube get_Vinv_panel_frailty_rcpp(const arma::mat& X, const arma::mat& Y, const double& h, std::string kernel);
+RcppExport SEXP _MYHfusionRcpp_get_Vinv_panel_frailty_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP hSEXP, SEXP kernelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -596,7 +581,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type Y(YSEXP);
     Rcpp::traits::input_parameter< const double& >::type h(hSEXP);
     Rcpp::traits::input_parameter< std::string >::type kernel(kernelSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_effVinv_panel_rcpp(X, Y, h, kernel));
+    rcpp_result_gen = Rcpp::wrap(get_Vinv_panel_frailty_rcpp(X, Y, h, kernel));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -2398,8 +2383,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_MYHfusionRcpp_criterion_panel_CV_rcpp", (DL_FUNC) &_MYHfusionRcpp_criterion_panel_CV_rcpp, 4},
     {"_MYHfusionRcpp_criterion_panel_SS_rcpp", (DL_FUNC) &_MYHfusionRcpp_criterion_panel_SS_rcpp, 4},
     {"_MYHfusionRcpp_criterion_panel_SSeff_rcpp", (DL_FUNC) &_MYHfusionRcpp_criterion_panel_SSeff_rcpp, 5},
-    {"_MYHfusionRcpp_criterion_panel_SSw_rcpp", (DL_FUNC) &_MYHfusionRcpp_criterion_panel_SSw_rcpp, 5},
-    {"_MYHfusionRcpp_get_effVinv_panel_rcpp", (DL_FUNC) &_MYHfusionRcpp_get_effVinv_panel_rcpp, 4},
+    {"_MYHfusionRcpp_get_Vinv_panel_frailty_rcpp", (DL_FUNC) &_MYHfusionRcpp_get_Vinv_panel_frailty_rcpp, 4},
     {"_MYHfusionRcpp_get_linkF_panel_rcpp", (DL_FUNC) &_MYHfusionRcpp_get_linkF_panel_rcpp, 5},
     {"_MYHfusionRcpp_cumuSIR_rcpp", (DL_FUNC) &_MYHfusionRcpp_cumuSIR_rcpp, 3},
     {"_MYHfusionRcpp_SolveLagrange_AD_EY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_SolveLagrange_AD_EY_normal_rcpp, 10},
