@@ -1,5 +1,6 @@
 Panel.SemiSI <- function(X, Y, kernel = "K2.Biweight", bandwidth = NULL,
-                         bandwidth.initial = 1, beta.initial = NULL)
+                         bandwidth.initial = 1, beta.initial = NULL,
+                         link.eval = NULL)
 {
   number_n <- dim(Y)[1]
   number_t <- dim(Y)[2]
@@ -112,6 +113,24 @@ Panel.SemiSI <- function(X, Y, kernel = "K2.Biweight", bandwidth = NULL,
 
   results$coef.SSeff.SS <- c(1, estimation$par)
   results$details.SSeff.SS <- estimation
+
+  # === estimate the link function ===
+
+  if (!is.null(link.eval))
+  {
+    link.eval <- as.vector(link.eval)
+
+    SI.hat.CV <- apply(aperm(X, c(3, 1, 2)) * results$coef.SSeff.CV, c(2, 3), sum)
+    link.hat.CV <- get_linkF_panel_rcpp(X = SI.hat.CV, Y = Y, u_points = link.eval,
+                                        h = results$bandwidth, kernel = cpp_kernel)
+
+    SI.hat.SS <- apply(aperm(X, c(3, 1, 2)) * results$coef.SSeff.SS, c(2, 3), sum)
+    link.hat.SS <- get_linkF_panel_rcpp(X = SI.hat.SS, Y = Y, u_points = link.eval,
+                                        h = results$bandwidth, kernel = cpp_kernel)
+
+    results$link.CV <- as.vector(link.hat.CV)
+    results$link.SS <- as.vector(link.hat.SS)
+  }
 
   # =============
 

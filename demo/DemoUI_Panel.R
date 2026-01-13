@@ -10,6 +10,12 @@ results.simulation <- matrix(0, nrow = SN, ncol = 5)
 dimnames(results.simulation) <- list(paste0("sim", 1:SN),
                                      c("CV", "SS", "SSeff.CV", "SSeff.SS", "bandwidth"))
 
+link.evaluation <- seq(-2, 2, 0.01)
+results.link <- array(0, c(length(link.evaluation), SN, 2))
+dimnames(results.link) <- list(link.evaluation,
+                               paste0("sim", 1:SN),
+                               c("CV", "SS"))
+
 for (sn in 1:SN) {
 
   set.seed(12345+sn)
@@ -34,7 +40,8 @@ for (sn in 1:SN) {
   X <- abind(X1, X2, along = 3)
 
   esti <- Panel.SemiSI(X = X, Y = Y, kernel = "K2.Biweight",
-                       beta.initial = beta0)
+                       beta.initial = beta0,
+                       link.eval = link.evaluation)
 
   results.simulation[sn, "CV"] <- esti$coef.CV[2]
   results.simulation[sn, "SS"] <- esti$coef.SS[2]
@@ -42,10 +49,22 @@ for (sn in 1:SN) {
   results.simulation[sn, "SSeff.SS"] <- esti$coef.SSeff.SS[2]
   results.simulation[sn, "bandwidth"] <- esti$bandwidth
 
+  results.link[, sn, "CV"] <- esti$link.CV
+  results.link[, sn, "SS"] <- esti$link.SS
+
   print(sn)
 }
 
 summary(results.simulation)
 apply(results.simulation, 2, sd)
+
+link.MC <- apply(results.link, c(1, 3), mean)
+
+par(mfrow = c(1,2))
+plot(link.evaluation, link.MC[, "CV"], type = 'l')
+lines(link.evaluation, 0.5 / (1 + exp(-link.evaluation)), col = 2)
+plot(link.evaluation, link.MC[, "SS"], type = 'l')
+lines(link.evaluation, 0.5 / (1 + exp(-link.evaluation)), col = 2)
+
 
 

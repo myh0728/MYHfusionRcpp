@@ -1,17 +1,21 @@
 Package: MYHfusionRcpp
 Type: Package
 Title: Packed codes of Ming-Yueh Huang's work
-Version: 0.3.4
-Date: 2024-10-23
-Author: Ming-Yueh Huang
-Maintainer: Ming-Yueh Huang
-    <myh0728@stat.sinica.edu.tw>
+Version: 0.3.5
+Date: 2026-01-01
+Authors@R: 
+    person("Ming-Yueh", "Huang", 
+           email = "myh0728@stat.sinica.edu.tw", 
+           role = c("aut", "cre"))
 Description: Topics including
     Maximum likelihood estimation for generalized linear models
+    Kernel smoothing
+    Survival analysis
     Dataset shift
-Depends: R (>= 4.2.1)
-License: None
-LazyData: true
+License: GPL (>= 3)
+Encoding: UTF-8
+Depends:
+    R (>= 4.5.2)
 Imports: Rcpp (>= 1.0.9),
     RcppArmadillo,
     frailtypack,
@@ -20,7 +24,7 @@ Imports: Rcpp (>= 1.0.9),
     abind,
     dplyr
 LinkingTo: Rcpp, RcppArmadillo
-SystemRequirements: C++11
+SystemRequirements: C++17
 NeedsCompilation: yes
 Suggests: 
     knitr,
@@ -28,3 +32,5 @@ Suggests:
 VignetteBuilder: knitr
 URL: https://github.com/myh0728/MYHfusionRcpp
 BugReports: https://github.com/myh0728/MYHfusionRcpp/issues
+RoxygenNote: 7.3.1
+LazyData: true

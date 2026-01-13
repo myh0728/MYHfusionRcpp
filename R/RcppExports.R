@@ -585,3 +585,7 @@ SKME_exact_rcpp <- function(time_last, is_event, time_event, X, x, h, kernel = "
     .Call(`_MYHfusionRcpp_SKME_exact_rcpp`, time_last, is_event, time_event, X, x, h, kernel)
 }
 
+SKME_exact_rcpp0 <- function(time_last, is_event, time_event, X, x, h, kernel = "K2_Ep") {
+    .Call(`_MYHfusionRcpp_SKME_exact_rcpp0`, time_last, is_event, time_event, X, x, h, kernel)
+}
+
