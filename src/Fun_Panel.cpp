@@ -414,6 +414,125 @@ arma::vec get_linkF_panel_rcpp(const arma::mat & X,
   return Fhat;
 }
 
+// [[Rcpp::export]]
+arma::cube get_Vinv_panel_exchangable_rcpp(const arma::mat & X,
+                                           const arma::mat & Y,
+                                           const double & h,
+                                           std::string kernel = "K2_Ep") {
 
+  const arma::uword n_n = Y.n_rows; // N
+  const arma::uword n_t = Y.n_cols; // T
+
+  KernelFunc k_func = get_kernel_func(kernel);
+  const double inv_h = 1.0 / h;
+
+  // 用來儲存標準差 (Sigma)，供第二階段使用
+  arma::mat Sigma_mat(n_n, n_t, arma::fill::zeros);
+
+  // 結果 Cube
+  arma::cube V_inv_cube(n_t, n_t, n_n, arma::fill::zeros);
+
+  double rho_sum = 0.0;
+
+  // =========================================================
+  // Stage 1: 平行計算 P (Smoothing), Sigma, 與 Rho 的分子
+  // =========================================================
+#pragma omp parallel for schedule(dynamic) reduction(+:rho_sum)
+  for (arma::uword i = 0; i < n_n; ++i) {
+
+    arma::vec p_i(n_t);
+    arma::vec sigma_i(n_t);
+
+    // 1. 計算 P_ij (Smoothing)
+    for (arma::uword j = 0; j < n_t; ++j) {
+      double target_x = X(i, j);
+      double p_num = 0.0;
+      double p_den = 0.0;
+
+      for (arma::uword j_F = 0; j_F < n_t; ++j_F) {
+        for (arma::uword i_F = 0; i_F < n_n; ++i_F) {
+          double u = (X(i_F, j_F) - target_x) * inv_h;
+          double k_val = k_func(u);
+          p_den += k_val;
+          p_num += Y(i_F, j_F) * k_val;
+        }
+      }
+
+      if (std::abs(p_den) > 1e-10) {
+        p_i(j) = p_num / p_den;
+      } else {
+        p_i(j) = 0.0;
+      }
+    }
+
+    // 2. 計算標準差 Sigma_i
+    arma::vec var_i = p_i % (1.0 - p_i);
+
+    // [重要] 數值穩定性處理 (Nugget effect)
+    // 確保後面除以 sigma 時不會爆炸
+    for(arma::uword k = 0; k < n_t; ++k) {
+      if(var_i(k) < 1e-8) var_i(k) = 1e-8;
+    }
+    sigma_i = arma::sqrt(var_i);
+
+    // 存入矩陣
+    Sigma_mat.row(i) = sigma_i.t();
+
+    // 3. 累加 Rho 分子
+    for (arma::uword j = 0; j < n_t - 1; ++j) {
+      double resid_j_std = (Y(i, j) - p_i(j)) / sigma_i(j);
+
+      for (arma::uword k = j + 1; k < n_t; ++k) {
+        double resid_k_std = (Y(i, k) - p_i(k)) / sigma_i(k);
+        rho_sum += resid_j_std * resid_k_std;
+      }
+    }
+  }
+
+  // 計算平均 Rho
+  double rho = rho_sum * 2.0 / (double)(n_n * n_t * (n_t - 1));
+
+  // 防呆：限制 rho 的範圍，避免分母為 0
+  // 理論極限是 -1/(T-1) < rho < 1
+  double lower_bound = -1.0 / (double)(n_t - 1) + 1e-6;
+  if (rho > 0.999) rho = 0.999;
+  if (rho < lower_bound) rho = lower_bound;
+
+  // =========================================================
+  // Stage 2: 使用解析解 (Analytical Solution) 直接填入 V_inv
+  // =========================================================
+
+  // 預先計算 R inverse 的係數 (A 和 B)
+  // 這些係數對所有個體都是一樣的
+  double denom = (1.0 - rho) * (1.0 + (n_t - 1) * rho);
+  double r_inv_diag = (1.0 + (n_t - 2) * rho) / denom; // 對角線係數 A
+  double r_inv_off  = -rho / denom;                    // 非對角線係數 B
+
+#pragma omp parallel for schedule(static)
+  for (arma::uword i = 0; i < n_n; ++i) {
+
+    // 取出該個體的 sigma
+    arma::vec sigma_i = Sigma_mat.row(i).t();
+    arma::mat & V_inv = V_inv_cube.slice(i); // 引用 Cube 的 slice
+
+    // 雙層迴圈填值
+    for (arma::uword j = 0; j < n_t; ++j) {
+
+      // 1. 對角線元素: A / sigma_j^2
+      // 注意：sigma_i(j) * sigma_i(j) 就是變異數
+      V_inv(j, j) = r_inv_diag / (sigma_i(j) * sigma_i(j));
+
+      // 2. 非對角線元素: B / (sigma_j * sigma_k)
+      // 利用對稱性一次填兩個
+      for (arma::uword k = j + 1; k < n_t; ++k) {
+        double val = r_inv_off / (sigma_i(j) * sigma_i(k));
+        V_inv(j, k) = val;
+        V_inv(k, j) = val;
+      }
+    }
+  }
+
+  return V_inv_cube;
+}
 
 

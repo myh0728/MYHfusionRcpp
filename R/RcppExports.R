@@ -169,6 +169,10 @@ get_linkF_panel_rcpp <- function(X, Y, u_points, h, kernel = "K2_Ep") {
     .Call(`_MYHfusionRcpp_get_linkF_panel_rcpp`, X, Y, u_points, h, kernel)
 }
 
+get_Vinv_panel_exchangable_rcpp <- function(X, Y, h, kernel = "K2_Ep") {
+    .Call(`_MYHfusionRcpp_get_Vinv_panel_exchangable_rcpp`, X, Y, h, kernel)
+}
+
 cumuSIR_rcpp <- function(X, Y, eps_inv) {
     .Call(`_MYHfusionRcpp_cumuSIR_rcpp`, X, Y, eps_inv)
 }
