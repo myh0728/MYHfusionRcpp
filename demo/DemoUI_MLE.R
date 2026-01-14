@@ -1,3 +1,5 @@
+rm(list = ls())
+
 ##### Normal regression model #####
 
 n <- 100

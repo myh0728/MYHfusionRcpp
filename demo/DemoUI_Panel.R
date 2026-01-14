@@ -1,3 +1,5 @@
+rm(list = ls())
+
 library(abind)
 
 n <- 200
@@ -5,7 +7,7 @@ L <- 12
 
 beta0 <- c(1, -1)
 
-SN <- 100
+SN <- 10
 results.simulation <- array(0, c(3, 5, SN))
 dimnames(results.simulation) <- list(c("Frailty", "Exchangable", "AR1"),
                                      c("CV", "SS", "SSeff.CV", "SSeff.SS", "bandwidth"),
@@ -85,11 +87,6 @@ for (sn in 1:SN) {
 
 apply(results.simulation, c(1, 2), mean)
 apply(results.simulation, c(1, 2), sd)
-
-
-
-
-
 
 
 

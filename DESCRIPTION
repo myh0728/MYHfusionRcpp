@@ -17,12 +17,7 @@ Encoding: UTF-8
 Depends:
     R (>= 4.5.2)
 Imports: Rcpp (>= 1.0.9),
-    RcppArmadillo,
-    frailtypack,
-    survival,
-    dfoptim,
-    abind,
-    dplyr
+    RcppArmadillo
 LinkingTo: Rcpp, RcppArmadillo
 SystemRequirements: C++17
 NeedsCompilation: yes
