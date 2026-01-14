@@ -31,7 +31,7 @@ SurvData_process <- function(data = NULL, X.name = NULL, Y.name = NULL, D.name =
   is_event <- D[ord]
 
   # 因為 time_last 已經排序過，unique 取出的也會是排序過的唯一時間點
-  time_event <- unique(time_last)
+  time_event <- unique(time_last[is_event == 1])
 
   # 3. 處理共變數 (僅當 X 存在時)
   if (!is.null(X)) {
@@ -48,3 +48,37 @@ SurvData_process <- function(data = NULL, X.name = NULL, Y.name = NULL, D.name =
 
   return(results)
 }
+
+KaplanMeier <- function(data = NULL, Y.name = NULL, D.name = NULL,
+                        X = NULL, Y = NULL, D = NULL,
+                        time.points = NULL)
+{
+  surv.data <- SurvData_process(data = data, Y.name = Y.name, D.name = D.name,
+                                Y = Y, D = D)
+
+  results.exact <- KME_exact_rcpp(time_last = surv.data$time_last,
+                                  is_event = surv.data$is_event,
+                                  time_event = surv.data$time_event)
+
+  results <- list(time = as.vector(results.exact$time),
+                  survival = as.vector(results.exact$survival),
+                  hazard = as.vector(results.exact$hazard),
+                  cum_hazard = as.vector(results.exact$cum_hazard))
+
+  if (!is.null(time.points))
+  {
+    time.points <- sort(unique(as.vector(time.points)))
+
+    results.time.points <- KME_at_times_rcpp(time_event = surv.data$time_event,
+                                             time_points = time.points,
+                                             S_event = results$survival,
+                                             H_event = results$cum_hazard)
+
+    results$survival_tps <- as.vector(results.time.points$survival)
+    results$cum_hazard_tps <- as.vector(results.time.points$cum_hazard)
+  }
+
+  return(results)
+}
+
+
