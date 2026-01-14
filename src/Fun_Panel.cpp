@@ -535,4 +535,135 @@ arma::cube get_Vinv_panel_exchangable_rcpp(const arma::mat & X,
   return V_inv_cube;
 }
 
+// [[Rcpp::export]]
+arma::cube get_Vinv_panel_AR1_rcpp(const arma::mat & X,
+                                   const arma::mat & Y,
+                                   const double & h,
+                                   std::string kernel = "K2_Ep") {
+
+  const arma::uword n_n = Y.n_rows; // N
+  const arma::uword n_t = Y.n_cols; // T
+
+  KernelFunc k_func = get_kernel_func(kernel);
+  const double inv_h = 1.0 / h;
+
+  // 儲存 Sigma 供 Stage 2 使用
+  arma::mat Sigma_mat(n_n, n_t, arma::fill::zeros);
+
+  // 結果 Cube
+  arma::cube V_inv_cube(n_t, n_t, n_n, arma::fill::zeros);
+
+  double rho_sum = 0.0;
+
+  // =========================================================
+  // Stage 1: 平行計算 P (Smoothing), Sigma, 與 Rho
+  // =========================================================
+#pragma omp parallel for schedule(dynamic) reduction(+:rho_sum)
+  for (arma::uword i = 0; i < n_n; ++i) {
+
+    arma::vec p_i(n_t);
+    arma::vec sigma_i(n_t);
+
+    // 1. Smoothing (Kernel Regression)
+    for (arma::uword j = 0; j < n_t; ++j) {
+      double target_x = X(i, j);
+      double p_num = 0.0;
+      double p_den = 0.0;
+
+      for (arma::uword j_F = 0; j_F < n_t; ++j_F) {
+        for (arma::uword i_F = 0; i_F < n_n; ++i_F) {
+          // 優化：直接讀取，不產生暫存向量
+          double u = (X(i_F, j_F) - target_x) * inv_h;
+          double k_val = k_func(u);
+          p_den += k_val;
+          p_num += Y(i_F, j_F) * k_val;
+        }
+      }
+
+      if (std::abs(p_den) > 1e-10) {
+        p_i(j) = p_num / p_den;
+      } else {
+        p_i(j) = 0.0;
+      }
+    }
+
+    // 2. 計算標準差 Sigma_i
+    arma::vec var_i = p_i % (1.0 - p_i);
+
+    // 數值穩定性處理
+    for(arma::uword k = 0; k < n_t; ++k) {
+      if(var_i(k) < 1e-8) var_i(k) = 1e-8;
+    }
+    sigma_i = arma::sqrt(var_i);
+    Sigma_mat.row(i) = sigma_i.t();
+
+    // 3. 累加 Rho 分子 (AR1 只需要看相鄰兩項)
+    for (arma::uword j = 0; j < n_t - 1; ++j) {
+      double resid_j_std = (Y(i, j) - p_i(j)) / sigma_i(j);
+      double resid_jj_std = (Y(i, j + 1) - p_i(j + 1)) / sigma_i(j + 1);
+
+      rho_sum += resid_j_std * resid_jj_std;
+    }
+  }
+
+  // 計算平均 Rho
+  double rho = rho_sum / (double)(n_n * (n_t - 1));
+
+  // [重要] 防呆與邊界限制
+  // AR(1) 解析解的分母是 1 - rho^2，若 rho 接近 1 或 -1 會爆炸
+  if (rho > 0.999) rho = 0.999;
+  if (rho < -0.999) rho = -0.999;
+
+  // =========================================================
+  // Stage 2: 使用 AR(1) 解析反矩陣公式填入 V_inv
+  // =========================================================
+
+  // 預先計算 AR(1) inverse 的常數係數
+  double rho_sq = rho * rho;
+  double scale = 1.0 / (1.0 - rho_sq); // 1 / (1 - rho^2)
+
+  // 係數 A: 用於頭尾對角線 (1 * scale)
+  // 係數 B: 用於中間對角線 ((1 + rho^2) * scale)
+  // 係數 C: 用於次對角線   (-rho * scale)
+
+  double coef_mid_diag = (1.0 + rho_sq) * scale;
+  double coef_off_diag = -rho * scale;
+
+#pragma omp parallel for schedule(static)
+  for (arma::uword i = 0; i < n_n; ++i) {
+
+    arma::vec sigma_i = Sigma_mat.row(i).t();
+    arma::mat & V_inv = V_inv_cube.slice(i); // 引用，直接修改記憶體
+
+    // AR(1) 反矩陣是三對角矩陣 (Tridiagonal)，其餘為 0
+    // 我們只遍歷需要填值的地方，大幅提升速度
+
+    // 1. 填入對角線 (Diagonal)
+    for (arma::uword j = 0; j < n_t; ++j) {
+      double sig_sq = sigma_i(j) * sigma_i(j);
+
+      if (j == 0 || j == n_t - 1) {
+        // 頭尾: 1 / (sig^2 * (1-rho^2))
+        V_inv(j, j) = scale / sig_sq;
+      } else {
+        // 中間: (1+rho^2) / (sig^2 * (1-rho^2))
+        V_inv(j, j) = coef_mid_diag / sig_sq;
+      }
+    }
+
+    // 2. 填入次對角線 (Off-diagonal, |j-k|=1)
+    for (arma::uword j = 0; j < n_t - 1; ++j) {
+      // 公式: -rho / (sig_j * sig_k * (1-rho^2))
+      double val = coef_off_diag / (sigma_i(j) * sigma_i(j + 1));
+
+      V_inv(j, j + 1) = val;
+      V_inv(j + 1, j) = val; // 對稱
+    }
+
+    // 其餘位置保持為 0 (初始化時已經填 0 了)
+  }
+
+  return V_inv_cube;
+}
+
 

@@ -614,6 +614,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// get_Vinv_panel_AR1_rcpp
+arma::cube get_Vinv_panel_AR1_rcpp(const arma::mat& X, const arma::mat& Y, const double& h, std::string kernel);
+RcppExport SEXP _MYHfusionRcpp_get_Vinv_panel_AR1_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP hSEXP, SEXP kernelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const double& >::type h(hSEXP);
+    Rcpp::traits::input_parameter< std::string >::type kernel(kernelSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_Vinv_panel_AR1_rcpp(X, Y, h, kernel));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cumuSIR_rcpp
 List cumuSIR_rcpp(const arma::mat& X, const arma::vec& Y, const double& eps_inv);
 RcppExport SEXP _MYHfusionRcpp_cumuSIR_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP eps_invSEXP) {
@@ -2400,6 +2414,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_MYHfusionRcpp_get_Vinv_panel_frailty_rcpp", (DL_FUNC) &_MYHfusionRcpp_get_Vinv_panel_frailty_rcpp, 4},
     {"_MYHfusionRcpp_get_linkF_panel_rcpp", (DL_FUNC) &_MYHfusionRcpp_get_linkF_panel_rcpp, 5},
     {"_MYHfusionRcpp_get_Vinv_panel_exchangable_rcpp", (DL_FUNC) &_MYHfusionRcpp_get_Vinv_panel_exchangable_rcpp, 4},
+    {"_MYHfusionRcpp_get_Vinv_panel_AR1_rcpp", (DL_FUNC) &_MYHfusionRcpp_get_Vinv_panel_AR1_rcpp, 4},
     {"_MYHfusionRcpp_cumuSIR_rcpp", (DL_FUNC) &_MYHfusionRcpp_cumuSIR_rcpp, 3},
     {"_MYHfusionRcpp_SolveLagrange_AD_EY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_SolveLagrange_AD_EY_normal_rcpp, 10},
     {"_MYHfusionRcpp_grad_psi_AD_EY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_grad_psi_AD_EY_normal_rcpp, 7},
