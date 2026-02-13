@@ -2352,23 +2352,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// SKME_exact_rcpp0
-List SKME_exact_rcpp0(const arma::vec& time_last, const arma::uvec& is_event, const arma::vec& time_event, const arma::mat& X, const arma::mat& x, const arma::vec& h, std::string kernel);
-RcppExport SEXP _MYHfusionRcpp_SKME_exact_rcpp0(SEXP time_lastSEXP, SEXP is_eventSEXP, SEXP time_eventSEXP, SEXP XSEXP, SEXP xSEXP, SEXP hSEXP, SEXP kernelSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type time_last(time_lastSEXP);
-    Rcpp::traits::input_parameter< const arma::uvec& >::type is_event(is_eventSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type time_event(time_eventSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type h(hSEXP);
-    Rcpp::traits::input_parameter< std::string >::type kernel(kernelSEXP);
-    rcpp_result_gen = Rcpp::wrap(SKME_exact_rcpp0(time_last, is_event, time_event, X, x, h, kernel));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_MYHfusionRcpp_K2_Ep_rcpp", (DL_FUNC) &_MYHfusionRcpp_K2_Ep_rcpp, 1},
@@ -2518,7 +2501,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_MYHfusionRcpp_KME_exact_rcpp", (DL_FUNC) &_MYHfusionRcpp_KME_exact_rcpp, 3},
     {"_MYHfusionRcpp_KME_at_times_rcpp", (DL_FUNC) &_MYHfusionRcpp_KME_at_times_rcpp, 4},
     {"_MYHfusionRcpp_SKME_exact_rcpp", (DL_FUNC) &_MYHfusionRcpp_SKME_exact_rcpp, 7},
-    {"_MYHfusionRcpp_SKME_exact_rcpp0", (DL_FUNC) &_MYHfusionRcpp_SKME_exact_rcpp0, 7},
     {NULL, NULL, 0}
 };
 
