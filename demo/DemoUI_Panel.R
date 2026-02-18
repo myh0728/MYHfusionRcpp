@@ -43,9 +43,10 @@ for (sn in 1:SN) {
 
   X <- abind(X1, X2, along = 3)
 
-  esti <- Panel.SemiSI.Frailty(X = X, Y = Y, kernel = "K2.Biweight",
-                               beta.initial = beta0,
-                               link.eval = link.evaluation)
+  esti <- Panel.SemiSI(X = X, Y = Y, kernel = "K2.Biweight",
+                       correlation = "frailty",
+                       beta.initial = beta0,
+                       link.eval = link.evaluation)
 
   results.simulation["Frailty", "CV", sn] <- esti$coef.CV[2]
   results.simulation["Frailty", "SS", sn] <- esti$coef.SS[2]
@@ -56,9 +57,10 @@ for (sn in 1:SN) {
   results.link[, "Frailty", "CV", sn] <- esti$link.CV
   results.link[, "Frailty", "SS", sn] <- esti$link.SS
 
-  esti <- Panel.SemiSI.Exchangable(X = X, Y = Y, kernel = "K2.Biweight",
-                                   beta.initial = beta0,
-                                   link.eval = link.evaluation)
+  esti <- Panel.SemiSI(X = X, Y = Y, kernel = "K2.Biweight",
+                       correlation = "exchangeable",
+                       beta.initial = beta0,
+                       link.eval = link.evaluation)
 
   results.simulation["Exchangable", "CV", sn] <- esti$coef.CV[2]
   results.simulation["Exchangable", "SS", sn] <- esti$coef.SS[2]
@@ -69,9 +71,10 @@ for (sn in 1:SN) {
   results.link[, "Exchangable", "CV", sn] <- esti$link.CV
   results.link[, "Exchangable", "SS", sn] <- esti$link.SS
 
-  esti <- Panel.SemiSI.AR1(X = X, Y = Y, kernel = "K2.Biweight",
-                           beta.initial = beta0,
-                           link.eval = link.evaluation)
+  esti <- Panel.SemiSI(X = X, Y = Y, kernel = "K2.Biweight",
+                       correlation = "AR1",
+                       beta.initial = beta0,
+                       link.eval = link.evaluation)
 
   results.simulation["AR1", "CV", sn] <- esti$coef.CV[2]
   results.simulation["AR1", "SS", sn] <- esti$coef.SS[2]
