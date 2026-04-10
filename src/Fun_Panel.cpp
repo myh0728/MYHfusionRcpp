@@ -75,6 +75,7 @@ double criterion_panel_CV_rcpp(const arma::mat & X,
         p_ij = p_ij_sum / valid_t_count;
       }
 
+      p_ij = std::max(0.0, std::min(1.0, p_ij));
       double diff_ij = Y(i, j) - p_ij;
 
       // 累加到 reduction 變數
@@ -144,6 +145,7 @@ double criterion_panel_SS_rcpp(const arma::mat & X,
         p_ij = p_ij_sum / valid_t_count;
       }
 
+      p_ij = std::max(0.0, std::min(1.0, p_ij));
       double diff_ij = Y(i, j) - p_ij;
 
       // 直接累加到 reduction 變數
@@ -217,15 +219,14 @@ double criterion_panel_SSeff_rcpp(const arma::mat & X,
         p_ij = p_ij_sum / valid_t_count;
       }
 
+      p_ij = std::max(0.0, std::min(1.0, p_ij));
       // 儲存殘差
       resid_i(j) = Y(i, j) - p_ij;
     }
 
     // 計算加權誤差平方和: (Y_i - p_i)' * V_inv_i * (Y_i - p_i)
     // V_inv 是 const reference，讀取 slice(i) 是 Thread-safe 的
-    double term_i = arma::as_scalar(resid_i.t() * V_inv.slice(i) * resid_i);
-
-    ss_val += term_i;
+    ss_val += arma::dot(resid_i, V_inv.slice(i) * resid_i);
   }
 
   return ss_val;
@@ -274,8 +275,14 @@ arma::cube get_Vinv_panel_frailty_rcpp(const arma::mat & X,
           p_num += Y(i_F, j_F) * k_val;
         }
       }
-      // P(i, j) 寫入各自獨立的記憶體位置，安全
-      if (std::abs(p_den) > 1e-10) P(i, j) = p_num / p_den;
+
+      if (std::abs(p_den) > 1e-10) {
+        double raw_p = p_num / p_den;
+        P(i, j) = std::max(0.0, std::min(1.0, raw_p));
+      } else {
+        // 若分母過小，給予預設值 0 (P 初始化已為 0，這行只是明確寫出邏輯)
+        P(i, j) = 0.0;
+      }
     }
 
     // 2. 預填外積
@@ -407,7 +414,8 @@ arma::vec get_linkF_panel_rcpp(const arma::mat & X,
 
     // 計算平均值 (Average of Marginal Smoothers)
     if (valid_t_count > 0) {
-      Fhat(l) = p_ij_sum / valid_t_count;
+      double raw_f = p_ij_sum / valid_t_count;
+      Fhat(l) = std::max(0.0, std::min(1.0, raw_f));
     }
   }
 
@@ -459,7 +467,8 @@ arma::cube get_Vinv_panel_exchangable_rcpp(const arma::mat & X,
       }
 
       if (std::abs(p_den) > 1e-10) {
-        p_i(j) = p_num / p_den;
+        double raw_p = p_num / p_den;
+        p_i(j) = std::max(0.0, std::min(1.0, raw_p));
       } else {
         p_i(j) = 0.0;
       }
@@ -581,7 +590,8 @@ arma::cube get_Vinv_panel_AR1_rcpp(const arma::mat & X,
       }
 
       if (std::abs(p_den) > 1e-10) {
-        p_i(j) = p_num / p_den;
+        double raw_p = p_num / p_den;
+        p_i(j) = std::max(0.0, std::min(1.0, raw_p));
       } else {
         p_i(j) = 0.0;
       }
@@ -665,5 +675,68 @@ arma::cube get_Vinv_panel_AR1_rcpp(const arma::mat & X,
 
   return V_inv_cube;
 }
+
+// [[Rcpp::export]]
+double criterion_panel_logit_SS_rcpp(const arma::mat & X,
+                                     const arma::mat & Y,
+                                     const double & intercept) {
+
+  const arma::uword n_n = Y.n_rows; // 個體數 (N)
+  const arma::uword n_t = Y.n_cols; // 時間點數 (T)
+
+  double ss_val = 0.0;
+
+  // 使用 OpenMP 平行化，負載均衡使用 static 排程
+#pragma omp parallel for schedule(static) reduction(+:ss_val)
+  for (arma::uword i = 0; i < n_n; ++i) {
+
+    for (arma::uword j = 0; j < n_t; ++j) {
+
+      double SI_ij = intercept + X(i, j);
+      double p_ij = 1.0 / (1.0 + std::exp(-SI_ij));
+      double diff = Y(i, j) - p_ij;
+      ss_val += diff * diff;
+    }
+  }
+
+  return ss_val;
+}
+
+// [[Rcpp::export]]
+double criterion_panel_logit_SSeff_rcpp(const arma::mat & X,
+                                        const arma::mat & Y,
+                                        const double & intercept,
+                                        const arma::cube & V_inv) {
+
+  const arma::uword n_n = Y.n_rows; // 個體數 (N)
+  const arma::uword n_t = Y.n_cols; // 時間點數 (T)
+
+  double ss_val = 0.0;
+
+  // 使用 OpenMP 平行化，靜態排程
+#pragma omp parallel for schedule(static) reduction(+:ss_val)
+  for (arma::uword i = 0; i < n_n; ++i) {
+
+    // 宣告在迴圈內，每個執行緒擁有自己獨立的 diff 向量 (長度為 T)
+    arma::vec diff(n_t);
+
+    for (arma::uword j = 0; j < n_t; ++j) {
+
+      double SI_ij = intercept + X(i, j);
+      double p_ij = 1.0 / (1.0 + std::exp(-SI_ij));
+
+      // 直接算出殘差並存入，省去 vector 相減和轉置 (.t()) 的開銷
+      diff(j) = Y(i, j) - p_ij;
+    }
+
+    // [效能關鍵]
+    // 使用 arma::dot(x, A * x) 來計算二次型 (Quadratic Form: x^T * A * x)
+    // 這是 Armadillo 中計算此類矩陣乘法最快且最標準的寫法，直接回傳 double
+    ss_val += arma::dot(diff, V_inv.slice(i) * diff);
+  }
+
+  return ss_val;
+}
+
 
 

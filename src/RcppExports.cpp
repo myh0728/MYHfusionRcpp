@@ -628,6 +628,33 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// criterion_panel_logit_SS_rcpp
+double criterion_panel_logit_SS_rcpp(const arma::mat& X, const arma::mat& Y, const double& intercept);
+RcppExport SEXP _MYHfusionRcpp_criterion_panel_logit_SS_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP interceptSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const double& >::type intercept(interceptSEXP);
+    rcpp_result_gen = Rcpp::wrap(criterion_panel_logit_SS_rcpp(X, Y, intercept));
+    return rcpp_result_gen;
+END_RCPP
+}
+// criterion_panel_logit_SSeff_rcpp
+double criterion_panel_logit_SSeff_rcpp(const arma::mat& X, const arma::mat& Y, const double& intercept, const arma::cube& V_inv);
+RcppExport SEXP _MYHfusionRcpp_criterion_panel_logit_SSeff_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP interceptSEXP, SEXP V_invSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const double& >::type intercept(interceptSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type V_inv(V_invSEXP);
+    rcpp_result_gen = Rcpp::wrap(criterion_panel_logit_SSeff_rcpp(X, Y, intercept, V_inv));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cumuSIR_rcpp
 List cumuSIR_rcpp(const arma::mat& X, const arma::vec& Y, const double& eps_inv);
 RcppExport SEXP _MYHfusionRcpp_cumuSIR_rcpp(SEXP XSEXP, SEXP YSEXP, SEXP eps_invSEXP) {
@@ -2398,6 +2425,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_MYHfusionRcpp_get_linkF_panel_rcpp", (DL_FUNC) &_MYHfusionRcpp_get_linkF_panel_rcpp, 5},
     {"_MYHfusionRcpp_get_Vinv_panel_exchangable_rcpp", (DL_FUNC) &_MYHfusionRcpp_get_Vinv_panel_exchangable_rcpp, 4},
     {"_MYHfusionRcpp_get_Vinv_panel_AR1_rcpp", (DL_FUNC) &_MYHfusionRcpp_get_Vinv_panel_AR1_rcpp, 4},
+    {"_MYHfusionRcpp_criterion_panel_logit_SS_rcpp", (DL_FUNC) &_MYHfusionRcpp_criterion_panel_logit_SS_rcpp, 3},
+    {"_MYHfusionRcpp_criterion_panel_logit_SSeff_rcpp", (DL_FUNC) &_MYHfusionRcpp_criterion_panel_logit_SSeff_rcpp, 4},
     {"_MYHfusionRcpp_cumuSIR_rcpp", (DL_FUNC) &_MYHfusionRcpp_cumuSIR_rcpp, 3},
     {"_MYHfusionRcpp_SolveLagrange_AD_EY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_SolveLagrange_AD_EY_normal_rcpp, 10},
     {"_MYHfusionRcpp_grad_psi_AD_EY_normal_rcpp", (DL_FUNC) &_MYHfusionRcpp_grad_psi_AD_EY_normal_rcpp, 7},

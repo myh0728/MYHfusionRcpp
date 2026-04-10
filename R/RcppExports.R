@@ -177,6 +177,14 @@ get_Vinv_panel_AR1_rcpp <- function(X, Y, h, kernel = "K2_Ep") {
     .Call(`_MYHfusionRcpp_get_Vinv_panel_AR1_rcpp`, X, Y, h, kernel)
 }
 
+criterion_panel_logit_SS_rcpp <- function(X, Y, intercept) {
+    .Call(`_MYHfusionRcpp_criterion_panel_logit_SS_rcpp`, X, Y, intercept)
+}
+
+criterion_panel_logit_SSeff_rcpp <- function(X, Y, intercept, V_inv) {
+    .Call(`_MYHfusionRcpp_criterion_panel_logit_SSeff_rcpp`, X, Y, intercept, V_inv)
+}
+
 cumuSIR_rcpp <- function(X, Y, eps_inv) {
     .Call(`_MYHfusionRcpp_cumuSIR_rcpp`, X, Y, eps_inv)
 }
