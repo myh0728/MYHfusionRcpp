@@ -559,3 +559,64 @@ Panel.SemiSI <- function(X, Y,
   # =============
   return(results)
 }
+
+Panel.logistic <- function(X, Y,
+                           correlation = c("exchangeable", "AR1"),
+                           alpha.initial = NULL, beta.initial = NULL)
+{
+  correlation <- match.arg(correlation)
+
+  number_n <- dim(Y)[1]
+  number_t <- dim(Y)[2]
+  number_p <- dim(X)[3]
+
+  if (is.null(alpha.initial)) {
+    alpha.initial <- 0
+  }
+
+  if (is.null(beta.initial)) {
+    beta.initial <- rep(0, number_p)
+  }
+
+  results <- list()
+
+  # === Step 1: OLS ===
+  SScriterion <- function(par)
+  {
+    SI <- apply(aperm(X, c(3, 1, 2)) * par[-1], c(2, 3), sum)
+    value <- criterion_panel_logit_SS_rcpp(X = SI, Y = Y, intercept = par[1])
+
+    return(value)
+  }
+
+  estimation <- nlminb(start = c(alpha.initial, beta.initial),
+                       objective = SScriterion)
+
+  results$coef.SS <- estimation$par
+  results$details.SS <- estimation
+
+  # === Step 2: WLS ===
+  # 根據 correlation 參數切換對應的 get_Vinv 函數
+  SI_initial <- apply(aperm(X, c(3, 1, 2)) * results$coef.SS[-1], c(2, 3), sum)
+
+  if (correlation == "exchangeable") {
+    effV.inv <- get_Vinv_panel_logit_exchangable_rcpp(X = SI_initial, Y = Y, intercept = results$coef.SS[1])
+  } else if (correlation == "AR1") {
+    effV.inv <- get_Vinv_panel_logit_AR1_rcpp(X = SI_initial, Y = Y, intercept = results$coef.SS[1])
+  }
+
+  SScriterion_eff <- function(par)
+  {
+    SI <- apply(aperm(X, c(3, 1, 2)) * par[-1], c(2, 3), sum)
+    value <- criterion_panel_logit_SSeff_rcpp(X = SI, Y = Y, intercept = par[1], V_inv = effV.inv)
+    return(value)
+  }
+
+  estimation <- nlminb(start = c(alpha.initial, beta.initial),
+                       objective = SScriterion_eff)
+
+  results$coef.SSeff.SS <- estimation$par
+  results$details.SSeff.SS <- estimation
+
+  return(results)
+}

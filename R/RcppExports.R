@@ -185,6 +185,14 @@ criterion_panel_logit_SSeff_rcpp <- function(X, Y, intercept, V_inv) {
     .Call(`_MYHfusionRcpp_criterion_panel_logit_SSeff_rcpp`, X, Y, intercept, V_inv)
 }
 
+get_Vinv_panel_logit_exchangable_rcpp <- function(X, Y, intercept) {
+    .Call(`_MYHfusionRcpp_get_Vinv_panel_logit_exchangable_rcpp`, X, Y, intercept)
+}
+
+get_Vinv_panel_logit_AR1_rcpp <- function(X, Y, intercept) {
+    .Call(`_MYHfusionRcpp_get_Vinv_panel_logit_AR1_rcpp`, X, Y, intercept)
+}
+
 cumuSIR_rcpp <- function(X, Y, eps_inv) {
     .Call(`_MYHfusionRcpp_cumuSIR_rcpp`, X, Y, eps_inv)
 }

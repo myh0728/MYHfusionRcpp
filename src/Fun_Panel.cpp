@@ -738,5 +738,181 @@ double criterion_panel_logit_SSeff_rcpp(const arma::mat & X,
   return ss_val;
 }
 
+// [[Rcpp::export]]
+arma::cube get_Vinv_panel_logit_exchangable_rcpp(const arma::mat & X,
+                                                 const arma::mat & Y,
+                                                 const double & intercept) {
+
+  const arma::uword n_n = Y.n_rows; // N
+  const arma::uword n_t = Y.n_cols; // T
+
+  // 儲存標準差
+  arma::mat Sigma_mat(n_n, n_t, arma::fill::zeros);
+  arma::cube V_inv_cube(n_t, n_t, n_n, arma::fill::zeros);
+
+  double rho_sum = 0.0;
+
+  // =========================================================
+  // Stage 1: 平行計算 P, Sigma, 與 Rho 的分子
+  // =========================================================
+  // 工作量完全對等，使用 static 排程效能最好
+#pragma omp parallel for schedule(static) reduction(+:rho_sum)
+  for (arma::uword i = 0; i < n_n; ++i) {
+
+    // 1. 高度向量化：一次算出該個體所有時間點的機率 P
+    arma::vec SI_i = intercept + X.row(i).t();
+    arma::vec p_i = 1.0 / (1.0 + arma::exp(-SI_i));
+
+    // 2. 計算標準差 Sigma_i 與下限保護
+    arma::vec var_i = p_i % (1.0 - p_i);
+    var_i.elem( arma::find(var_i < 1e-8) ).fill(1e-8);
+    arma::vec sigma_i = arma::sqrt(var_i);
+
+    Sigma_mat.row(i) = sigma_i.t();
+
+    // 3. 累加 Rho 分子
+    // 先算出標準化殘差向量 Z
+    arma::vec resid_std = (Y.row(i).t() - p_i) / sigma_i;
+
+    // (總和)^2
+    double sum_resid = arma::sum(resid_std);
+    // 平方和
+    double sum_sq_resid = arma::accu(arma::square(resid_std));
+
+    // 套用公式: sum(Z_j * Z_k) = 0.5 * [ (sum Z)^2 - sum(Z^2) ]
+    rho_sum += 0.5 * (sum_resid * sum_resid - sum_sq_resid);
+  }
+
+  // 計算平均 Rho
+  double rho = rho_sum * 2.0 / (double)(n_n * n_t * (n_t - 1));
+
+  // 防呆：限制 rho 的範圍
+  double lower_bound = -1.0 / (double)(n_t - 1) + 1e-6;
+  if (rho > 0.999) rho = 0.999;
+  if (rho < lower_bound) rho = lower_bound;
+
+  // =========================================================
+  // Stage 2: 使用解析解 (Analytical Solution) 直接填入 V_inv
+  // =========================================================
+
+  double denom = (1.0 - rho) * (1.0 + (n_t - 1) * rho);
+  double r_inv_diag = (1.0 + (n_t - 2) * rho) / denom; // 係數 A
+  double r_inv_off  = -rho / denom;                    // 係數 B
+
+#pragma omp parallel for schedule(static)
+  for (arma::uword i = 0; i < n_n; ++i) {
+
+    // 取出 sigma_i 的倒數
+    arma::vec inv_sig = 1.0 / Sigma_mat.row(i).t();
+
+    arma::mat & V_inv = V_inv_cube.slice(i);
+
+    // 高度向量化：免除所有迴圈，直接使用矩陣外積生成 V_inv
+    // 1. 先把整個矩陣當成非對角線元素計算: B * (inv_sig * inv_sig^T)
+    V_inv = r_inv_off * (inv_sig * inv_sig.t());
+
+    // 2. 將對角線元素覆蓋為正確的對角線值: A * (inv_sig^2)
+    V_inv.diag() = r_inv_diag * (inv_sig % inv_sig);
+  }
+
+  return V_inv_cube;
+}
+
+// [[Rcpp::export]]
+arma::cube get_Vinv_panel_logit_AR1_rcpp(const arma::mat & X,
+                                         const arma::mat & Y,
+                                         const double & intercept) {
+
+  const arma::uword n_n = Y.n_rows; // N
+  const arma::uword n_t = Y.n_cols; // T
+
+  // 儲存 Sigma 供 Stage 2 使用
+  arma::mat Sigma_mat(n_n, n_t, arma::fill::zeros);
+
+  // 結果 Cube
+  arma::cube V_inv_cube(n_t, n_t, n_n, arma::fill::zeros);
+
+  double rho_sum = 0.0;
+
+  // =========================================================
+  // Stage 1: 高度向量化計算 P, Sigma, 與 Rho
+  // =========================================================
+  // 工作量完全對等，使用 static 排程效能最好
+#pragma omp parallel for schedule(static) reduction(+:rho_sum)
+  for (arma::uword i = 0; i < n_n; ++i) {
+
+    // 1. 高度向量化：一次算出該個體所有時間點的機率 P
+    arma::vec SI_i = intercept + X.row(i).t();
+    arma::vec p_i = 1.0 / (1.0 + arma::exp(-SI_i));
+
+    // 2. 計算標準差 Sigma_i 與下限保護
+    arma::vec var_i = p_i % (1.0 - p_i);
+    var_i.elem( arma::find(var_i < 1e-8) ).fill(1e-8);
+    arma::vec sigma_i = arma::sqrt(var_i);
+    Sigma_mat.row(i) = sigma_i.t();
+
+    // 3. 累加 Rho 分子 (免迴圈，使用錯位內積)
+    if (n_t > 1) {
+      // 先算出整條標準化殘差向量
+      arma::vec resid_std = (Y.row(i).t() - p_i) / sigma_i;
+
+      // AR(1) 分子: sum( Z_j * Z_{j+1} )
+      // 用 subvec 取出 0~T-2 與 1~T-1，然後做內積
+      rho_sum += arma::dot(resid_std.subvec(0, n_t - 2),
+                           resid_std.subvec(1, n_t - 1));
+    }
+  }
+
+  // 計算平均 Rho
+  double rho = rho_sum / (double)(n_n * (n_t - 1));
+
+  // [重要] 防呆與邊界限制
+  if (rho > 0.999) rho = 0.999;
+  if (rho < -0.999) rho = -0.999;
+
+  // =========================================================
+  // Stage 2: 使用 AR(1) 解析反矩陣公式快速填值 (免迴圈)
+  // =========================================================
+
+  double rho_sq = rho * rho;
+  double scale = 1.0 / (1.0 - rho_sq);
+
+  double coef_mid_diag = (1.0 + rho_sq) * scale;
+  double coef_off_diag = -rho * scale;
+
+#pragma omp parallel for schedule(static)
+  for (arma::uword i = 0; i < n_n; ++i) {
+
+    arma::vec sigma_i = Sigma_mat.row(i).t();
+    arma::mat & V_inv = V_inv_cube.slice(i);
+
+    // 預先算出 1 / sigma 以及 1 / sigma^2
+    arma::vec inv_sig = 1.0 / sigma_i;
+    arma::vec inv_sig_sq = inv_sig % inv_sig;
+
+    // 1. 填入主對角線 (Diagonal)
+    // 預設全部填入中間項係數
+    arma::vec diag_vals = coef_mid_diag * inv_sig_sq;
+    // 修正頭尾兩項
+    diag_vals(0) = scale * inv_sig_sq(0);
+    diag_vals(n_t - 1) = scale * inv_sig_sq(n_t - 1);
+
+    // 直接貼上主對角線
+    V_inv.diag() = diag_vals;
+
+    // 2. 填入次對角線 (Off-diagonal)
+    if (n_t > 1) {
+      // 次對角線的值: coef * (1/sig_j) * (1/sig_{j+1})
+      arma::vec off_diag_vals = coef_off_diag * (inv_sig.subvec(0, n_t - 2) % inv_sig.subvec(1, n_t - 1));
+
+      // 直接貼上上下兩條次對角線 (k=1 代表上對角線, k=-1 代表下對角線)
+      V_inv.diag(1) = off_diag_vals;
+      V_inv.diag(-1) = off_diag_vals;
+    }
+  }
+
+  return V_inv_cube;
+}
+
 
 
