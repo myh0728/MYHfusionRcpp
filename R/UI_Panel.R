@@ -592,7 +592,9 @@ Panel.logistic <- function(X, Y,
   estimation <- nlminb(start = c(alpha.initial, beta.initial),
                        objective = SScriterion)
 
-  results$coef.SS <- estimation$par
+  par.hat <- estimation$par
+  names(par.hat) <- c("intercept", paste("X", 1:number_p, sep = "."))
+  results$coef.SS <- par.hat
   results$details.SS <- estimation
 
   # === Step 2: WLS ===
@@ -615,7 +617,9 @@ Panel.logistic <- function(X, Y,
   estimation <- nlminb(start = c(alpha.initial, beta.initial),
                        objective = SScriterion_eff)
 
-  results$coef.SSeff.SS <- estimation$par
+  par.hat <- estimation$par
+  names(par.hat) <- c("intercept", paste("X", 1:number_p, sep = "."))
+  results$coef.SSeff.SS <- par.hat
   results$details.SSeff.SS <- estimation
 
   return(results)
